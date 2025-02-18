@@ -26,7 +26,6 @@ jobs:
         working-directory: llm_advisor_app
         run: |
           npm run build
-          npm run export
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v3
