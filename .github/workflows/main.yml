@@ -19,9 +19,11 @@ jobs:
           node-version: "16" # or any supported version
 
       - name: Install dependencies
-        run: npm install
+        working-directory: llm_advisor_app
+        run: npm ci
 
       - name: Build and Export Next.js
+        working-directory: llm_advisor_app
         run: |
           npm run build
           npm run export
@@ -35,7 +37,7 @@ jobs:
 
       - name: Sync out/ folder to S3
         run: |
-          aws s3 sync out/ s3://my-bucket --delete
+          aws s3 sync llm_advisor_app/out s3://${{ secrets.BUCKET_NAME }} --delete
 
       - name: Invalidate CloudFront Cache
         run: |
