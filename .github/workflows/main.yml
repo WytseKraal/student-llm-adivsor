@@ -1,0 +1,42 @@
+name: Deploy Next.js to S3
+
+on:
+  push:
+    branches:
+      - main  # or whichever branch you want to trigger deployment
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Set up Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'  # or any supported version
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build and Export Next.js
+        run: |
+          npm run build
+          npm run export
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Sync out/ folder to S3
+        run: |
+          aws s3 sync out/ s3://my-bucket --delete
+
+      - name: Invalidate CloudFront Cache
+        run: |
+          aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
