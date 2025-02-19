@@ -8,6 +8,7 @@ export default function Home() {
 
   // const apiUrl = "http://127.0.0.1:3001";
   const apiUrl = "https://d10tb7qqmyl8u1.cloudfront.net";
+
   async function callLocalApi() {
     try {
       const res = await fetch(`${apiUrl}/Prod/hello`);
