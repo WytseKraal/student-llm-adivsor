@@ -1,24 +1,22 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
-Description: Simple API Gateway with Python Lambda Function.
+Description: API Gateway with Cognito Authorization
 
 Parameters:
   UserPoolArn:
     Type: String
     Description: ARN of the Cognito User Pool
-    Default: "arn:aws:cognito-idp:eu-north-1:565393034649:userpool/eu-north-1_cXdMnsSwH"
+    Default: "arn:aws:cognito-idp:eu-north-1:565393034649:userpool/eu-north-1_cXdMnsSwH" # Replace with your User Pool ARN
+
+Globals:
+  Api:
+    Auth:
+      Authorizers:
+        CognitoAuthorizer:
+          UserPoolArn: !Ref UserPoolArn
+          AuthType: COGNITO_USER_POOLS
 
 Resources:
-  CognitoAuthorizer:
-    Type: AWS::ApiGateway::Authorizer
-    Properties:
-      Name: CognitoUserPoolAuthorizer
-      Type: COGNITO_USER_POOLS
-      IdentitySource: method.request.header.Authorization
-      RestApiId: !Ref ServerlessRestApi
-      ProviderARNs:
-        - !Ref UserPoolArn
-
   HelloFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -32,7 +30,7 @@ Resources:
             Path: /hello
             Method: GET
             Auth:
-              Authorizer: !Ref CognitoAuthorizer
+              Authorizer: CognitoAuthorizer
 
 Outputs:
   ApiUrl:
