@@ -30,7 +30,8 @@ interface AuthContextType {
   signOut: () => void;
   getToken: () => Promise<string>;
   completeNewPasswordChallenge: (
-    newPassword: string
+    newPassword: string,
+    name: string
   ) => Promise<CognitoUserSession>;
   challengeUser: CognitoUser | null;
 }
@@ -133,7 +134,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   const completeNewPasswordChallenge = async (
-    newPassword: string
+    newPassword: string,
+    name: string
   ): Promise<CognitoUserSession> => {
     return new Promise((resolve, reject) => {
       if (!challengeUser) {
@@ -143,7 +145,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       challengeUser.completeNewPasswordChallenge(
         newPassword,
-        {},
+        { name },
         {
           onSuccess: (result: CognitoUserSession) => {
             setUser(challengeUser);

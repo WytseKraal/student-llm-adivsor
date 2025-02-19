@@ -9,6 +9,7 @@ export default function Home() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const [name, setName] = useState("");
   const [showText, setShowText] = useState(false);
   const {
     user,
@@ -63,7 +64,7 @@ export default function Home() {
   const handleNewPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await completeNewPasswordChallenge(newPassword);
+      await completeNewPasswordChallenge(newPassword, name);
       setApiResponse("Successfully set new password!");
       setNewPassword("");
     } catch (error) {
@@ -113,6 +114,12 @@ export default function Home() {
             placeholder="New Password"
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
+          />
+          <Input
+            type="text"
+            placeholder="Your Name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
           />
           <Button type="submit">Set New Password</Button>
         </form>
