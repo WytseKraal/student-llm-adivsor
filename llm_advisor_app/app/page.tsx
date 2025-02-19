@@ -7,10 +7,10 @@ export default function Home() {
   const [apiResponse, setApiResponse] = useState("");
 
   // const apiUrl = "http://127.0.0.1:3001";
-  const apiUrl = "https://d10tb7qqmyl8u1.cloudfront.net/Prod";
+  const apiUrl = "https://d10tb7qqmyl8u1.cloudfront.net";
   async function callLocalApi() {
     try {
-      const res = await fetch(`${apiUrl}/hello`);
+      const res = await fetch(`${apiUrl}/Prod/hello`);
       const data = await res.json();
       console.log("API Response:", data);
       setApiResponse(data.message);
