@@ -38,30 +38,5 @@ Resources:
       StageName: !Ref StageNameParameter
       EndpointConfiguration: REGIONAL
 
-  MyApiKey:
-    Type: AWS::ApiGateway::ApiKey
-    Properties:
-      Name: "MyApiKey"
-      Enabled: true
-
-  MyUsagePlan:
-    Type: AWS::ApiGateway::UsagePlan
-    Properties:
-      UsagePlanName: "ApiRateLimit"
-      Description: "Usage plan to throttle requests"
-      Throttle:
-        BurstLimit: 10
-        RateLimit: 5
-      ApiStages:
-        - ApiId: !Ref MyApi
-          Stage: !Ref StageNameParameter
-
-  MyUsagePlanKey:
-    Type: AWS::ApiGateway::UsagePlanKey
-    Properties:
-      KeyId: !Ref MyApiKey
-      KeyType: "API_KEY"
-      UsagePlanId: !Ref MyUsagePlan
-
 Conditions:
   IsDev: !Equals [!Ref EnvironmentType, "dev"]
