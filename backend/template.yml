@@ -15,3 +15,8 @@ Resources:
           Properties:
             Path: /hello
             Method: GET
+
+Outputs:
+  ApiUrl:
+    Description: "URL of the API Gateway endpoint"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod"
