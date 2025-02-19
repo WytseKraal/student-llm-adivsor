@@ -76,7 +76,8 @@ jobs:
         working-directory: backend
         run: |
           sam deploy --stack-name my-backend-stack \
-                     --capabilities CAPABILITY_IAM \
-                     --region ${{ secrets.AWS_REGION }} \
-                     --no-confirm-changeset \
-                     --no-fail-on-empty-changeset
+                    --capabilities CAPABILITY_IAM \
+                    --region ${{ secrets.AWS_REGION }} \
+                    --resolve-s3 \
+                    --no-confirm-changeset \
+                    --no-fail-on-empty-changeset
