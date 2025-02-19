@@ -1,5 +1,4 @@
 "use client";
-
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useAuth } from "@/hooks/auth";
@@ -9,8 +8,16 @@ export default function Home() {
   const [apiResponse, setApiResponse] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
   const [showText, setShowText] = useState(false);
-  const { user, signIn, signOut, getToken } = useAuth();
+  const {
+    user,
+    signIn,
+    signOut,
+    getToken,
+    completeNewPasswordChallenge,
+    challengeUser,
+  } = useAuth();
 
   const apiUrl = "https://26jbdrdk5g.execute-api.eu-north-1.amazonaws.com/Prod";
 
@@ -34,10 +41,33 @@ export default function Home() {
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await signIn(email, password);
-      setApiResponse("Successfully signed in!");
+      const result = await signIn(email, password);
+      if (
+        "challengeName" in result &&
+        result.challengeName === "NEW_PASSWORD_REQUIRED"
+      ) {
+        setApiResponse("Please set a new password");
+      } else {
+        setApiResponse("Successfully signed in!");
+      }
     } catch (error) {
       console.error("Sign in error:", error);
+      if (error instanceof Error) {
+        setApiResponse(error.message);
+      } else {
+        setApiResponse("An unknown error occurred");
+      }
+    }
+  };
+
+  const handleNewPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await completeNewPasswordChallenge(newPassword);
+      setApiResponse("Successfully set new password!");
+      setNewPassword("");
+    } catch (error) {
+      console.error("New password error:", error);
       if (error instanceof Error) {
         setApiResponse(error.message);
       } else {
@@ -54,7 +84,7 @@ export default function Home() {
     <div className="flex flex-col items-center justify-center min-h-screen p-8 pb-20 sm:p-20 font-[family-name:var(--font-geist-sans)]">
       <h1 className="text-2xl font-bold mb-8">Protected API Test</h1>
 
-      {!user ? (
+      {!user && !challengeUser ? (
         <form
           onSubmit={handleSignIn}
           className="flex flex-col gap-4 w-full max-w-md"
@@ -73,9 +103,22 @@ export default function Home() {
           />
           <Button type="submit">Sign In</Button>
         </form>
+      ) : challengeUser ? (
+        <form
+          onSubmit={handleNewPassword}
+          className="flex flex-col gap-4 w-full max-w-md"
+        >
+          <Input
+            type="password"
+            placeholder="New Password"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+          />
+          <Button type="submit">Set New Password</Button>
+        </form>
       ) : (
         <div className="flex flex-col gap-4 items-center">
-          <p>Welcome, {user.getUsername()}!</p>
+          <p>Welcome, {user?.getUsername()}!</p>
           <Button onClick={callProtectedApi}>Call Protected API</Button>
           <Button variant="outline" onClick={signOut}>
             Sign Out

@@ -23,9 +23,16 @@ interface PoolData {
 interface AuthContextType {
   user: CognitoUser | null;
   loading: boolean;
-  signIn: (email: string, password: string) => Promise<CognitoUserSession>;
+  signIn: (
+    email: string,
+    password: string
+  ) => Promise<CognitoUserSession | { challengeName: string }>;
   signOut: () => void;
   getToken: () => Promise<string>;
+  completeNewPasswordChallenge: (
+    newPassword: string
+  ) => Promise<CognitoUserSession>;
+  challengeUser: CognitoUser | null;
 }
 
 interface AuthProviderProps {
@@ -44,6 +51,7 @@ const userPool = new CognitoUserPool(poolData);
 const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: true,
+  challengeUser: null,
   signIn: async () => {
     throw new Error("signIn not implemented");
   },
@@ -53,11 +61,15 @@ const AuthContext = createContext<AuthContextType>({
   getToken: async () => {
     throw new Error("getToken not implemented");
   },
+  completeNewPasswordChallenge: async () => {
+    throw new Error("completeNewPasswordChallenge not implemented");
+  },
 });
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<CognitoUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const [challengeUser, setChallengeUser] = useState<CognitoUser | null>(null);
 
   useEffect(() => {
     checkAuth();
@@ -65,7 +77,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const checkAuth = () => {
     const cognitoUser = userPool.getCurrentUser();
-
     if (cognitoUser) {
       cognitoUser.getSession(
         (err: Error | null, session: CognitoUserSession | null) => {
@@ -88,7 +99,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const signIn = async (
     email: string,
     password: string
-  ): Promise<CognitoUserSession> => {
+  ): Promise<CognitoUserSession | { challengeName: string }> => {
     return new Promise((resolve, reject) => {
       const authenticationDetails = new AuthenticationDetails({
         Username: email,
@@ -103,12 +114,47 @@ export function AuthProvider({ children }: AuthProviderProps) {
       cognitoUser.authenticateUser(authenticationDetails, {
         onSuccess: (result: CognitoUserSession) => {
           setUser(cognitoUser);
+          setChallengeUser(null);
           resolve(result);
         },
         onFailure: (err: Error) => {
           reject(err);
         },
+        newPasswordRequired: (userAttributes, requiredAttributes) => {
+          // Delete sensitive attributes before passing to completeNewPasswordChallenge
+          delete userAttributes.email_verified;
+          delete userAttributes.phone_number_verified;
+
+          setChallengeUser(cognitoUser);
+          resolve({ challengeName: "NEW_PASSWORD_REQUIRED" });
+        },
       });
+    });
+  };
+
+  const completeNewPasswordChallenge = async (
+    newPassword: string
+  ): Promise<CognitoUserSession> => {
+    return new Promise((resolve, reject) => {
+      if (!challengeUser) {
+        reject(new Error("No challenge user found"));
+        return;
+      }
+
+      challengeUser.completeNewPasswordChallenge(
+        newPassword,
+        {},
+        {
+          onSuccess: (result: CognitoUserSession) => {
+            setUser(challengeUser);
+            setChallengeUser(null);
+            resolve(result);
+          },
+          onFailure: (err: Error) => {
+            reject(err);
+          },
+        }
+      );
     });
   };
 
@@ -117,6 +163,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     if (cognitoUser) {
       cognitoUser.signOut();
       setUser(null);
+      setChallengeUser(null);
     }
   };
 
@@ -147,6 +194,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     signIn,
     signOut,
     getToken,
+    completeNewPasswordChallenge,
+    challengeUser,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
