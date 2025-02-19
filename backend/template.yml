@@ -7,6 +7,10 @@ Parameters:
     AllowedValues:
       - dev
       - prod
+  StageNameParameter:
+    Type: String
+    Default: dev
+    Description: API Gateway stage name
 
 Resources:
   MyBackendFunction:
@@ -28,19 +32,11 @@ Resources:
             Path: /hello
             Method: GET
 
-  # The AWS::Serverless::Api resource is automatically
-  # created for you when you add an ApiEvent, but we can
-  # define it explicitly if we need more control:
   MyApi:
     Type: AWS::Serverless::Api
     Properties:
-      StageName: !Ref StageName
+      StageName: !Ref StageNameParameter
       EndpointConfiguration: REGIONAL
-
-  StageNameParameter:
-    Type: String
-    Default: dev
-    Description: API Gateway stage name
 
   MyApiKey:
     Type: AWS::ApiGateway::ApiKey
