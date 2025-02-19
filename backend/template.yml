@@ -11,6 +11,11 @@ Parameters:
 Globals:
   Api:
     Auth:
+    Cors:
+      AllowMethods: "'GET,OPTIONS'"
+      AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+      AllowOrigin: "'https://d10tb7qqmyl8u1.cloudfront.net'"
+    Auth:
       Authorizers:
         CognitoAuthorizer:
           UserPoolArn: !Ref UserPoolArn

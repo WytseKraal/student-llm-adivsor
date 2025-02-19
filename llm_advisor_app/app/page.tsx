@@ -27,7 +27,8 @@ export default function Home() {
       const token = await getToken();
       const res = await fetch(`${apiUrl}/hello`, {
         headers: {
-          Authorization: token,
+          Authorization: token, // Token is automatically formatted correctly
+          "Content-Type": "application/json",
         },
       });
       const data = await res.json();
