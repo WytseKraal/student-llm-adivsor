@@ -6,7 +6,15 @@ Parameters:
   UserPoolArn:
     Type: String
     Description: ARN of the Cognito User Pool
-    Default: "arn:aws:cognito-idp:eu-north-1:565393034649:userpool/eu-north-1_cXdMnsSwH"
+    Default: "arn:aws:cognito-idp:eu-north-1:565393034649:userpool/eu-north-1_cXdMnsSwH" # Replace with your User Pool ARN
+
+Globals:
+  Api:
+    Auth:
+      Authorizers:
+        CognitoAuthorizer:
+          UserPoolArn: !Ref UserPoolArn
+          AuthType: COGNITO_USER_POOLS
 
 Resources:
   HelloFunction:
