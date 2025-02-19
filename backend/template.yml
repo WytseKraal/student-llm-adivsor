@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
-Description: Simple API Gateway with Python Lambda Function.
+Description: API Gateway with Cognito Authorization
 
 Parameters:
   UserPoolArn:
@@ -10,6 +10,11 @@ Parameters:
 
 Globals:
   Api:
+    Auth:
+    Cors:
+      AllowMethods: "'GET,OPTIONS'"
+      AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+      AllowOrigin: "'https://d10tb7qqmyl8u1.cloudfront.net'"
     Auth:
       Authorizers:
         CognitoAuthorizer:
@@ -29,6 +34,8 @@ Resources:
           Properties:
             Path: /hello
             Method: GET
+            Auth:
+              Authorizer: CognitoAuthorizer
 
 Outputs:
   ApiUrl:

@@ -22,14 +22,13 @@ export default function Home() {
 
   const apiUrl = "https://26jbdrdk5g.execute-api.eu-north-1.amazonaws.com/Prod";
 
-  // const apiUrl = "http://127.0.0.1:3001";
-
   async function callProtectedApi() {
     try {
       const token = await getToken();
       const res = await fetch(`${apiUrl}/hello`, {
         headers: {
-          Authorization: token,
+          Authorization: token, // Token is automatically formatted correctly
+          "Content-Type": "application/json",
         },
       });
       const data = await res.json();
