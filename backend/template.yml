@@ -5,24 +5,21 @@ Description: API Gateway with Cognito Authorization
 Parameters:
   UserPoolArn:
     Type: String
-    Default: "arn:aws:cognito-idp:eu-north-1:565393034649:userpool/eu-north-1_cXdMnsSwH"
-
-  # Add this new parameter
-  CorsAllowOrigin:
-    Type: String
-    Default: "https://d10tb7qqmyl8u1.cloudfront.net"
+    Description: ARN of the Cognito User Pool
+    Default: "arn:aws:cognito-idp:eu-north-1:565393034649:userpool/eu-north-1_cXdMnsSwH" # Replace with your User Pool ARN
 
 Globals:
   Api:
+    Auth:
+    Cors:
+      AllowMethods: "'GET,OPTIONS'"
+      AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+      AllowOrigin: "'https://d10tb7qqmyl8u1.cloudfront.net'"
     Auth:
       Authorizers:
         CognitoAuthorizer:
           UserPoolArn: !Ref UserPoolArn
           AuthType: COGNITO_USER_POOLS
-    Cors:
-      AllowMethods: "'GET,OPTIONS'"
-      AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-      AllowOrigin: !Sub "'${CorsAllowOrigin}'" # Use parameter here
 
 Resources:
   HelloFunction:
