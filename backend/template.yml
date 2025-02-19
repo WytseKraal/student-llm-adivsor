@@ -27,7 +27,6 @@ Resources:
           Properties:
             Path: /hello
             Method: GET
-            ApiKeyRequired: true
 
   # The AWS::Serverless::Api resource is automatically
   # created for you when you add an ApiEvent, but we can
