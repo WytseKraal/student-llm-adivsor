@@ -15,7 +15,7 @@ Resources:
           Properties:
             Path: /hello
             Method: GET
-            Cors: "*"
+            Cors: True
 
 Outputs:
   ApiUrl:
