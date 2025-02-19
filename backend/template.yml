@@ -1,4 +1,24 @@
+Transform: AWS::Serverless-2016-10-31
+
+Parameters:
+  EnvironmentType:
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - prod
+  StageNameParameter:
+    Type: String
+    Default: dev
+    Description: API Gateway stage name
+
 Resources:
+  MyApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: !Ref StageNameParameter
+      EndpointConfiguration: REGIONAL
+
   MyBackendFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -18,3 +38,6 @@ Resources:
             Path: /hello
             Method: GET
             RestApiId: !Ref MyApi
+
+Conditions:
+  IsDev: !Equals [!Ref EnvironmentType, "dev"]
