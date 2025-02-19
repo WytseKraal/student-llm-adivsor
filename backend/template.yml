@@ -2,16 +2,6 @@ AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
 Description: Simple API Gateway with Python Lambda Function.
 
-Globals:
-  Api:
-    Auth:
-      Authorizers:
-        MyLambdaAuthorizer:
-          FunctionArn: !GetAtt MyLambdaAuthorizer.Arn
-          Identity:
-            Headers:
-              - x-custom-auth
-
 Resources:
   HelloFunction:
     Type: AWS::Serverless::Function
@@ -25,15 +15,6 @@ Resources:
           Properties:
             Path: /hello
             Method: GET
-            Auth:
-              Authorizer: MyLambdaAuthorizer
-
-  MyLambdaAuthorizer:
-    Type: AWS::Serverless::Function
-    Properties:
-      Handler: authorizer.authorizer.lambda_handler
-      Runtime: python3.9
-      CodeUri: authorizer/
 
 Outputs:
   ApiUrl:
