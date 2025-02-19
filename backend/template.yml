@@ -1,0 +1,73 @@
+Transform: AWS::Serverless-2016-10-31
+
+Parameters:
+  EnvironmentType:
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - prod
+
+Resources:
+  MyBackendFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: .
+      Handler: app.lambda_handler
+      Runtime: python3.9
+      Environment:
+        Variables:
+          ALLOWED_ORIGIN: !If
+            - IsDev
+            - "*"
+            - "https://d10tb7qqmyl8u1.cloudfront.net"
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /hello
+            Method: GET
+            ApiKeyRequired: true
+
+  # The AWS::Serverless::Api resource is automatically
+  # created for you when you add an ApiEvent, but we can
+  # define it explicitly if we need more control:
+  MyApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: !Ref StageName
+      EndpointConfiguration: REGIONAL
+
+  StageNameParameter:
+    Type: String
+    Default: dev
+    Description: API Gateway stage name
+
+  MyApiKey:
+    Type: AWS::ApiGateway::ApiKey
+    Properties:
+      Name: "MyApiKey"
+      Enabled: true
+      Value: "RATE_LMITER"
+
+  MyUsagePlan:
+    Type: AWS::ApiGateway::UsagePlan
+    Properties:
+      UsagePlanName: "ApiRateLimit"
+      Description: "Usage plan to throttle requests"
+      Throttle:
+        BurstLimit: 10
+        RateLimit: 5
+      ApiStages:
+        - ApiId: !Ref MyApi
+          Stage: !Ref StageNameParameter
+
+  MyUsagePlanKey:
+    Type: AWS::ApiGateway::UsagePlanKey
+    Properties:
+      KeyId: !Ref MyApiKey
+      KeyType: "API_KEY"
+      UsagePlanId: !Ref MyUsagePlan
+
+Conditions:
+  IsDev: !Equals [!Ref EnvironmentType, "dev"]

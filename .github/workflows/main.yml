@@ -41,3 +41,45 @@ jobs:
       - name: Invalidate CloudFront Cache
         run: |
           aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
+
+  backend-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
+
+      - name: Install AWS SAM CLI
+        run: pip install --upgrade aws-sam-cli
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Build SAM
+        working-directory: backend
+        run: sam build --use-container
+
+      - name: Package SAM
+        working-directory: backend
+        run: |
+          sam package \
+            --template-file template.yml \
+            --output-template-file packaged.yaml \
+            --s3-bucket ${{ secrets.SAM_ARTIFACTS_BUCKET }}
+
+      - name: Deploy SAM
+        working-directory: backend
+        run: |
+          sam deploy \
+            --template-file packaged.yaml \
+            --stack-name my-lambda-backend \
+            --capabilities CAPABILITY_IAM \
+            --parameter-overrides EnvironmentType=prod
