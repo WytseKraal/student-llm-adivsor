@@ -9,8 +9,12 @@ Resources:
       StageName: Prod
       Cors:
         AllowOrigin: "*"
-        AllowMethods: "GET,OPTIONS"
-        AllowHeaders: "Content-Type,Authorization" # add others as needed
+        AllowMethods:
+          - GET
+          - OPTIONS
+        AllowHeaders:
+          - Content-Type
+          - Authorization
 
   HelloFunction:
     Type: AWS::Serverless::Function
