@@ -78,6 +78,6 @@ jobs:
           sam deploy --stack-name my-backend-stack \
                     --capabilities CAPABILITY_IAM \
                     --region ${{ secrets.AWS_REGION }} \
-                    --resolve-s3 \
+                    --s3-bucket artifacts-llm-advisor-cloudform \
                     --no-confirm-changeset \
                     --no-fail-on-empty-changeset
