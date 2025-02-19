@@ -1,17 +1,8 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
-Description: API Gateway with CORS and Python Lambda Function.
+Description: Simple API Gateway with Python Lambda Function.
 
 Resources:
-  MyApi:
-    Type: AWS::Serverless::Api
-    Properties:
-      StageName: Prod
-      Cors:
-        AllowOrigin: "'*'"
-        AllowMethods: "GET,OPTIONS"
-        AllowHeaders: "Content-Type,Authorization"
-
   HelloFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -22,11 +13,10 @@ Resources:
         HelloEvent:
           Type: Api
           Properties:
-            RestApiId: !Ref MyApi
             Path: /hello
             Method: GET
 
 Outputs:
   ApiUrl:
     Description: "URL of the API Gateway endpoint"
-    Value: !Sub "https://${MyApi}.execute-api.${AWS::Region}.amazonaws.com/Prod"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod"
