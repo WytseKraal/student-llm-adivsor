@@ -58,6 +58,11 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       # Install AWS SAM CLI. You can also use a pre-built container if you prefer.
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
+
       - name: Install AWS SAM CLI
         run: |
           python -m pip install --upgrade pip
