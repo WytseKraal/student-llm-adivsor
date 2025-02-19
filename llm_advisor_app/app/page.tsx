@@ -6,7 +6,8 @@ import { useState } from "react";
 export default function Home() {
   const [apiResponse, setApiResponse] = useState("");
 
-  const apiUrl = "http://127.0.0.1:3001";
+  // const apiUrl = "http://127.0.0.1:3001";
+  const apiUrl = "https://26jbdrdk5g.execute-api.eu-north-1.amazonaws.com/Prod";
   async function callLocalApi() {
     try {
       const res = await fetch(`${apiUrl}/hello`);
