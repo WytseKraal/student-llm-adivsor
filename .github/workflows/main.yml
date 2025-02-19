@@ -41,3 +41,37 @@ jobs:
       - name: Invalidate CloudFront Cache
         run: |
           aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
+
+  deploy-backend:
+    runs-on: ubuntu-latest
+    # Optionally, you can have this job run after the frontend deploy job
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      # Install AWS SAM CLI. You can also use a pre-built container if you prefer.
+      - name: Install AWS SAM CLI
+        run: |
+          python -m pip install --upgrade pip
+          pip install aws-sam-cli
+
+      - name: Build Backend with SAM
+        working-directory: backend
+        run: sam build
+
+      - name: Deploy Backend with SAM
+        working-directory: backend
+        run: |
+          sam deploy --stack-name my-backend-stack \
+                     --capabilities CAPABILITY_IAM \
+                     --region ${{ secrets.AWS_REGION }} \
+                     --no-confirm-changeset \
+                     --no-fail-on-empty-changeset
