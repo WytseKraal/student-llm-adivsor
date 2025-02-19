@@ -48,7 +48,6 @@ Resources:
     Properties:
       Name: "MyApiKey"
       Enabled: true
-      Value: "RATE_LMITER"
 
   MyUsagePlan:
     Type: AWS::ApiGateway::UsagePlan
