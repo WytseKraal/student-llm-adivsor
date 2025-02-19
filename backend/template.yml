@@ -15,6 +15,15 @@ Resources:
           Properties:
             Path: /hello
             Method: GET
+            Auth:
+              Authorizer: MyLambdaAuthorizer
+
+  MyLambdaAuthorizer:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: authorizer.authorizer.lambda_handler
+      Runtime: python3.9
+      CodeUri: authorizer/
 
 Outputs:
   ApiUrl:
