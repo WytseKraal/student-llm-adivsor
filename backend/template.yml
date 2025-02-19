@@ -7,6 +7,9 @@ Parameters:
     Type: String
     Description: ARN of the Cognito User Pool
     Default: "arn:aws:cognito-idp:eu-north-1:565393034649:userpool/eu-north-1_cXdMnsSwH" # Replace with your User Pool ARN
+    CorsAllowOrigin:
+      Type: String
+      Default: "https://d10tb7qqmyl8u1.cloudfront.net"
 
 Globals:
   Api:
@@ -14,7 +17,7 @@ Globals:
     Cors:
       AllowMethods: "'GET,OPTIONS'"
       AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-      AllowOrigin: "'https://d10tb7qqmyl8u1.cloudfront.net'"
+      AllowOrigin: !Sub "'${CorsAllowOrigin}'"
     Auth:
       Authorizers:
         CognitoAuthorizer:

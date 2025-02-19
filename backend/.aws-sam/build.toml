@@ -9,13 +9,4 @@ manifest_hash = ""
 packagetype = "Zip"
 functions = ["HelloFunction"]
 
-[function_build_definitions.02e69a11-1c3c-462e-82db-aea8e11443cc]
-codeuri = "/home/wytse/Desktop/SE/DevOps/CloudProject/student-llm-adivsor/backend/authorizer"
-runtime = "python3.9"
-architecture = "x86_64"
-handler = "authorizer.authorizer.lambda_handler"
-manifest_hash = ""
-packagetype = "Zip"
-functions = ["MyLambdaAuthorizer"]
-
 [layer_build_definitions]
