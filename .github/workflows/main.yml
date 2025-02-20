@@ -78,5 +78,5 @@ jobs:
                     --region ${{ secrets.AWS_REGION }} \
                     --s3-bucket artifacts-llm-advisor-cloudform \
                     --no-confirm-changeset \
-                    --parameter-overrides "Environment=prod AllowedOrigin=https://d10tb7qqmyl8u1.cloudfront.net" \
+                    --parameter-overrides "Environment=prod" \
                     --no-fail-on-empty-changeset
