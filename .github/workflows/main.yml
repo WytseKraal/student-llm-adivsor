@@ -35,7 +35,6 @@ jobs:
 
   build-backend:
     runs-on: ubuntu-latest
-    needs: build-frontend
     steps:
       - name: Check out code
         uses: actions/checkout@v3
@@ -63,7 +62,8 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: [build-frontend, build-backend]
-    environment: production # Requires manual approval if environment protection is set
+    # The environment "production" can be configured to require manual approval.
+    environment: production
     steps:
       - name: Download Frontend Artifact
         uses: actions/download-artifact@v4
