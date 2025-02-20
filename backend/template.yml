@@ -9,7 +9,7 @@ Parameters:
     Default: "arn:aws:cognito-idp:eu-north-1:565393034649:userpool/eu-north-1_cXdMnsSwH" # Replace with your User Pool ARN
   Environment:
     Type: String
-    Default: dev
+    Default: prod
     AllowedValues:
       - dev
       - prod
