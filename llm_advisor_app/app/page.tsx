@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useAuth } from "@/hooks/auth";
 import { Input } from "@/components/ui/input";
+import { env } from "@/environment";
 
 export default function Home() {
   const [apiResponse, setApiResponse] = useState("");
@@ -20,7 +21,7 @@ export default function Home() {
     challengeUser,
   } = useAuth();
 
-  const apiUrl = "https://26jbdrdk5g.execute-api.eu-north-1.amazonaws.com/Prod";
+  const apiUrl = env.apiUrl;
 
   async function callProtectedApi() {
     try {
@@ -81,6 +82,8 @@ export default function Home() {
   const handleToggleText = () => {
     setShowText(!showText);
   };
+
+  console.log("Using url: ", apiUrl);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-8 pb-20 sm:p-20 font-[family-name:var(--font-geist-sans)]">

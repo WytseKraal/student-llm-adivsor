@@ -13,6 +13,7 @@ import {
   CognitoUserSession,
   ISignUpResult,
 } from "amazon-cognito-identity-js";
+import { env } from "@/environment";
 
 // Type definitions
 interface PoolData {
@@ -42,8 +43,8 @@ interface AuthProviderProps {
 
 // Pool configuration
 const poolData: PoolData = {
-  UserPoolId: "eu-north-1_cXdMnsSwH",
-  ClientId: "29sfsu3nvhqfsjjnimcgh9ejab",
+  UserPoolId: env.cognitoConfig.UserPoolId,
+  ClientId: env.cognitoConfig.ClientId,
 };
 
 const userPool = new CognitoUserPool(poolData);

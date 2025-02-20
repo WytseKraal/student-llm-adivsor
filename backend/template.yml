@@ -7,6 +7,13 @@ Parameters:
     Type: String
     Description: ARN of the Cognito User Pool
     Default: "arn:aws:cognito-idp:eu-north-1:565393034649:userpool/eu-north-1_cXdMnsSwH" # Replace with your User Pool ARN
+  Environment:
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - prod
+    Description: Environment type (dev or prod)
 
 Globals:
   Api:
@@ -14,7 +21,10 @@ Globals:
     Cors:
       AllowMethods: "'GET,OPTIONS'"
       AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-      AllowOrigin: "'https://d10tb7qqmyl8u1.cloudfront.net'"
+      AllowOrigin: !If 
+        - IsDev
+        - "'http://localhost:3000'"
+        - "'https://d10tb7qqmyl8u1.cloudfront.net'"
     Auth:
       Authorizers:
         CognitoAuthorizer:
@@ -25,6 +35,9 @@ Resources:
   HelloFunction:
     Type: AWS::Serverless::Function
     Properties:
+      Environment:
+        Variables:
+          STAGE: !Ref Stage
       Handler: app.lambda_handler
       Runtime: python3.9
       CodeUri: .
@@ -41,3 +54,8 @@ Outputs:
   ApiUrl:
     Description: "URL of the API Gateway endpoint"
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod"
+
+Conditions:
+  IsDev: !Equals 
+    - !Ref Environment
+    - dev

@@ -44,7 +44,6 @@ jobs:
 
   deploy-backend:
     runs-on: ubuntu-latest
-    # Optionally, you can have this job run after the frontend deploy job
 
     steps:
       - name: Check out code
@@ -57,7 +56,6 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      # Install AWS SAM CLI. You can also use a pre-built container if you prefer.
       - name: Set up Python 3.9
         uses: actions/setup-python@v4
         with:
@@ -80,4 +78,5 @@ jobs:
                     --region ${{ secrets.AWS_REGION }} \
                     --s3-bucket artifacts-llm-advisor-cloudform \
                     --no-confirm-changeset \
+                    --parameter-overrides "Environment=dev" \
                     --no-fail-on-empty-changeset
