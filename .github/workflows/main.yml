@@ -1,14 +1,19 @@
-name: Deploy Next.js to S3
+name: Build and Deploy Application
 
 on:
   push:
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      deploy:
+        description: "Deploy to production"
+        required: true
+        type: boolean
 
 jobs:
-  build-and-deploy:
+  build-frontend:
     runs-on: ubuntu-latest
-
     steps:
       - name: Check out code
         uses: actions/checkout@v3
@@ -24,39 +29,22 @@ jobs:
 
       - name: Build and Export Next.js
         working-directory: llm_advisor_app
-        run: |
-          npm run build
+        run: npm run build
         env:
           NEXT_PUBLIC_ENV: production
 
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v3
+      - name: Upload frontend build artifacts
+        uses: actions/upload-artifact@v3
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+          name: frontend-build
+          path: llm_advisor_app/out
 
-      - name: Sync out/ folder to S3
-        run: |
-          aws s3 sync llm_advisor_app/out s3://${{ secrets.BUCKET_NAME }} --delete
-
-      - name: Invalidate CloudFront Cache
-        run: |
-          aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
-
-  deploy-backend:
+  build-backend:
+    needs: build-frontend
     runs-on: ubuntu-latest
-
     steps:
       - name: Check out code
         uses: actions/checkout@v3
-
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v3
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Set up Python 3.9
         uses: actions/setup-python@v4
@@ -72,13 +60,53 @@ jobs:
         working-directory: backend
         run: sam build
 
+      - name: Upload backend build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: backend-build
+          path: backend/.aws-sam
+
+  deploy:
+    needs: [build-frontend, build-backend]
+    runs-on: ubuntu-latest
+    if: github.event.inputs.deploy == 'true'
+    environment: production
+    concurrency: production
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Download frontend build
+        uses: actions/download-artifact@v3
+        with:
+          name: frontend-build
+          path: frontend-build
+
+      - name: Deploy frontend to S3
+        run: |
+          aws s3 sync frontend-build s3://${{ secrets.BUCKET_NAME }} --delete
+
+      - name: Invalidate CloudFront Cache
+        run: |
+          aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
+
+      - name: Download backend build
+        uses: actions/download-artifact@v3
+        with:
+          name: backend-build
+          path: backend-build
+
       - name: Deploy Backend with SAM
-        working-directory: backend
+        working-directory: backend-build
         run: |
           sam deploy --stack-name my-backend-stack \
-                    --capabilities CAPABILITY_IAM \
-                    --region ${{ secrets.AWS_REGION }} \
-                    --s3-bucket artifacts-llm-advisor-cloudform \
-                    --no-confirm-changeset \
-                    --parameter-overrides "Environment=prod" \
-                    --no-fail-on-empty-changeset
+            --capabilities CAPABILITY_IAM \
+            --region ${{ secrets.AWS_REGION }} \
+            --s3-bucket artifacts-llm-advisor-cloudform \
+            --no-confirm-changeset \
+            --parameter-overrides "Environment=prod" \
+            --no-fail-on-empty-changeset
