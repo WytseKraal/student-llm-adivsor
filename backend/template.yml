@@ -20,7 +20,7 @@ Globals:
     Auth:
     Cors:
       AllowMethods: "'GET,OPTIONS'"
-      AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+      AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token, Origin'"
       AllowOrigin: !If 
         - IsDev
         - "'http://localhost:3000'"
@@ -38,6 +38,9 @@ Resources:
       Handler: app.lambda_handler
       Runtime: python3.9
       CodeUri: .
+      Environment:
+        Variables:
+          Environment: !Ref Environment
       Events:
         HelloEvent:
           Type: Api
