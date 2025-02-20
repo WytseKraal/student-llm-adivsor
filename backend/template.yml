@@ -49,6 +49,31 @@ Resources:
             Method: GET
             Auth:
               Authorizer: CognitoAuthorizer
+  GoodbyeFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: goodbye.lambda_handler
+      Runtime: python3.9
+      CodeUri: .
+      Environment:
+        Variables:
+          Environment: !Ref Environment
+      Events:
+        ByeEvent:
+          Type: Api
+          Properties:
+            Path: /goodbye/bye
+            Method: GET
+            Auth:
+              Authorizer: CognitoAuthorizer
+        SeeyaEvent:
+          Type: Api
+          Properties:
+            Path: /goodbye/seeya
+            Method: GET
+            Auth:
+              Authorizer: CognitoAuthorizer
+
 
 Outputs:
   ApiUrl:

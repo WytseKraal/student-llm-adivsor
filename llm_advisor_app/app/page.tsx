@@ -26,7 +26,7 @@ export default function Home() {
   async function callProtectedApi() {
     try {
       const token = await getToken();
-      const res = await fetch(`${apiUrl}/hello`, {
+      const res = await fetch(`${apiUrl}/goodbye/bye`, {
         headers: {
           Authorization: token, // Token is automatically formatted correctly
           "Content-Type": "application/json",
