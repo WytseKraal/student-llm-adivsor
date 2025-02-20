@@ -29,6 +29,10 @@ const prod: Environment = {
 };
 
 const getEnvironment = (): Environment => {
+  if (typeof window !== "undefined") {
+    const isProd = window.location.origin.includes("cloudfront.net");
+    return isProd ? prod : dev;
+  }
   return process.env.NEXT_PUBLIC_ENV === "production" ? prod : dev;
 };
 
