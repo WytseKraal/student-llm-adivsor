@@ -1,15 +1,9 @@
-name: Build and Deploy Application
+name: Build and Deploy
 
 on:
   push:
     branches:
       - main
-  workflow_dispatch:
-    inputs:
-      deploy:
-        description: "Deploy to production"
-        required: true
-        type: boolean
 
 jobs:
   build-frontend:
@@ -18,12 +12,12 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v3
 
-      - name: Set up Node
+      - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: "18"
 
-      - name: Install dependencies
+      - name: Install frontend dependencies
         working-directory: llm_advisor_app
         run: npm ci
 
@@ -33,15 +27,15 @@ jobs:
         env:
           NEXT_PUBLIC_ENV: production
 
-      - name: Upload frontend build artifacts
+      - name: Upload Frontend Artifact
         uses: actions/upload-artifact@v3
         with:
-          name: frontend-build
+          name: frontend-out
           path: llm_advisor_app/out
 
   build-backend:
-    needs: build-frontend
     runs-on: ubuntu-latest
+    needs: build-frontend
     steps:
       - name: Check out code
         uses: actions/checkout@v3
@@ -60,19 +54,30 @@ jobs:
         working-directory: backend
         run: sam build
 
-      - name: Upload backend build artifacts
+      - name: Upload Backend Artifact
         uses: actions/upload-artifact@v3
         with:
           name: backend-build
-          path: backend/.aws-sam
+          path: backend/.aws-sam/build
 
   deploy:
-    needs: [build-frontend, build-backend]
     runs-on: ubuntu-latest
-    if: github.event.inputs.deploy == 'true'
+    needs: [build-frontend, build-backend]
+    # Using an environment here lets you require manual approval.
     environment: production
-    concurrency: production
     steps:
+      - name: Download Frontend Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: frontend-out
+          path: llm_advisor_app/out
+
+      - name: Download Backend Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: backend-build
+          path: backend/.aws-sam/build
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v3
         with:
@@ -80,28 +85,13 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Download frontend build
-        uses: actions/download-artifact@v3
-        with:
-          name: frontend-build
-          path: frontend-build
-
-      - name: Deploy frontend to S3
+      - name: Deploy Frontend to S3 and Invalidate CloudFront Cache
         run: |
-          aws s3 sync frontend-build s3://${{ secrets.BUCKET_NAME }} --delete
-
-      - name: Invalidate CloudFront Cache
-        run: |
+          aws s3 sync llm_advisor_app/out s3://${{ secrets.BUCKET_NAME }} --delete
           aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
 
-      - name: Download backend build
-        uses: actions/download-artifact@v3
-        with:
-          name: backend-build
-          path: backend-build
-
       - name: Deploy Backend with SAM
-        working-directory: backend-build
+        working-directory: backend
         run: |
           sam deploy --stack-name my-backend-stack \
             --capabilities CAPABILITY_IAM \
