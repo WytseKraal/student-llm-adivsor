@@ -35,9 +35,6 @@ Resources:
   HelloFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Environment:
-        Variables:
-          STAGE: !Ref Stage
       Handler: app.lambda_handler
       Runtime: python3.9
       CodeUri: .
