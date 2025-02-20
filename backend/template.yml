@@ -9,7 +9,7 @@ Parameters:
     Default: "arn:aws:cognito-idp:eu-north-1:565393034649:userpool/eu-north-1_cXdMnsSwH" # Replace with your User Pool ARN
   Environment:
     Type: String
-    Default: dev
+    Default: http://localhost:3000
     AllowedValues:
       - dev
       - prod
@@ -21,10 +21,7 @@ Globals:
     Cors:
       AllowMethods: "'GET,OPTIONS'"
       AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-      AllowOrigin: !If 
-        - IsDev
-        - "'http://localhost:3000'"
-        - "'https://d10tb7qqmyl8u1.cloudfront.net'"
+      AllowOrigin: !Sub "'${AllowedOrigin}'"
     Auth:
       Authorizers:
         CognitoAuthorizer:
@@ -51,8 +48,3 @@ Outputs:
   ApiUrl:
     Description: "URL of the API Gateway endpoint"
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod"
-
-Conditions:
-  IsDev: !Equals 
-    - !Ref Environment
-    - dev
