@@ -25,12 +25,12 @@ const prod: Environment = {
     ClientId: "29sfsu3nvhqfsjjnimcgh9ejab",
     region: "eu-north-1",
   },
-  corsOrigin: "https://d10tb7qqmyl8u1.cloudfront.net",
+  corsOrigin: "http://13.53.152.71",
 };
 
 const getEnvironment = (): Environment => {
   if (typeof window !== "undefined") {
-    const isProd = window.location.origin.includes("cloudfront.net");
+    const isProd = window.location.origin.includes("13.53");
     return isProd ? prod : dev;
   }
   return process.env.NEXT_PUBLIC_ENV === "production" ? prod : dev;

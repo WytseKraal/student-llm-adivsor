@@ -22,7 +22,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: frontend-build
-          path: llm_advisor_app
+          path: llm_advisor_app/
+          if-no-files-found: error
 
   build-backend:
     runs-on: ubuntu-latest
@@ -49,6 +50,7 @@ jobs:
         with:
           name: backend-build
           path: backend/.aws-sam/build
+          if-no-files-found: error
 
   deploy-frontend:
     runs-on: ubuntu-latest
@@ -61,14 +63,18 @@ jobs:
           name: frontend-build
           path: frontend-build
 
+      - name: List files
+        run: ls -la frontend-build
+
       - name: Copy Files to LightSail (SCP)
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.LIGHTSAIL_HOST }}
           username: ubuntu
           key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
-          source: frontend-build/llm_advisor_app
-          target: /home/ubuntu/frontend
+          source: "frontend-build/*"
+          target: "/home/ubuntu/frontend"
+          strip_components: 1
 
       - name: Finalize deployment
         uses: appleboy/ssh-action@v0.1.10
@@ -77,7 +83,7 @@ jobs:
           username: ubuntu
           key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
           script: |
-            cd /home/ubuntu/frontend/llm_advisor_app
+            cd /home/ubuntu/frontend
             pm2 stop advisor_app || true
             pm2 start npm --name "advisor_app" -- start
 
@@ -86,6 +92,9 @@ jobs:
     needs: [build-backend]
     environment: production
     steps:
+      - name: Checkout for SAM template
+        uses: actions/checkout@v3
+
       - name: Download Backend Artifact
         uses: actions/download-artifact@v4
         with:
