@@ -41,7 +41,7 @@ jobs:
           key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
           # same note about known_hosts
           script: |
-            cd /home/ubuntu/frontend
+            cd /home/ubuntu/frontend/llm_advisor_app
 
             # Restart PM2 process
             pm2 stop advisor_app || true
@@ -75,16 +75,9 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
-    needs: [build-frontend, build-backend]
-    # The environment "production" can be configured to require manual approval.
+    needs: [build-backend]
     environment: production
     steps:
-      - name: Download Frontend Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: frontend-out
-          path: llm_advisor_app/out
-
       - name: Download Backend Artifact
         uses: actions/download-artifact@v4
         with:
@@ -97,11 +90,6 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
-
-      - name: Deploy Frontend to S3 and Invalidate CloudFront Cache
-        run: |
-          aws s3 sync llm_advisor_app/out s3://${{ secrets.BUCKET_NAME }} --delete
-          aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
 
       - name: Deploy Backend with SAM
         working-directory: backend
