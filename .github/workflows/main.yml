@@ -59,7 +59,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: frontend-build
-          path: .
+          path: frontend-build
 
       - name: Copy Files to LightSail (SCP)
         uses: appleboy/scp-action@v0.1.7
@@ -67,8 +67,7 @@ jobs:
           host: ${{ secrets.LIGHTSAIL_HOST }}
           username: ubuntu
           key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
-          source: |
-            llm_advisor_app
+          source: frontend-build/llm_advisor_app
           target: /home/ubuntu/frontend
 
       - name: Finalize deployment
