@@ -5,13 +5,9 @@ on:
     branches:
       - main
 
-    #  - name: Install frontend dependencies
-    #     working-directory: llm_advisor_app
-
 jobs:
   build-frontend:
     runs-on: ubuntu-latest
-
     steps:
       - name: Check out repo
         uses: actions/checkout@v3
@@ -21,6 +17,12 @@ jobs:
         run: |
           npm install 
           npm run build
+
+      - name: Upload Frontend Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-build
+          path: llm_advisor_app
 
   build-backend:
     runs-on: ubuntu-latest
@@ -53,13 +55,18 @@ jobs:
     needs: [build-frontend]
     environment: production
     steps:
+      - name: Download Frontend Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-build
+          path: .
+
       - name: Copy Files to LightSail (SCP)
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.LIGHTSAIL_HOST }}
           username: ubuntu
           key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
-
           source: |
             llm_advisor_app
           target: /home/ubuntu/frontend
@@ -72,8 +79,6 @@ jobs:
           key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
           script: |
             cd /home/ubuntu/frontend/llm_advisor_app
-
-            # Restart PM2 process
             pm2 stop advisor_app || true
             pm2 start npm --name "advisor_app" -- start
 
