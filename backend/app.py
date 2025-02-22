@@ -24,7 +24,7 @@ class BaseHandler:
         """Determine the CORS origin based on the environment."""
         self.logger.info(f"Current environment: {self.environment}")
         if self.environment == 'prod':
-            return 'https://d10tb7qqmyl8u1.cloudfront.net'
+            return 'http://13.53.152.71'
         return 'http://localhost:3000'
 
     def build_headers(self):

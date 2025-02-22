@@ -24,7 +24,7 @@ Globals:
       AllowOrigin: !If 
         - IsDev
         - "'http://localhost:3000'"
-        - "'https://d10tb7qqmyl8u1.cloudfront.net'"
+        - "'http://13.53.152.71'"
     Auth:
       Authorizers:
         CognitoAuthorizer:
