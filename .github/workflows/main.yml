@@ -75,7 +75,7 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
-    needs: [build-frontend, build-backend]
+    needs: [build-backend]
     environment: production
     steps:
       - name: Download Backend Artifact
