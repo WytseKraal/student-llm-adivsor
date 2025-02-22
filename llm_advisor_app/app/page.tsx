@@ -129,7 +129,7 @@ export default function Home() {
         </form>
       ) : (
         <div className="flex flex-col gap-4 items-center">
-          <p>Welcome, {user?.getUsername()}!</p>
+          <p>Welcome From lightsail, {user?.getUsername()}!</p>
           <Button onClick={callProtectedApi}>Call Protected API</Button>
           <Button variant="outline" onClick={signOut}>
             Sign Out
