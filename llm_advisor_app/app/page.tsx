@@ -4,8 +4,11 @@ import { useState } from "react";
 import { useAuth } from "@/hooks/auth";
 import { Input } from "@/components/ui/input";
 import { env } from "@/environment";
+import { useUserData } from "@/hooks/userDataHook";
 
 export default function Home() {
+  const { userName, userEmail, sub, phoneNumber, isLoading, error } =
+    useUserData();
   const [apiResponse, setApiResponse] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -160,7 +163,13 @@ export default function Home() {
         </form>
       ) : (
         <div className="flex flex-col gap-4 items-center">
-          <p>Welcome from Lightsail!, {user?.getUsername()}!</p>
+          {!isLoading && !error && (
+            <div>
+              <p>Name: {userName}</p>
+              <p>Email: {userEmail}</p>
+              <p>Sub: {sub}</p>
+            </div>
+          )}
           <Button onClick={callHelloApi}>Call /hello Endpoint</Button>
           <Button onClick={callByeApi}>Call /goodbye/bye Endpoint</Button>
           <Button onClick={callSeeyaApi}>Call /goodbye/seeya Endpoint</Button>
