@@ -126,12 +126,9 @@ jobs:
           host: ${{ secrets.LIGHTSAIL_HOST }}
           username: ubuntu
           key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
-          # We'll copy everything from 'frontend-dist'...
-          source: "frontend-dist/**/*"
+          source: "frontend-dist/llm_advisor_app/*"
           target: "/home/ubuntu/frontend-temp"
-          # ... and flatten by removing just one top-level folder if you
-          # see 'llm_advisor_app' or 'frontend-dist' in the paths.
-          strip_components: 1
+          strip_components: 0
 
       - name: Finalize Deployment on Lightsail
         uses: appleboy/ssh-action@v0.1.10
