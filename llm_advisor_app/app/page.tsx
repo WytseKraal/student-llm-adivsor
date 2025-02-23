@@ -165,7 +165,7 @@ export default function Home() {
         </form>
       ) : (
         <div className="flex flex-col gap-4 items-center">
-          <p>Welcome from Lightsail, {user?.getUsername()}!</p>
+          <p>Welcome from Lightsail!, {user?.getUsername()}!</p>
           <Button onClick={callHelloApi}>Call /hello Endpoint</Button>
           <Button onClick={callByeApi}>Call /goodbye/bye Endpoint</Button>
           <Button onClick={callSeeyaApi}>Call /goodbye/seeya Endpoint</Button>
@@ -176,11 +176,6 @@ export default function Home() {
       )}
 
       {apiResponse && <p className="mt-4">Response: {apiResponse}</p>}
-
-      <Button onClick={handleToggleText} className="mt-4">
-        Toggle Text
-      </Button>
-      {showText && <p className="mt-4">This is the toggled text!</p>}
     </div>
   );
 }
