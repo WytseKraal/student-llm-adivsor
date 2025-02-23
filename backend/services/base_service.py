@@ -9,6 +9,7 @@ logger.setLevel(logging.INFO)
 
 # TODO: Move APIError
 # TODO: Retrieve urls from .env file
+# TODO: use model dump and json dump
 
 class APIError(Exception):
     """

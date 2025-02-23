@@ -29,11 +29,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: frontend-build
-          path: |
-            llm_advisor_app/.next
-            llm_advisor_app/package.json
-            llm_advisor_app/package-lock.json
-            llm_advisor_app/public
+          path: llm_advisor_app
 
   build-backend:
     runs-on: ubuntu-latest
@@ -104,6 +100,31 @@ jobs:
           name: frontend-build
           path: frontend-dist
 
+      - name: Create deployment script
+        run: |
+          cat << 'EOF' > deploy.sh
+          #!/bin/bash
+
+          # Stop the current application
+          pm2 delete advisor_app || true
+
+          # Clean up and prepare directories
+          rm -rf ~/frontend-old
+          mv ~/frontend ~/frontend-old || true
+          rm -rf ~/frontend
+          mv ~/frontend-temp ~/frontend
+
+          # Install dependencies and rebuild
+          cd ~/frontend
+          npm ci --production
+
+          # Start the application
+          pm2 start npm --name "advisor_app" -- start
+
+          # Clean up
+          rm -rf ~/frontend-old
+          EOF
+
       - name: Deploy to LightSail
         uses: appleboy/ssh-action@v0.1.10
         with:
@@ -112,10 +133,8 @@ jobs:
           key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
           script: |
             # Prepare deployment directory
+            rm -rf ~/frontend-temp
             mkdir -p ~/frontend-temp
-
-            # Clean up any previous deployment
-            rm -rf ~/frontend-temp/*
 
       - name: Copy Files to LightSail
         uses: appleboy/scp-action@v0.1.7
@@ -123,30 +142,16 @@ jobs:
           host: ${{ secrets.LIGHTSAIL_HOST }}
           username: ubuntu
           key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
-          source: "frontend-dist/*"
+          source: "frontend-dist/*,deploy.sh"
           target: "/home/ubuntu/frontend-temp"
           strip_components: 1
 
-      - name: Finalize Deployment
+      - name: Execute Deployment
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.LIGHTSAIL_HOST }}
           username: ubuntu
           key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
           script: |
-            # Stop the current application
-            pm2 delete advisor_app || true
-
-            # Backup current deployment
-            mv ~/frontend ~/frontend-old || true
-
-            # Move new deployment into place
-            mv ~/frontend-temp ~/frontend
-
-            # Install dependencies and start the application
-            cd ~/frontend
-            npm ci --production
-            pm2 start npm --name "advisor_app" -- start
-
-            # Clean up old deployment
-            rm -rf ~/frontend-old
+            chmod +x ~/frontend-temp/deploy.sh
+            ~/frontend-temp/deploy.sh
