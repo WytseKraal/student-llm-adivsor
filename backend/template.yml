@@ -35,7 +35,7 @@ Resources:
   HelloFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: app.lambda_handler
+      Handler: handlers/hello_handler.lambda_handler
       Runtime: python3.9
       CodeUri: .
       Environment:
@@ -52,7 +52,7 @@ Resources:
   GoodbyeFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: goodbye.lambda_handler
+      Handler: handlers/goodbye_handler.lambda_handler
       Runtime: python3.9
       CodeUri: .
       Environment:

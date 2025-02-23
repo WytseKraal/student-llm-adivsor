@@ -23,21 +23,57 @@ export default function Home() {
 
   const apiUrl = env.apiUrl;
 
-  async function callProtectedApi() {
+  async function callHelloApi() {
     try {
       const token = await getToken();
-      const res = await fetch(`${apiUrl}/goodbye/bye`, {
+      const res = await fetch(`${apiUrl}/hello`, {
         headers: {
           Authorization: token, // Token is automatically formatted correctly
           "Content-Type": "application/json",
         },
       });
       const data = await res.json();
-      console.log("API Response:", data);
-      setApiResponse(data.message);
+      console.log("Hello API Response:", data);
+      setApiResponse(`Hello: ${data.message}`);
     } catch (error) {
-      console.error("Error:", error);
-      setApiResponse("An error occurred");
+      console.error("Error calling /hello endpoint:", error);
+      setApiResponse("An error occurred calling /hello endpoint");
+    }
+  }
+
+  async function callByeApi() {
+    try {
+      const token = await getToken();
+      const res = await fetch(`${apiUrl}/goodbye/bye`, {
+        headers: {
+          Authorization: token,
+          "Content-Type": "application/json",
+        },
+      });
+      const data = await res.json();
+      console.log("Goodbye Bye API Response:", data);
+      setApiResponse(`Goodbye Bye: ${data.message}`);
+    } catch (error) {
+      console.error("Error calling /goodbye/bye endpoint:", error);
+      setApiResponse("An error occurred calling /goodbye/bye endpoint");
+    }
+  }
+
+  async function callSeeyaApi() {
+    try {
+      const token = await getToken();
+      const res = await fetch(`${apiUrl}/goodbye/seeya`, {
+        headers: {
+          Authorization: token,
+          "Content-Type": "application/json",
+        },
+      });
+      const data = await res.json();
+      console.log("Goodbye Seeya API Response:", data);
+      setApiResponse(`Goodbye Seeya: ${data.message}`);
+    } catch (error) {
+      console.error("Error calling /goodbye/seeya endpoint:", error);
+      setApiResponse("An error occurred calling /goodbye/seeya endpoint");
     }
   }
 
@@ -129,8 +165,10 @@ export default function Home() {
         </form>
       ) : (
         <div className="flex flex-col gap-4 items-center">
-          <p>Welcome From lightsail, {user?.getUsername()}!</p>
-          <Button onClick={callProtectedApi}>Call Protected API</Button>
+          <p>Welcome from Lightsail, {user?.getUsername()}!</p>
+          <Button onClick={callHelloApi}>Call /hello Endpoint</Button>
+          <Button onClick={callByeApi}>Call /goodbye/bye Endpoint</Button>
+          <Button onClick={callSeeyaApi}>Call /goodbye/seeya Endpoint</Button>
           <Button variant="outline" onClick={signOut}>
             Sign Out
           </Button>
