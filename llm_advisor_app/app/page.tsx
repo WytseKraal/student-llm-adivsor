@@ -7,8 +7,7 @@ import { env } from "@/environment";
 import { useUserData } from "@/hooks/userDataHook";
 
 export default function Home() {
-  const { userName, userEmail, sub, phoneNumber, isLoading, error } =
-    useUserData();
+  const { userName, userEmail, sub, isLoading, error } = useUserData();
   const [apiResponse, setApiResponse] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
