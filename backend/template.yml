@@ -19,7 +19,7 @@ Globals:
   Api:
     Auth:
     Cors:
-      AllowMethods: "'GET,OPTIONS'"
+      AllowMethods: "'GET,PUT, OPTIONS'"
       AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token, Origin'"
       AllowOrigin: !If 
         - IsDev

@@ -41,7 +41,7 @@ class BaseService:
         return {
             'Access-Control-Allow-Origin': allowed_origin,
             'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,Origin',
-            'Access-Control-Allow-Methods': 'GET,POST,OPTIONS'
+            'Access-Control-Allow-Methods': 'GET,PUT,POST,OPTIONS'
         }
 
     
