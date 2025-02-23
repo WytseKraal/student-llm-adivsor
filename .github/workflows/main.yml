@@ -102,6 +102,7 @@ jobs:
           script: |
             cd /home/ubuntu/frontend
             npm install --production
+            npm run build
             pm2 delete advisor_app || true
             sleep 2
             pm2 start npm --name "advisor_app" -- start
