@@ -78,6 +78,7 @@ Resources:
     Properties:
       Handler: handlers/database_handler.lambda_handler
       Runtime: python3.9
+      Timeout: 10
       CodeUri: .
       Environment:
         Variables:
