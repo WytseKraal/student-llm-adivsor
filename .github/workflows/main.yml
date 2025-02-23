@@ -28,6 +28,8 @@ jobs:
       - name: Upload Frontend Artifact
         uses: actions/upload-artifact@v4
         with:
+          # Give it a name and list out all the files/folders we want
+          # to include in the artifact.
           name: frontend-build
           path: |
             llm_advisor_app/.next
@@ -105,6 +107,9 @@ jobs:
           name: frontend-build
           path: frontend-dist
 
+      - name: Show local artifact folder (debug)
+        run: ls -R frontend-dist
+
       - name: Prepare Deployment Directory on Lightsail
         uses: appleboy/ssh-action@v0.1.10
         with:
@@ -121,8 +126,11 @@ jobs:
           host: ${{ secrets.LIGHTSAIL_HOST }}
           username: ubuntu
           key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
-          source: "frontend-dist/*"
+          # We'll copy everything from 'frontend-dist'...
+          source: "frontend-dist/**/*"
           target: "/home/ubuntu/frontend-temp"
+          # ... and flatten by removing just one top-level folder if you
+          # see 'llm_advisor_app' or 'frontend-dist' in the paths.
           strip_components: 1
 
       - name: Finalize Deployment on Lightsail
@@ -141,11 +149,16 @@ jobs:
             # Move in the freshly uploaded build
             mv ~/frontend-temp ~/frontend
 
+            echo "Check that .next/ is in ~/frontend..."
+            ls -R ~/frontend
+
             # Install production dependencies
             cd ~/frontend
             npm ci --production
 
             # Start the Next.js app with PM2
+            # (This just runs "npm run start", which expects 
+            #  a built .next folder)
             pm2 start npm --name "advisor_app" -- start
 
             # Clean up the old version
