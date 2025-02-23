@@ -1,4 +1,5 @@
 name: Build and Deploy
+
 on:
   push:
     branches:
@@ -10,33 +11,50 @@ jobs:
     steps:
       - name: Check out repo
         uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+          cache: "npm"
+          cache-dependency-path: llm_advisor_app/package-lock.json
+
       - name: Install & Build NextJS
         working-directory: llm_advisor_app
         run: |
-          npm install 
+          npm ci
           npm run build
+
       - name: Upload Frontend Artifact
         uses: actions/upload-artifact@v4
         with:
           name: frontend-build
-          path: llm_advisor_app
+          path: |
+            llm_advisor_app/.next
+            llm_advisor_app/package.json
+            llm_advisor_app/package-lock.json
+            llm_advisor_app/public
 
   build-backend:
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
         uses: actions/checkout@v3
+
       - name: Set up Python 3.9
         uses: actions/setup-python@v4
         with:
           python-version: "3.9"
+
       - name: Install AWS SAM CLI
         run: |
           python -m pip install --upgrade pip
           pip install aws-sam-cli
+
       - name: Build Backend with SAM
         working-directory: backend
         run: sam build
+
       - name: Upload Backend Artifact
         uses: actions/upload-artifact@v4
         with:
@@ -50,17 +68,20 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v3
+
       - name: Download Backend Artifact
         uses: actions/download-artifact@v4
         with:
           name: backend-build
           path: backend/.aws-sam/build
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v3
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
+
       - name: Deploy Backend with SAM
         working-directory: backend
         run: |
@@ -81,28 +102,51 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: frontend-build
-          path: dist # Change to a temporary directory
+          path: frontend-dist
 
-      - name: Copy Files to LightSail (SCP)
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.LIGHTSAIL_HOST }}
-          username: ubuntu
-          key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
-          source: "dist/*" # Copy contents instead of directory
-          target: "/home/ubuntu/frontend"
-          strip_components: 1 # Remove the top-level directory
-
-      - name: Finalize deployment
+      - name: Deploy to LightSail
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.LIGHTSAIL_HOST }}
           username: ubuntu
           key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
           script: |
-            cd /home/ubuntu/frontend
-            npm install --production
-            npm run build
+            # Prepare deployment directory
+            mkdir -p ~/frontend-temp
+
+            # Clean up any previous deployment
+            rm -rf ~/frontend-temp/*
+
+      - name: Copy Files to LightSail
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.LIGHTSAIL_HOST }}
+          username: ubuntu
+          key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
+          source: "frontend-dist/*"
+          target: "/home/ubuntu/frontend-temp"
+          strip_components: 1
+
+      - name: Finalize Deployment
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.LIGHTSAIL_HOST }}
+          username: ubuntu
+          key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
+          script: |
+            # Stop the current application
             pm2 delete advisor_app || true
-            sleep 2
+
+            # Backup current deployment
+            mv ~/frontend ~/frontend-old || true
+
+            # Move new deployment into place
+            mv ~/frontend-temp ~/frontend
+
+            # Install dependencies and start the application
+            cd ~/frontend
+            npm ci --production
             pm2 start npm --name "advisor_app" -- start
+
+            # Clean up old deployment
+            rm -rf ~/frontend-old
