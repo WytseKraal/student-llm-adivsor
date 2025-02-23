@@ -73,6 +73,33 @@ Resources:
             Method: GET
             Auth:
               Authorizer: CognitoAuthorizer
+  DatabaseFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handlers/database_handler.lambda_handler
+      Runtime: python3.9
+      CodeUri: .
+      Environment:
+        Variables:
+          Environment: !Ref Environment
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: prod-student-advisor-table
+      Events:
+        PutStudent:
+          Type: Api
+          Properties:
+            Path: /student
+            Method: PUT
+            Auth:
+              Authorizer: CognitoAuthorizer
+        GetStudent:
+          Type: Api
+          Properties:
+            Path: /student
+            Method: GET
+            Auth:
+              Authorizer: CognitoAuthorizer
 
 
 Outputs:
