@@ -72,35 +72,35 @@ jobs:
             --parameter-overrides "Environment=prod" \
             --no-fail-on-empty-changeset
 
-deploy-frontend:
-  runs-on: ubuntu-latest
-  needs: [build-frontend]
-  environment: production
-  steps:
-    - name: Download Frontend Artifact
-      uses: actions/download-artifact@v4
-      with:
-        name: frontend-build
-        path: dist # Change to a temporary directory
+  deploy-frontend:
+    runs-on: ubuntu-latest
+    needs: [build-frontend]
+    environment: production
+    steps:
+      - name: Download Frontend Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-build
+          path: dist # Change to a temporary directory
 
-    - name: Copy Files to LightSail (SCP)
-      uses: appleboy/scp-action@v0.1.7
-      with:
-        host: ${{ secrets.LIGHTSAIL_HOST }}
-        username: ubuntu
-        key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
-        source: "dist/*" # Copy contents instead of directory
-        target: "/home/ubuntu/frontend"
-        strip_components: 1 # Remove the top-level directory
+      - name: Copy Files to LightSail (SCP)
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.LIGHTSAIL_HOST }}
+          username: ubuntu
+          key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
+          source: "dist/*" # Copy contents instead of directory
+          target: "/home/ubuntu/frontend"
+          strip_components: 1 # Remove the top-level directory
 
-    - name: Finalize deployment
-      uses: appleboy/ssh-action@v0.1.10
-      with:
-        host: ${{ secrets.LIGHTSAIL_HOST }}
-        username: ubuntu
-        key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
-        script: |
-          cd /home/ubuntu/frontend
-          pm2 delete advisor_app || true
-          sleep 2
-          pm2 start npm --name "advisor_app" -- start
+      - name: Finalize deployment
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.LIGHTSAIL_HOST }}
+          username: ubuntu
+          key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
+          script: |
+            cd /home/ubuntu/frontend
+            pm2 delete advisor_app || true
+            sleep 2
+            pm2 start npm --name "advisor_app" -- start
