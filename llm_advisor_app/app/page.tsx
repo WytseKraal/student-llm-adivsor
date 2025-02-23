@@ -11,7 +11,6 @@ export default function Home() {
   const [password, setPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [name, setName] = useState("");
-  const [showText, setShowText] = useState(false);
   const {
     user,
     signIn,
@@ -113,10 +112,6 @@ export default function Home() {
         setApiResponse("An unknown error occurred");
       }
     }
-  };
-
-  const handleToggleText = () => {
-    setShowText(!showText);
   };
 
   console.log("Using url: ", apiUrl);
