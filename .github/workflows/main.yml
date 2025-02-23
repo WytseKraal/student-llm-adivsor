@@ -6,37 +6,43 @@ on:
       - main
 
 jobs:
-  build-frontend:
+  build-and-deply-frontend:
     runs-on: ubuntu-latest
+
     steps:
       - name: Check out repo
         uses: actions/checkout@v3
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: "18"
-          cache: "npm"
-          cache-dependency-path: llm_advisor_app/package-lock.json
-
       - name: Install & Build NextJS
         working-directory: llm_advisor_app
         run: |
-          npm ci
+          npm install 
           npm run build
 
-      - name: Upload Frontend Artifact
-        uses: actions/upload-artifact@v4
+      - name: Copy Files to LightSail (SCP)
+        uses: appleboy/scp-action@v0.1.7
         with:
-          # Give it a name and list out all the files/folders we want
-          # to include in the artifact.
-          name: frontend-build
-          path: |
-            llm_advisor_app/.next
-            llm_advisor_app/package.json
-            llm_advisor_app/package-lock.json
-            llm_advisor_app/public
-            llm_advisor_app/next.config.js
+          host: ${{ secrets.LIGHTSAIL_HOST }}
+          username: ubuntu
+          key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
+
+          source: |
+            llm_advisor_app
+          target: /home/ubuntu/frontend
+
+      - name: Finalize deployment
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.LIGHTSAIL_HOST }}
+          username: ubuntu
+          key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
+          # same note about known_hosts
+          script: |
+            cd /home/ubuntu/frontend/llm_advisor_app
+
+            # Restart PM2 process
+            pm2 stop advisor_app || true
+            pm2 start npm --name "advisor_app" -- start
 
   build-backend:
     runs-on: ubuntu-latest
@@ -69,9 +75,6 @@ jobs:
     needs: [build-backend]
     environment: production
     steps:
-      - name: Check out code
-        uses: actions/checkout@v3
-
       - name: Download Backend Artifact
         uses: actions/download-artifact@v4
         with:
@@ -95,68 +98,3 @@ jobs:
             --no-confirm-changeset \
             --parameter-overrides "Environment=prod" \
             --no-fail-on-empty-changeset
-
-  deploy-frontend:
-    runs-on: ubuntu-latest
-    needs: [build-frontend]
-    environment: production
-    steps:
-      - name: Download Frontend Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: frontend-build
-          path: frontend-dist
-
-      - name: Show local artifact folder (debug)
-        run: ls -R frontend-dist
-
-      - name: Prepare Deployment Directory on Lightsail
-        uses: appleboy/ssh-action@v0.1.10
-        with:
-          host: ${{ secrets.LIGHTSAIL_HOST }}
-          username: ubuntu
-          key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
-          script: |
-            mkdir -p ~/frontend-temp
-            rm -rf ~/frontend-temp/*
-
-      - name: Copy Files to Lightsail
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.LIGHTSAIL_HOST }}
-          username: ubuntu
-          key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
-          source: "frontend-dist/llm_advisor_app/*"
-          target: "/home/ubuntu/frontend-temp"
-          strip_components: 0
-
-      - name: Finalize Deployment on Lightsail
-        uses: appleboy/ssh-action@v0.1.10
-        with:
-          host: ${{ secrets.LIGHTSAIL_HOST }}
-          username: ubuntu
-          key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
-          script: |
-            # Stop the current application if running
-            pm2 delete advisor_app || true
-
-            # Backup current frontend
-            mv ~/frontend ~/frontend-old || true
-
-            # Move in the freshly uploaded build
-            mv ~/frontend-temp ~/frontend
-
-            echo "Check that .next/ is in ~/frontend..."
-            ls -R ~/frontend
-
-            # Install production dependencies
-            cd ~/frontend
-            npm ci --production
-
-            # Start the Next.js app with PM2
-            # (This just runs "npm run start", which expects 
-            #  a built .next folder)
-            pm2 start npm --name "advisor_app" -- start
-
-            # Clean up the old version
-            rm -rf ~/frontend-old
