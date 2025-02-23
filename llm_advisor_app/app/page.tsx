@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/auth";
 import { Input } from "@/components/ui/input";
 import { env } from "@/environment";
 import { useUserData } from "@/hooks/userDataHook";
+import StudentManager from "@/components/database_interaction";
 
 export default function Home() {
   const { userName, userEmail, sub, isLoading, error } = useUserData();
@@ -172,6 +173,7 @@ export default function Home() {
           <Button onClick={callHelloApi}>Call /hello Endpoint</Button>
           <Button onClick={callByeApi}>Call /goodbye/bye Endpoint</Button>
           <Button onClick={callSeeyaApi}>Call /goodbye/seeya Endpoint</Button>
+          <StudentManager apiUrl={apiUrl} getToken={getToken} />
           <Button variant="outline" onClick={signOut}>
             Sign Out
           </Button>

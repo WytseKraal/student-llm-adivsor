@@ -8,7 +8,7 @@ from typing import Dict, Any
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-class StudentService(BaseService):
+class DatabaseService(BaseService):
     def __init__(self, event, context):
         super().__init__(event, context)
         self.dynamodb = boto3.resource('dynamodb')
