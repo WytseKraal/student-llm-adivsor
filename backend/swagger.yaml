@@ -1,0 +1,143 @@
+openapi: 3.0.0
+info:
+  title: Student Advisor API
+  version: 1.0.0
+  description: API for student advisor application
+servers:
+  - url: http://localhost:3001/
+    description: Local development
+  - url: https://{apiId}.execute-api.eu-north-1.amazonaws.com/Prod
+    description: Production environment
+    variables:
+      apiId:
+        default: 26jbdrdk5g
+components:
+  securitySchemes:
+    CognitoAuth:
+      type: oauth2
+      x-oauth2-redirect-url: http://localhost/oauth2-redirect.html
+      flows:
+        implicit:
+          authorizationUrl: https://eu-north-1cxdmnsswh.auth.eu-north-1.amazoncognito.com/oauth2/authorize
+          clientId: 29sfsu3nvhqfsjjnimcgh9ejab
+          redirectUrl: http://localhost/oauth2-redirect.html
+          scopes: {}
+paths:
+  /hello:
+    get:
+      summary: Hello endpoint
+      description: Returns a hello message
+      security:
+        - CognitoAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "hello"
+  /goodbye/bye:
+    get:
+      summary: Goodbye endpoint
+      description: Returns a goodbye message
+      security:
+        - CognitoAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "goodbye"
+  /goodbye/seeya:
+    get:
+      summary: See ya endpoint
+      description: Returns a see ya message
+      security:
+        - CognitoAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "see ya"
+  /student:
+    get:
+      summary: Get student information
+      description: Retrieves a student by ID
+      security:
+        - CognitoAuth: []
+      parameters:
+        - name: id
+          in: query
+          required: true
+          description: Student ID
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  name:
+                    type: string
+                  advisor:
+                    type: string
+        "404":
+          description: Student not found
+        "400":
+          description: Invalid request
+        "500":
+          description: Server error
+    put:
+      summary: Create or update student
+      description: Creates or updates a student record
+      security:
+        - CognitoAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id:
+                  type: string
+                name:
+                  type: string
+                advisor:
+                  type: string
+      responses:
+        "200":
+          description: Student created or updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Student created successfully"
+        "400":
+          description: Invalid request
+        "500":
+          description: Server error

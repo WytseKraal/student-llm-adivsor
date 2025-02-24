@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DynamoDB Schema Visualization</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f7f9fc;
+            color: #333;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #eaecef;
+        }
+        .overview {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .table-design {
+            display: flex;
+            margin-bottom: 30px;
+        }
+        .primary-table, .gsi {
+            flex: 1;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 0 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .primary-table {
+            background-color: rgba(255, 153, 0, 0.1);
+            border: 1px solid rgba(255, 153, 0, 0.3);
+        }
+        .gsi {
+            background-color: rgba(82, 127, 255, 0.1);
+            border: 1px solid rgba(82, 127, 255, 0.3);
+        }
+        .entity {
+            background-color: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .entity h3 {
+            margin-top: 0;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+            color: #2c3e50;
+        }
+        .keys {
+            padding: 10px;
+            background-color: #f5f5f5;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        .key {
+            font-family: monospace;
+            padding: 5px;
+        }
+        .primary-key {
+            color: #e67e22;
+            font-weight: bold;
+        }
+        .sort-key {
+            color: #3498db;
+            font-weight: bold;
+        }
+        .gsi-key {
+            color: #9b59b6;
+            font-weight: bold;
+        }
+        .attributes {
+            padding: 10px 0;
+        }
+        .attribute {
+            display: flex;
+            padding: 5px 0;
+            border-bottom: 1px solid #f1f1f1;
+        }
+        .attribute-name {
+            font-weight: bold;
+            width: 150px;
+        }
+        .attribute-type {
+            color: #7f8c8d;
+            flex: 1;
+        }
+        .attribute-example {
+            color: #34495e;
+            font-style: italic;
+            flex: 2;
+            font-family: monospace;
+        }
+        .relationships {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .relationship {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            margin: 10px 0;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+        .entity-box {
+            background-color: #3498db;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .relationship-type {
+            margin: 0 15px;
+            color: #7f8c8d;
+            font-style: italic;
+        }
+        .arrow {
+            margin: 0 15px;
+            font-size: 20px;
+        }
+        .access-patterns {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .pattern {
+            margin: 15px 0;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            border-left: 4px solid #3498db;
+        }
+        .pattern-name {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        .pattern-description {
+            margin-bottom: 10px;
+            color: #7f8c8d;
+        }
+        .pattern-code {
+            background-color: #f1f1f1;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            overflow-x: auto;
+        }
+        .note {
+            background-color: rgba(241, 196, 15, 0.1);
+            border-left: 4px solid #f1c40f;
+            padding: 10px 15px;
+            margin: 15px 0;
+            border-radius: 0 4px 4px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>DynamoDB Schema for Student LLM Advisor</h1>
+        
+        <div class="overview">
+            <h2>Single-Table Design Overview</h2>
+            <p>This DynamoDB schema uses a single-table design to efficiently store all entities related to the Student Management Portal. The schema is optimized for common access patterns while ensuring data isolation between students.</p>
+            
+            <div class="note">
+                <strong>Important:</strong> In DynamoDB, we model data based on access patterns rather than entity relationships. The single-table approach combines different entity types in one table, using key design to enable efficient queries.
+            </div>
+        </div>
+        
+        <div class="table-design">
+            <div class="primary-table">
+                <h2>Primary Table Structure</h2>
+                <p>The main table uses a composite primary key consisting of a partition key (PK) and sort key (SK).</p>
+                
+                <div class="keys">
+                    <div class="key"><span class="primary-key">PK (Partition Key)</span>: Entity type prefix followed by ID</div>
+                    <div class="key"><span class="sort-key">SK (Sort Key)</span>: Hierarchical identifier for item types</div>
+                </div>
+                
+                <p>Example primary key combinations:</p>
+                <ul>
+                    <li><code>PK="USER#123", SK="PROFILE"</code> - User profile</li>
+                    <li><code>PK="USER#123", SK="CLASS#101"</code> - User's class enrollment</li>
+                    <li><code>PK="USER#123", SK="GRADE#A1"</code> - User's grade for assignment</li>
+                </ul>
+            </div>
+            
+            <div class="gsi">
+                <h2>Global Secondary Indexes</h2>
+                <p>GSIs enable additional access patterns by creating alternative key structures.</p>
+                
+                <h3>GSI1: Relationship Index</h3>
+                <div class="keys">
+                    <div class="key"><span class="gsi-key">GSI1PK</span>: Entity ID for "reverse" lookups</div>
+                    <div class="key"><span class="gsi-key">GSI1SK</span>: Hierarchical identifier for filtering</div>
+                </div>
+                
+                <h3>GSI2: Analytics Index</h3>
+                <div class="keys">
+                    <div class="key"><span class="gsi-key">GSI2PK</span>: Typically time-based identifiers</div>
+                    <div class="key"><span class="gsi-key">GSI2SK</span>: Entity IDs for filtering</div>
+                </div>
+            </div>
+        </div>
+        
+        <h2>Entity Data Models</h2>
+        
+        <div class="entity">
+            <h3>Student (User)</h3>
+            <div class="keys">
+                <div class="key"><span class="primary-key">PK</span>: USER#{userId}</div>
+                <div class="key"><span class="sort-key">SK</span>: PROFILE</div>
+                <div class="key"><span class="gsi-key">GSI1PK</span>: USER#{userId}</div>
+                <div class="key"><span class="gsi-key">GSI1SK</span>: PROFILE</div>
+            </div>
+            
+            <div class="attributes">
+                <div class="attribute">
+                    <div class="attribute-name">userId</div>
+                    <div class="attribute-type">string</div>
+                    <div class="attribute-example">"123456"</div>
+                </div>
+                <div class="attribute">
+                    <div class="attribute-name">email</div>
+                    <div class="attribute-type">string</div>
+                    <div class="attribute-example">"student@example.com"</div>
+                </div>
+                <div class="attribute">
+                    <div class="attribute-name">name</div>
+                    <div class="attribute-type">string</div>
+                    <div class="attribute-example">"John Smith"</div>
+                </div>
+                <div class="attribute">
+                    <div class="attribute-name">courseId</div>
+                    <div class="attribute-type">string</div>
+                    <div class="attribute-example">"CS101"</div>
+                </div>
+                <div class="attribute">
+                    <div class="attribute-name">entityType</div>
+                    <div class="attribute-type">string</div>
+                    <div class="attribute-example">"USER"</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="entity">
+            <h3>Class Enrollment</h3>
+            <div class="keys">
+                <div class="key"><span class="primary-key">PK</span>: USER#{userId}</div>
+                <div class="key"><span class="sort-key">SK</span>: CLASS#{classId}</div>
+                <div class="key"><span class="gsi-key">GSI1PK</span>: CLASS#{classId}</div>
+                <div class="key"><span class="gsi-key">GSI1SK</span>: USER#{userId}</div>
+            </div>
+            
+            <div class="attributes">
+                <div class="attribute">
+                    <div class="attribute-name">userId</div>
+                    <div class="attribute-type">string</div>
+                    <div class="attribute-example">"123456"</div>
+                </div>
+                <div class="attribute">
+                    <div class="attribute-name">classId</div>
+                    <div class="attribute-type">string</div>
+                    <div class="attribute-example">"CL001"</div>
+                </div>
+                <div class="attribute">
+                    <div class="attribute-name">enrollmentDate</div>
+                    <div class="attribute-type">timestamp</div>
+                    <div class="attribute-example">"2023-09-15T00:00:00Z"</div>
+                </div>
+                <div class="attribute">
+                    <div class="attribute-name">status</div>
+                    <div class="attribute-type">string</div>
+                    <div class="attribute-example">"ACTIVE"</div>
+                </div>
+                <div class="attribute">
+                    <div class="attribute-name">entityType</div>
+                    <div class="attribute-type">string</div>
+                    <div class="attribute-example">"ENROLLMENT"</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="entity">
+            <h3>Grade</h3>
+            <div class="keys">
+                <div class="key"><span class="primary-key">PK</span>: USER#{userId}</div>
+                <div class="key"><span class="sort-key">SK</span>: GRADE#{itemId}</div>
+                <div class="key"><span class="gsi-key">GSI1PK</span>: CLASS#{classId}</div>
+                <div class="key"><span class="gsi-key">GSI1SK</span>: GRADE#USER#{userId}#{itemId}</div>
+            </div>
+            
+            <div class="attributes">
+                <div class="attribute">
+                    <div class="attribute-name">userId</div>
+                    <div class="attribute-type">string</div>
+                    <div class="attribute-example">"123456"</div>
+                </div>
+                <div class="attribute">
+                    <div class="attribute-name">itemId</div>
+                    <div class="attribute-type">string</div>
+                    <div class="attribute-example">"ASN001" or "EXAM001"</div>
+                </div>
+                <div class="attribute">
+                    <div class="attribute-name">classId</div>
+                    <div class="attribute-type">string</div>
+                    <div class="attribute-example">"CL001"</div>
+                </div>
+                <div class="attribute">
+                    <div class="attribute-name">score</div>
+                    <div class="attribute-type">number</div>
+                    <div class="attribute-example">95</div>
+                </div>
+                <div class="attribute">
+                    <div class="attribute-name">gradeType</div>
+                    <div class="attribute-type">string</div>
+                    <div class="attribute-example">"ASSIGNMENT" or "EXAM"</div>
+                </div>
+                <div class="attribute">
+                    <div class="attribute-name">entityType</div>
+                    <div class="attribute-type">string</div>
+                    <div class="attribute-example">"GRADE"</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="entity">
+            <h3>Course</h3>
+            <div class="keys">
+                <div class="key"><span class="primary-key">PK</span>: COURSE#{courseId}</div>
+                <div class="key"><span class="sort-key">SK</span>: INFO</div>
+                <div class="key"><span class="gsi-key">GSI1PK</span>: COURSE</div>
+                <div class="key"><span class="gsi-key">GSI1SK</span>: {courseId}</div>
+            </div>
+            
+            <div class="attributes">
+                <div class="attribute">
+                    <div class="attribute-name">courseId</div>
+                    <div class="attribute-type">string</div>
+                    <div class="attribute-example">"CS101"</div>
+                </div>
+                <div class="attribute">
+                    <div class="attribute-name">title</div>
+                    <div class="attribute-type">string</div>
+                    <div class="attribute-example">"Computer Science Fundamentals"</div>
+                </div>
+                <div class="attribute">
+                    <div class="attribute-name">requirements</div>
+                    <div class="attribute-type">list</div>
+                    <div class="attribute-example">["MATH101"]</div>
+                </div>
+                <div class="attribute">
+                    <div class="attribute-name">entityType</div>
+                    <div class="attribute-type">string</div>
+                    <div class="attribute-example">"COURSE"</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="entity">
+            <h3>Class</h3>
+            <div class="keys">
+                <div class="key"><span class="primary-key">PK</span>: CLASS#{classId}</div>
+                <div class="key"><span class="sort-key">SK</span>: INFO</div>
+                <div class="key"><span class="gsi-key">GSI1PK</span>: COURSE#{courseId}</div>
+                <div class="key"><span class="gsi-key">GSI1SK</span>: CLASS#{classId}</div>
+            </div>
+            
+            <div class="attributes">
+                <div class="attribute">
+                    <div class="attribute-name">classId</div>
+                    <div class="attribute-type">string</div>
+                    <div class="attribute-example">"CL001"</div>
+                </div>
+                <div class="attribute">
+                    <div class="attribute-name">courseId</div>
+                    <div class="attribute-type">string</div>
+                    <div class="attribute-example">"CS101"</div>
+                </div>
+                <div class="attribute">
+                    <div class="attribute-name">title</div>
+                    <div class="attribute-type">string</div>
+                    <div class="attribute-example">"Introduction to Programming"</div>
+                </div>
+                <div class="attribute">
+                    <div class="attribute-name">instructor</div>
+                    <div class="attribute-type">string</div>
+                    <div class="attribute-example">"Dr. Jane Doe"</div>
+                </div>
+                <div class="attribute">
+                    <div class="attribute-name">entityType</div>
+                    <div class="attribute-type">string</div>
+                    <div class="attribute-example">"CLASS"</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="entity">
+            <h3>Usage Tracking</h3>
+            <div class="keys">
+                <div class="key"><span class="primary-key">PK</span>: USER#{userId}</div>
+                <div class="key"><span class="sort-key">SK</span>: USAGE#{yearMonth}</div>
+                <div class="key"><span class="gsi-key">GSI1PK</span>: USAGE#{yearMonth}</div>
+                <div class="key"><span class="gsi-key">GSI1SK</span>: USER#{userId}</div>
+            </div>
+            
+            <div class="attributes">
+                <div class="attribute">
+                    <div class="attribute-name">userId</div>
+                    <div class="attribute-type">string</div>
+                    <div class="attribute-example">"123456"</div>
+                </div>
+                <div class="attribute">
+                    <div class="attribute-name">month</div>
+                    <div class="attribute-type">string</div>
+                    <div class="attribute-example">"2023-10"</div>
+                </div>
+                <div class="attribute">
+                    <div class="attribute-name">questionsCount</div>
+                    <div class="attribute-type">number</div>
+                    <div class="attribute-example">42</div>
+                </div>
+                <div class="attribute">
+                    <div class="attribute-name">inputTokens</div>
+                    <div class="attribute-type">number</div>
+                    <div class="attribute-example">3750</div>
+                </div>
+                <div class="attribute">
+                    <div class="attribute-name">outputTokens</div>
+                    <div class="attribute-type">number</div>
+                    <div class="attribute-example">9800</div>
+                </div>
+                <div class="attribute">
+                    <div class="attribute-name">entityType</div>
+                    <div class="attribute-type">string</div>
+                    <div class="attribute-example">"USAGE"</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="relationships">
+            <h2>Logical Relationships</h2>
+            <p>While DynamoDB doesn't enforce relationships like a relational database, here are the logical relationships modeled by our key design:</p>
+            
+            <div class="relationship">
+                <div class="entity-box">Student</div>
+                <div class="relationship-type">enrolls in</div>
+                <div class="arrow">→</div>
+                <div class="entity-box">Class</div>
+            </div>
+            
+            <div class="relationship">
+                <div class="entity-box">Student</div>
+                <div class="relationship-type">receives</div>
+                <div class="arrow">→</div>
+                <div class="entity-box">Grade</div>
+            </div>
+            
+            <div class="relationship">
+                <div class="entity-box">Course</div>
+                <div class="relationship-type">contains</div>
+                <div class="arrow">→</div>
+                <div class="entity-box">Class</div>
+            </div>
+            
+            <div class="relationship">
+                <div class="entity-box">Class</div>
+                <div class="relationship-type">has</div>
+                <div class="arrow">→</div>
+                <div class="entity-box">Assignment</div>
+            </div>
+            
+            <div class="relationship">
+                <div class="entity-box">Student</div>
+                <div class="relationship-type">tracked by</div>
+                <div class="arrow">→</div>
+                <div class="entity-box">Usage</div>
+            </div>
+        </div>
+        
+        <div class="access-patterns">
+            <h2>Key Access Patterns</h2>
+            <p>The table design supports these primary access patterns efficiently:</p>
+            
+            <div class="pattern">
+                <div class="pattern-name">Get Student Profile</div>
+                <div class="pattern-description">Retrieve a student's profile information</div>
+                <div class="pattern-code">
+                    // Using Primary Key<br>
+                    PK = "USER#123", SK = "PROFILE"
+                </div>
+            </div>
+            
+            <div class="pattern">
+                <div class="pattern-name">Get Student Classes</div>
+                <div class="pattern-description">Get all classes a student is enrolled in</div>
+                <div class="pattern-code">
+                    // Using Primary Key with begins_with<br>
+                    PK = "USER#123", SK begins_with "CLASS#"
+                </div>
+            </div>
+            
+            <div class="pattern">
+                <div class="pattern-name">Get Student Grades</div>
+                <div class="pattern-description">Get all grades for a student</div>
+                <div class="pattern-code">
+                    // Using Primary Key with begins_with<br>
+                    PK = "USER#123", SK begins_with "GRADE#"
+                </div>
+            </div>
+            
+            <div class="pattern">
+                <div class="pattern-name">Get Class Students</div>
+                <div class="pattern-description">Get all students enrolled in a class</div>
+                <div class="pattern-code">
+                    // Using GSI1<br>
+                    GSI1PK = "CLASS#101", GSI1SK begins_with "USER#"
+                </div>
+            </div>
+            
+            <div class="pattern">
+                <div class="pattern-name">Get Class Grades</div>
+                <div class="pattern-description">Get all grades for a specific class</div>
+                <div class="pattern-code">
+                    // Using GSI1<br>
+                    GSI1PK = "CLASS#101", GSI1SK begins_with "GRADE#"
+                </div>
+            </div>
+            
+            <div class="pattern">
+                <div class="pattern-name">Get Monthly Usage</div>
+                <div class="pattern-description">Get usage statistics for all students in a month</div>
+                <div class="pattern-code">
+                    // Using GSI1<br>
+                    GSI1PK = "USAGE#2023-10"
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
