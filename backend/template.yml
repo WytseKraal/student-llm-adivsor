@@ -85,7 +85,7 @@ Resources:
           Environment: !Ref Environment
       Policies:
         - DynamoDBCrudPolicy:
-            TableName: prod-student-advisor-table
+            TableName: prod-student-advisor-table # TODO: Change this based on environment!!
       Events:
         PutStudent:
           Type: Api

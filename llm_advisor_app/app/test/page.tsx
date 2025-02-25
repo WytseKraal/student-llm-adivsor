@@ -1,16 +1,22 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/auth";
 import { env } from "@/environment";
 import AuthComponent from "@/components/auth/AuthComponent";
+import ApiService from "@/components/testing/ApiTest";
 import UserProfile from "@/components/user/UserProfile";
 import StudentManager from "@/components/database_interaction";
-import FancyTitle from "@/components/styling/FancyTitle";
 
-export default function Home() {
+export default function Test() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const { user, getToken } = useAuth();
   const apiUrl = env.apiUrl;
+
+  useEffect(() => {
+    if (user) {
+      setIsLoggedIn(true);
+    }
+  }, [user]);
 
   const handleAuthStateChange = (loggedIn: boolean) => {
     setIsLoggedIn(loggedIn);
@@ -18,9 +24,17 @@ export default function Home() {
 
   return (
     <div className="flex flex-col items-center min-h-screen p-8 pb-20 sm:p-20 font-[family-name:var(--font-geist-sans)]">
+      <h1 className="text-2xl font-bold mb-8">Protected API Test</h1>
+
       <AuthComponent onAuthStateChange={handleAuthStateChange} />
 
-      {user && isLoggedIn && <FancyTitle />}
+      {user && isLoggedIn && (
+        <div className="flex flex-col gap-8 items-center w-full max-w-md mt-8">
+          <UserProfile />
+          <ApiService getToken={getToken} />
+          <StudentManager apiUrl={apiUrl} getToken={getToken} />
+        </div>
+      )}
     </div>
   );
 }
