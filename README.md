@@ -9,3 +9,5 @@ cd into backend
 start python env with all needed libs - Need to update requirments.txt
 
 Now it starts on prod dynamoDB need to switch to dev probably?
+
+<!-- TODO: Change * to localhosts -->
