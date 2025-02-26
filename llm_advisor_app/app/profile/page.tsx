@@ -1,15 +1,12 @@
 "use client";
 import { useState } from "react";
 import { useAuth } from "@/hooks/auth";
-import { env } from "@/environment";
 import AuthComponent from "@/components/auth/AuthComponent";
 import UserProfile from "@/components/user/UserProfileManager";
-import StudentManager from "@/components/database_interaction";
 
 export default function Profile() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const { user, getToken } = useAuth();
-  const apiUrl = env.apiUrl;
+  const { user } = useAuth();
 
   const handleAuthStateChange = (loggedIn: boolean) => {
     setIsLoggedIn(loggedIn);

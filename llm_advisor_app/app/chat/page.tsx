@@ -2,12 +2,11 @@
 import { useState } from "react";
 import { useAuth } from "@/hooks/auth";
 import AuthComponent from "@/components/auth/AuthComponent";
-import UserProfile from "@/components/user/UserProfileManager";
 import ChatService from "@/components/user/ChatService";
 
 export default function Profile() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const { user, getToken } = useAuth();
+  const { user } = useAuth();
 
   const handleAuthStateChange = (loggedIn: boolean) => {
     setIsLoggedIn(loggedIn);

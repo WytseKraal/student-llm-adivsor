@@ -41,13 +41,17 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
+// Check if we're running in a browser environment
+const isBrowser = typeof window !== "undefined";
+
 // Pool configuration
 const poolData: PoolData = {
   UserPoolId: env.cognitoConfig.UserPoolId,
   ClientId: env.cognitoConfig.ClientId,
 };
 
-const userPool = new CognitoUserPool(poolData);
+// Only initialize userPool in browser environment
+const userPool = isBrowser ? new CognitoUserPool(poolData) : null;
 
 // Create context with default values
 const AuthContext = createContext<AuthContextType>({
@@ -74,10 +78,21 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [challengeUser, setChallengeUser] = useState<CognitoUser | null>(null);
 
   useEffect(() => {
-    checkAuth();
+    // Only check auth in the browser
+    if (isBrowser) {
+      checkAuth();
+    } else {
+      setLoading(false);
+    }
   }, []);
 
   const checkAuth = () => {
+    // Ensure userPool exists (browser environment)
+    if (!userPool) {
+      setLoading(false);
+      return;
+    }
+
     const cognitoUser = userPool.getCurrentUser();
     if (cognitoUser) {
       cognitoUser.getSession(
@@ -102,6 +117,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
     email: string,
     password: string
   ): Promise<CognitoUserSession | { challengeName: string }> => {
+    // Check if we're in browser environment
+    if (!isBrowser || !userPool) {
+      return Promise.reject(
+        new Error("Authentication not available on server")
+      );
+    }
+
     return new Promise((resolve, reject) => {
       const authenticationDetails = new AuthenticationDetails({
         Username: email,
@@ -138,6 +160,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
     newPassword: string,
     name: string
   ): Promise<CognitoUserSession> => {
+    // Check if we're in browser environment
+    if (!isBrowser) {
+      return Promise.reject(
+        new Error("Authentication not available on server")
+      );
+    }
+
     return new Promise((resolve, reject) => {
       if (!challengeUser) {
         reject(new Error("No challenge user found"));
@@ -162,6 +191,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   const signOut = () => {
+    // Check if we're in browser environment
+    if (!isBrowser || !userPool) {
+      return;
+    }
+
     const cognitoUser = userPool.getCurrentUser();
     if (cognitoUser) {
       cognitoUser.signOut();
@@ -171,6 +205,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   const getToken = async (): Promise<string> => {
+    // Check if we're in browser environment
+    if (!isBrowser || !userPool) {
+      return Promise.reject(
+        new Error("Authentication not available on server")
+      );
+    }
+
     return new Promise((resolve, reject) => {
       const cognitoUser = userPool.getCurrentUser();
       if (cognitoUser) {

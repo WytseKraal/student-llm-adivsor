@@ -10,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Loader2 } from "lucide-react";
 
@@ -27,10 +27,7 @@ interface ChatServiceProps {
   getToken?: () => Promise<string | null>;
 }
 
-export default function ChatService({
-  apiUrl = "/api/chat",
-  getToken,
-}: ChatServiceProps) {
+export default function ChatService({}: ChatServiceProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -43,16 +40,6 @@ export default function ChatService({
 
   const sendMessage = async (message: string): Promise<string> => {
     // If we have a getToken function, use it to get auth token
-    let headers: HeadersInit = {
-      "Content-Type": "application/json",
-    };
-
-    if (getToken) {
-      const token = await getToken();
-      if (token) {
-        headers["Authorization"] = `Bearer ${token}`;
-      }
-    }
 
     try {
       // In a real implementation, you would make an actual API call:
