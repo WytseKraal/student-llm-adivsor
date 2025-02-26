@@ -4,35 +4,41 @@ from services.base_service import BaseService, APIError
 import json
 import logging
 from typing import Dict, Any
+import os
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 class DatabaseService(BaseService):
     def __init__(self, event, context):
-        super().__init__(event, context)
-        event_dict = {
-            'httpMethod': event.httpMethod,
-            'path': event.path,
-            'headers': event.headers,
-            'queryStringParameters': event.queryStringParameters,
-            'body': event.body if hasattr(event, 'body') else None
-        }
-        logging.info(f"Received event: {json.dumps(event_dict)}")
-
-
-        logging.info(f"AWS Region: {boto3.Session().region_name}")
-        
-        self.dynamodb = boto3.resource('dynamodb', region_name='eu-north-1')
-        self.table = self.dynamodb.Table('prod-student-advisor-table')
-        
-        # Test table connection
-        try:
-            self.table.table_status
-            logging.info("Successfully connected to DynamoDB table")
-        except Exception as e:
-            logging.error(f"Failed to connect to DynamoDB: {str(e)}")
-            raise
+            super().__init__(event, context)
+            
+            event_dict = {
+                'httpMethod': event.httpMethod,
+                'path': event.path,
+                'headers': event.headers,
+                'queryStringParameters': event.queryStringParameters,
+                'body': event.body if hasattr(event, 'body') else None
+            }
+            
+            logging.info(f"Received event: {json.dumps(event_dict)}")
+            logging.info(f"AWS Region: {boto3.Session().region_name}")
+            
+            environment = os.getenv('Environment', 'prod')
+            table_name = f"{environment}-student-advisor-table"
+            logging.info(f"Using {environment} environment")
+            
+            # Initialize the dynamodb client
+            self.dynamodb = boto3.resource('dynamodb', region_name='eu-north-1')
+            self.table = self.dynamodb.Table(table_name)
+            
+            # Test table connection
+            try:
+                self.table.table_status
+                logging.info("Successfully connected to DynamoDB table")
+            except Exception as e:
+                logging.error(f"Failed to connect to DynamoDB: {str(e)}")
+                raise
 
     def handle(self) -> dict:
         http_method = self.event.httpMethod.upper()
