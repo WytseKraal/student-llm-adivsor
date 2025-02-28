@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useAuth } from "@/hooks/auth";
 import { env } from "@/environment";
 import AuthComponent from "@/components/auth/AuthComponent";
