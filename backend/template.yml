@@ -19,7 +19,7 @@ Globals:
   Api:
     Auth:
     Cors:
-      AllowMethods: "'GET,PUT, OPTIONS'"
+      AllowMethods: "'GET,PUT,POST,OPTIONS'"
       AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token, Origin'"
       AllowOrigin: !If 
         - IsDev
@@ -36,7 +36,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handlers/hello_handler.lambda_handler
-      Runtime: python3.9
+      Runtime: python3.12
       CodeUri: .
       Environment:
         Variables:
@@ -53,7 +53,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handlers/goodbye_handler.lambda_handler
-      Runtime: python3.9
+      Runtime: python3.12
       CodeUri: .
       Environment:
         Variables:
@@ -77,7 +77,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handlers/database_handler.lambda_handler
-      Runtime: python3.9
+      Runtime: python3.12
       Timeout: 10
       CodeUri: .
       Environment:
@@ -101,7 +101,25 @@ Resources:
             Method: GET
             Auth:
               Authorizer: CognitoAuthorizer
-
+  ChatFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handlers/chat_handler.lambda_handler
+      Runtime: python3.12
+      Timeout: 10
+      CodeUri: .
+      Environment:
+        Variables:
+          Environment: !Ref Environment
+          OPENAI_API_KEY: !Ref OPENAI_API_KEY
+      Events:
+        ChatEvent:
+          Type: Api
+          Properties:
+            Path: /chat
+            Method: POST
+            Auth:
+              Authorizer: CognitoAuthorizer
 
 Outputs:
   ApiUrl:

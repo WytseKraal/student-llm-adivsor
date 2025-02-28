@@ -9,6 +9,7 @@ from services.database_service import DatabaseService
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
+
 def lambda_handler(event: dict, context: object) -> dict:
     try:
         event_obj = LambdaEvent(**event)
@@ -24,7 +25,8 @@ def lambda_handler(event: dict, context: object) -> dict:
         return LambdaResponse(
             statusCode=400,
             headers={},
-            body=json.dumps({"error": "Invalid event structure", "details": ve.errors()})
+            body=json.dumps({"error": "Invalid event structure",
+                             "details": ve.errors()})
         ).dict()
     except Exception as e:
         logger.exception("Unhandled exception")

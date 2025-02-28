@@ -23,14 +23,17 @@ interface Message {
 }
 
 interface ChatServiceProps {
-  apiUrl?: string;
-  getToken?: () => Promise<string | null>;
+  apiUrl: string;
+  getToken: () => Promise<string | null>;
 }
 
-export default function ChatService({}: ChatServiceProps) {
+export default function ChatService({ apiUrl, getToken }: ChatServiceProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [tokenUsage, setTokenUsage] = useState
+    <{ total: number; prompt: number; completion: number }>
+    ({ total: 0, prompt: 0, completion: 0 });
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll to bottom when messages update
@@ -39,14 +42,18 @@ export default function ChatService({}: ChatServiceProps) {
   }, [messages]);
 
   const sendMessage = async (message: string): Promise<string> => {
-    // If we have a getToken function, use it to get auth token
-
     try {
-      // In a real implementation, you would make an actual API call:
-      /*
-      const response = await fetch(apiUrl, {
+      const token = await getToken();
+      if (!token) {
+        throw new Error("No authentication token available.");
+      }
+
+      const response = await fetch(`${apiUrl}/chat`, {
         method: "POST",
-        headers,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({ message }),
       });
 
@@ -55,15 +62,15 @@ export default function ChatService({}: ChatServiceProps) {
       }
 
       const data = await response.json();
-      return data.message;
-      */
 
-      // For now, we'll just mock the API response with a delay
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          resolve(message); // Echo back the same message
-        }, 1000);
-      });
+      const usage = data.usage;
+      setTokenUsage((prevUsage) => ({
+        total: prevUsage.total + usage.total_tokens,
+        prompt: usage.prompt_tokens,
+        completion: usage.completion_tokens,
+      }));
+
+      return data.response;
     } catch (error) {
       console.error("API call failed:", error);
       throw error;
@@ -130,9 +137,8 @@ export default function ChatService({}: ChatServiceProps) {
               {messages.map((message) => (
                 <div
                   key={message.id}
-                  className={`flex ${
-                    message.sender === "user" ? "justify-end" : "justify-start"
-                  }`}
+                  className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"
+                    }`}
                 >
                   <div className="flex items-start max-w-[80%] gap-2">
                     {message.sender === "bot" && (
@@ -144,11 +150,10 @@ export default function ChatService({}: ChatServiceProps) {
                     )}
 
                     <div
-                      className={`rounded-lg px-3 py-2 ${
-                        message.sender === "user"
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-muted"
-                      }`}
+                      className={`rounded-lg px-3 py-2 ${message.sender === "user"
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted"
+                        }`}
                     >
                       <p>{message.content}</p>
                       <p className="text-xs opacity-70 mt-1">
@@ -175,7 +180,11 @@ export default function ChatService({}: ChatServiceProps) {
         </CardContent>
       </ScrollArea>
 
-      <CardFooter className="border-t p-4">
+      <CardFooter className="border-t p-4 flex flex-col gap-2">
+        <div className="text-xs text-gray-500">
+          Total token usage (session): {tokenUsage.total} | Last prompt: {tokenUsage.prompt} | Last completion: {tokenUsage.completion}
+        </div>
+
         <form onSubmit={handleSendMessage} className="flex w-full gap-2">
           <Input
             placeholder="Type your message..."
@@ -196,6 +205,7 @@ export default function ChatService({}: ChatServiceProps) {
           </Button>
         </form>
       </CardFooter>
+
     </Card>
   );
 }
