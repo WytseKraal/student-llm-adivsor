@@ -1,12 +1,14 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/auth";
+import { env } from "@/environment";
 import AuthComponent from "@/components/auth/AuthComponent";
 import ChatService from "@/components/user/ChatService";
 
 export default function Profile() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const { user } = useAuth();
+  const { user, getToken } = useAuth();
+  const apiUrl = env.apiUrl;
 
   const handleAuthStateChange = (loggedIn: boolean) => {
     setIsLoggedIn(loggedIn);
@@ -17,8 +19,9 @@ export default function Profile() {
       <h1 className="text-2xl font-bold mb-8">Protected API Test</h1>
 
       <AuthComponent onAuthStateChange={handleAuthStateChange} />
-
-      {user && isLoggedIn && <ChatService />}
+      {user && isLoggedIn && (
+        <ChatService apiUrl={apiUrl} getToken={getToken} />
+      )}
     </div>
   );
 }
