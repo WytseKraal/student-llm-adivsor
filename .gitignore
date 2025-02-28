@@ -134,6 +134,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+backend/env.json
 
 # Spyder project settings
 .spyderproject
@@ -208,3 +209,6 @@ jspm_packages
 # Optional REPL history
 .node_repl_history
 .next
+
+# AWS
+backend/.aws-sam/build.toml
