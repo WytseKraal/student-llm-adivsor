@@ -6,7 +6,7 @@ Parameters:
   UserPoolArn:
     Type: String
     Description: ARN of the Cognito User Pool
-    Default: "arn:aws:cognito-idp:eu-north-1:565393034649:userpool/eu-north-1_cXdMnsSwH" # Replace with your User Pool ARN
+    Default: "arn:aws:cognito-idp:eu-north-1:565393034649:userpool/eu-north-1_cXdMnsSwH"
   Environment:
     Type: String
     Default: prod
@@ -14,6 +14,11 @@ Parameters:
       - dev
       - prod
     Description: Environment type (dev or prod)
+  OpenAIAPIKey:
+    Type: String
+    Description: OpenAI API Key for LLM access
+    NoEcho: true  # This prevents the key from being displayed in logs/console
+
 
 Globals:
   Api:
