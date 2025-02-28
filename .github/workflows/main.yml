@@ -94,5 +94,5 @@ jobs:
             --region ${{ secrets.AWS_REGION }} \
             --s3-bucket artifacts-llm-advisor-cloudform \
             --no-confirm-changeset \
-            --parameter-overrides "Environment=prod OpenAIAPIKey=${{ secrets.OPENAI_API_KEY }}" \
+            --parameter-overrides "Environment=prod OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" \
             --no-fail-on-empty-changeset

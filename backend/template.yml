@@ -14,7 +14,7 @@ Parameters:
       - dev
       - prod
     Description: Environment type (dev or prod)
-  OpenAIAPIKey:
+  OPENAI_API_KEY:
     Type: String
     Description: OpenAI API Key for LLM access
     NoEcho: true  # This prevents the key from being displayed in logs/console
