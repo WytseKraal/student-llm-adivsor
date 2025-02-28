@@ -31,6 +31,9 @@ export default function ChatService({ apiUrl, getToken }: ChatServiceProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [tokenUsage, setTokenUsage] = useState
+    <{ total: number; prompt: number; completion: number }>
+    ({ total: 0, prompt: 0, completion: 0 });
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll to bottom when messages update
@@ -59,6 +62,14 @@ export default function ChatService({ apiUrl, getToken }: ChatServiceProps) {
       }
 
       const data = await response.json();
+
+      const usage = data.usage;
+      setTokenUsage((prevUsage) => ({
+        total: prevUsage.total + usage.total_tokens,
+        prompt: usage.prompt_tokens,
+        completion: usage.completion_tokens,
+      }));
+
       return data.response;
     } catch (error) {
       console.error("API call failed:", error);
@@ -169,7 +180,11 @@ export default function ChatService({ apiUrl, getToken }: ChatServiceProps) {
         </CardContent>
       </ScrollArea>
 
-      <CardFooter className="border-t p-4">
+      <CardFooter className="border-t p-4 flex flex-col gap-2">
+        <div className="text-xs text-gray-500">
+          Total token usage (session): {tokenUsage.total} | Last prompt: {tokenUsage.prompt} | Last completion: {tokenUsage.completion}
+        </div>
+
         <form onSubmit={handleSendMessage} className="flex w-full gap-2">
           <Input
             placeholder="Type your message..."
@@ -190,6 +205,7 @@ export default function ChatService({ apiUrl, getToken }: ChatServiceProps) {
           </Button>
         </form>
       </CardFooter>
+
     </Card>
   );
 }

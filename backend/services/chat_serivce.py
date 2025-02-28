@@ -52,12 +52,20 @@ class ChatService(BaseService):
 
             # Extract OpenAI response
             ai_response = response.choices[0].message.content
+            ai_usage = response.usage
+            ai_usage_dict = {
+                "prompt_tokens": ai_usage.prompt_tokens,
+                "completion_tokens": ai_usage.completion_tokens,
+                "total_tokens": ai_usage.total_tokens
+            }
 
             response = LambdaResponse(
                 statusCode=200,
                 headers=self.build_headers(),
-                body=json.dumps({"response": ai_response})
+                body=json.dumps(
+                    {"response": ai_response, "usage": ai_usage_dict})
             )
+
             return response.dict()
 
         except json.JSONDecodeError:
