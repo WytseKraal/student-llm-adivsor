@@ -3,16 +3,33 @@ import boto3
 import courses
 import students
 import timetable
+import datagenerator
+
+BATCHSIZE = 25
+REGION = 'eu-north-1'
+TABLENAME = 'application_database'
 
 
-def upload():
-    dynamodb = boto3.resource('dynamodb', region_name='eu-north-1')
+def upload(items):
+    dynamodb = boto3.resource('dynamodb', region_name=REGION)
     # Select the table
-    table = dynamodb.Table('application_database')
-    for c in timetable.timetable:
-        # Insert data
-        print(c['pk'])
-        response = table.put_item(
-            Item = c
-        )
-        print("Item inserted:", response)
+    table = dynamodb.Table(TABLENAME)
+    with table.batch_writer() as batch:
+        for i in range(0, len(items), BATCHSIZE):
+            batch_items = items[i:i + BATCHSIZE]
+            for item in batch_items:
+                print(f"Uploading: {item['pk']}")
+                batch.put_item(Item=item)
+
+
+def main():
+    upload(courses.courses)
+    upload(students.student_profile)
+    upload(timetable.timetable)
+    enrollments, results = datagenerator.create_enrollments()
+    print(enrollments)
+    print()
+    print(results)
+    upload(enrollments)
+    print("done e")
+    upload(results)

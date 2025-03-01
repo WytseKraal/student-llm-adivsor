@@ -125,7 +125,7 @@ courses = [{
       "CiviC Compiler Report"
     ],
     "remarks": "All study material as well as lectures are provided in English.",
-	"startdate": "2024-03-15" 
+    "startdate": "2024-03-15" 
   },
   {
     "pk": "COURSE#5364MBDC6Y",
@@ -161,9 +161,9 @@ courses = [{
       "Practical group project"
     ],
     "remarks": "A Canvas site for the course is available.",
-	"startdate": "2025-03-15" 
+    "startdate": "2025-03-15"
   },
-   {
+  {
     "pk": "COURSE#5364SSVT6Y",
     "sk": "DETAILS",
     "course_id": "5364SSVT6Y",
