@@ -141,3 +141,37 @@ paths:
           description: Invalid request
         "500":
           description: Server error
+  /chat:
+    post:
+      summary: Chat with the AI assistant
+      description: Sends a message to the chatbot and receives a response.
+      security:
+        - CognitoAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [message]
+              properties:
+                message:
+                  type: string
+                  example: "Hello, how can you help me?"
+      responses:
+        "200":
+          description: Successful chatbot response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  response:
+                    type: string
+                    example: "Hello! How can I assist you today?"
+        "400":
+          description: Invalid request (e.g., missing message field or malformed JSON)
+        "401":
+          description: Unauthorized request (missing or invalid Cognito token)
+        "500":
+          description: Internal server error

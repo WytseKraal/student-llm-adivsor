@@ -6,7 +6,7 @@ Parameters:
   UserPoolArn:
     Type: String
     Description: ARN of the Cognito User Pool
-    Default: "arn:aws:cognito-idp:eu-north-1:565393034649:userpool/eu-north-1_cXdMnsSwH" # Replace with your User Pool ARN
+    Default: "arn:aws:cognito-idp:eu-north-1:565393034649:userpool/eu-north-1_cXdMnsSwH"
   Environment:
     Type: String
     Default: prod
@@ -14,12 +14,17 @@ Parameters:
       - dev
       - prod
     Description: Environment type (dev or prod)
+  OpenAIAPIKey:
+    Type: String
+    Description: OpenAI API Key for LLM access
+    NoEcho: true  # This prevents the key from being displayed in logs/console
+
 
 Globals:
   Api:
     Auth:
     Cors:
-      AllowMethods: "'GET,PUT, OPTIONS'"
+      AllowMethods: "'GET,PUT,POST,OPTIONS'"
       AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token, Origin'"
       AllowOrigin: !If 
         - IsDev
@@ -36,7 +41,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handlers/hello_handler.lambda_handler
-      Runtime: python3.9
+      Runtime: python3.12
       CodeUri: .
       Environment:
         Variables:
@@ -53,7 +58,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handlers/goodbye_handler.lambda_handler
-      Runtime: python3.9
+      Runtime: python3.12
       CodeUri: .
       Environment:
         Variables:
@@ -77,7 +82,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handlers/database_handler.lambda_handler
-      Runtime: python3.9
+      Runtime: python3.12
       Timeout: 10
       CodeUri: .
       Environment:
@@ -101,7 +106,25 @@ Resources:
             Method: GET
             Auth:
               Authorizer: CognitoAuthorizer
-
+  ChatFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handlers/chat_handler.lambda_handler
+      Runtime: python3.12
+      Timeout: 10
+      CodeUri: .
+      Environment:
+        Variables:
+          Environment: !Ref Environment
+          OPENAI_API_KEY: !Ref OpenAIAPIKey
+      Events:
+        ChatEvent:
+          Type: Api
+          Properties:
+            Path: /chat
+            Method: POST
+            Auth:
+              Authorizer: CognitoAuthorizer
 
 Outputs:
   ApiUrl:
