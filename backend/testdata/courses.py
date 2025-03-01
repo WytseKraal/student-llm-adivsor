@@ -1,7 +1,7 @@
 courses = [{
-    "pk": "COURSE#DEVOPS",
+    "pk": "COURSE#5364DCBS6Y",
     "sk": "DETAILS",
-    "course_id": "DEVOPS",
+    "course_id": "5364DCBS6Y",
     "name": "DevOps and Cloud-based Software",
     "description": "DevOps is a modern software and applications development model that realizes continuous integration (CI), continuous deployment (CD), and continuous improvement of services and applications, deeply based on cloud virtualization, on-demand services deployment, and precision services monitoring currently available on major cloud platforms.",
     "objectives": [
@@ -36,12 +36,13 @@ courses = [{
       "Group project report and code",
       "Project development process"
     ],
-    "remarks": "Availability of Canvas site"
+    "remarks": "Availability of Canvas site",
+	"startdate": "2024-05-15" 
   },
   {
-    "pk": "COURSE#SOFT_EVOL",
+    "pk": "COURSE#5364SOEV6Y",
     "sk": "DETAILS",
-    "course_id": "SOFT_EVOL",
+    "course_id": "5364SOEV6Y",
     "name": "Software Evolution",
     "description": "This course focuses on analyzing large software systems using software quality metrics and empirical techniques.",
     "objectives": [
@@ -57,7 +58,7 @@ courses = [{
       "Ideally, knowledge of compiler construction (parsing, ASTs, basic code analysis).",
       "Good English reading and writing skills."
     ],
-    "registration": "More details can be found at https://student.uva.nl/en/topics/course-registration",
+    "registration_info": "More details can be found at https://student.uva.nl/en/topics/course-registration",
     "teaching_methods": [
       "Lecture",
       "Laptop seminar",
@@ -76,12 +77,13 @@ courses = [{
       "Practical lab assignments performed in pairs, assessed via demonstration/presentation and report.",
       "Individual reading and writing exercise (annotated bibliography for selected papers)."
     ],
-    "remarks": "The course reader and assignments will be made available on Canvas."
+    "remarks": "The course reader and assignments will be made available on Canvas.",
+	"startdate": "2025-01-15" 
 },
 {
-    "pk": "COURSE#COMPILER",
+    "pk": "COURSE#5062COMP6Y",
     "sk": "DETAILS",
-    "course_id": "COMPILER",
+    "course_id": "5062COMP6Y",
     "name": "Compiler Construction",
     "description": "As implementations of programming languages, compilers are integral parts of any computing system software stack. The general task of compilers to transform structured text from one format to another is ubiquitous in all areas of computing. This course covers all aspects of modern compiler design and implementation, including lexical and syntactical analysis, context/type checking and inference, high-level code transformations/optimizations, and target code generation.",
     "objectives": [
@@ -122,5 +124,78 @@ courses = [{
       "CiviC Compiler Project",
       "CiviC Compiler Report"
     ],
-    "remarks": "All study material as well as lectures are provided in English."
+    "remarks": "All study material as well as lectures are provided in English.",
+	"startdate": "2024-03-15" 
+  },
+  {
+    "pk": "COURSE#5364MBDC6Y",
+    "sk": "DETAILS",
+    "course_id": "5364MBDC6Y",
+    "name": "Model-based Design of Cyber-physical Systems",
+    "description": "Cyber-physical systems (CPS) integrate computation, sensing, actuation, and networking to interact with and control the physical world. This course focuses on the complexities of CPS and their model-based design methodologies to increase system quality and efficiency.",
+    "objectives": [
+      "Explain key characteristics and complexity drivers of cyber-physical systems.",
+      "Model software behavior using Statecharts and generate code.",
+      "Functionally verify systems using methods based on Petri Net models.",
+      "Create a domain-specific language (DSL) for model specification and validation.",
+      "Verify schedulability of periodic tasks and perform cache analysis on single-core and multi-core systems.",
+      "Explain design-space exploration for optimizing cost, performance, and energy consumption.",
+      "Collaborate in teams to develop model-based software for cyber-physical systems."
+    ],
+    "contents": [
+      "Introduction to cyber-physical systems and their complexity drivers.",
+      "Model-based specification, analysis, and verification of CPS behavior.",
+      "Software development for CPS using model-based methodologies.",
+      "Hardware and software configurations for optimized CPS performance."
+    ],
+    "prerequisites": ["Programming experience in Java, Python, or C++", "Computer Organization (preferred, not mandatory)"],
+    "registration_info": "https://student.uva.nl/en/topics/course-registration",
+    "teaching_methods": [
+      "Lecture",
+      "Laptop seminar",
+      "Self-study",
+      "Working independently on a project or thesis"
+    ],
+    "assessment": [
+      "Three assignments",
+      "Practical group project"
+    ],
+    "remarks": "A Canvas site for the course is available.",
+	"startdate": "2025-03-15" 
+  },
+   {
+    "pk": "COURSE#5364SSVT6Y",
+    "sk": "DETAILS",
+    "course_id": "5364SSVT6Y",
+    "name": "Software Verification, Validation, and Testing (SVVT)",
+    "description": "Software specification, verification, and testing entail checking whether a given software system satisfies given requirements and/or specifications. This course covers formal specifications, type-specification, abstraction, and automated testing methods with a focus on functional and imperative programming in Haskell.",
+    "objectives": [
+      "Understand and write specifications in the language of predicate logic.",
+      "Use type-specification and abstraction to make programs more easily testable.",
+      "Write formal specifications for testing Haskell code.",
+      "Use random test generation for automating the test process."
+    ],
+    "contents": [
+      "Formal specifications: preconditions and postconditions in software testing.",
+      "Random test generation and automated test processes.",
+      "Testing functional and imperative programming styles in Haskell."
+    ],
+    "prerequisites": ["Basic familiarity with logic and functional programming in Haskell"],
+    "registration_info": "https://student.uva.nl/en/topics/course-registration",
+    "teaching_methods": [
+      "Lecture",
+      "Seminar",
+      "Laptop seminar",
+      "Self-study"
+    ],
+    "study_materials": [
+      "Graham Hutton, Programming in Haskell, Cambridge University Press 2016 (Second Edition)",
+      "Recommended background reading: Logic in Action (available online)",
+      "The Haskell Road to Logic, Maths, and Programming"
+    ],
+    "assessment": [
+      "Course examination with assignments and a final assessment of theoretical and practical components."
+    ],
+    "remarks": "Course materials and announcements will be provided via Canvas.",
+	"startdate": "2025-03-15" 
   }]
