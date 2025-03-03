@@ -44,10 +44,18 @@ class ChatService(BaseService):
                 raise APIError("Missing 'message' in request body",
                                status_code=400)
 
+
+            prompt = f"""
+            You are an expert student helper.
+            Help this student as best as you can with this message
+
+            {user_message}
+            """
+
             # Call OpenAI API
             response = self.client.chat.completions.create(
                 model="gpt-4o-mini",
-                messages=[{"role": "user", "content": user_message}]
+                messages=[{"role": "user", "content": prompt}]
             )
 
             # Extract OpenAI response
