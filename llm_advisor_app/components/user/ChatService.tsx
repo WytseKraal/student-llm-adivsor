@@ -13,6 +13,7 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Loader2 } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 
 // Message type definition
 interface Message {
@@ -31,9 +32,11 @@ export default function ChatService({ apiUrl, getToken }: ChatServiceProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [tokenUsage, setTokenUsage] = useState
-    <{ total: number; prompt: number; completion: number }>
-    ({ total: 0, prompt: 0, completion: 0 });
+  const [tokenUsage, setTokenUsage] = useState<{
+    total: number;
+    prompt: number;
+    completion: number;
+  }>({ total: 0, prompt: 0, completion: 0 });
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll to bottom when messages update
@@ -48,13 +51,28 @@ export default function ChatService({ apiUrl, getToken }: ChatServiceProps) {
         throw new Error("No authentication token available.");
       }
 
+      // Format the conversation history into a context string
+      let contextString = "";
+      if (messages.length > 0) {
+        contextString = messages
+          .map((msg) => {
+            const role = msg.sender === "user" ? "User" : "Assistant";
+            return `${role}: ${msg.content}`;
+          })
+          .join("\n\n");
+        contextString += "\n\n";
+      }
+
+      // Add the current message with the context and formatting instruction
+      const enhancedMessage = `${contextString}User: ${message}\n\nPlease format your response using markdown for better readability. Consider the entire conversation history above when responding.`;
+
       const response = await fetch(`${apiUrl}/chat`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ message }),
+        body: JSON.stringify({ message: enhancedMessage }),
       });
 
       if (!response.ok) {
@@ -137,8 +155,9 @@ export default function ChatService({ apiUrl, getToken }: ChatServiceProps) {
               {messages.map((message) => (
                 <div
                   key={message.id}
-                  className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"
-                    }`}
+                  className={`flex ${
+                    message.sender === "user" ? "justify-end" : "justify-start"
+                  }`}
                 >
                   <div className="flex items-start max-w-[80%] gap-2">
                     {message.sender === "bot" && (
@@ -150,12 +169,19 @@ export default function ChatService({ apiUrl, getToken }: ChatServiceProps) {
                     )}
 
                     <div
-                      className={`rounded-lg px-3 py-2 ${message.sender === "user"
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted"
-                        }`}
+                      className={`rounded-lg px-3 py-2 ${
+                        message.sender === "user"
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-muted"
+                      }`}
                     >
-                      <p>{message.content}</p>
+                      {message.sender === "bot" ? (
+                        <div className="prose prose-sm dark:prose-invert">
+                          <ReactMarkdown>{message.content}</ReactMarkdown>
+                        </div>
+                      ) : (
+                        <p>{message.content}</p>
+                      )}
                       <p className="text-xs opacity-70 mt-1">
                         {message.timestamp.toLocaleTimeString([], {
                           hour: "2-digit",
@@ -182,7 +208,8 @@ export default function ChatService({ apiUrl, getToken }: ChatServiceProps) {
 
       <CardFooter className="border-t p-4 flex flex-col gap-2">
         <div className="text-xs text-gray-500">
-          Total token usage (session): {tokenUsage.total} | Last prompt: {tokenUsage.prompt} | Last completion: {tokenUsage.completion}
+          Total token usage (session): {tokenUsage.total} | Last prompt:{" "}
+          {tokenUsage.prompt} | Last completion: {tokenUsage.completion}
         </div>
 
         <form onSubmit={handleSendMessage} className="flex w-full gap-2">
@@ -205,7 +232,6 @@ export default function ChatService({ apiUrl, getToken }: ChatServiceProps) {
           </Button>
         </form>
       </CardFooter>
-
     </Card>
   );
 }

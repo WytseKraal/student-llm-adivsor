@@ -16,8 +16,6 @@ export default function Profile() {
 
   return (
     <div className="flex flex-col items-center min-h-screen p-8 pb-20 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <h1 className="text-2xl font-bold mb-8">Protected API Test</h1>
-
       <AuthComponent onAuthStateChange={handleAuthStateChange} />
       {user && isLoggedIn && (
         <ChatService apiUrl={apiUrl} getToken={getToken} />
