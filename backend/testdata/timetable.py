@@ -1,7 +1,7 @@
 timetable =[
   {
-    "pk": "COURSE#5364DCBS6Y",
-    "sk": "TIMETABLE",
+    "PK": "COURSE#5364DCBS6Y",
+    "SK": "TIMETABLE",
     "schedule": {
       "1": {
         "Monday": [["9:00 AM - 10:30 AM", "Lecture", "l.01"]],
@@ -37,8 +37,8 @@ timetable =[
     }
   },
   {
-    "pk": "COURSE#5364SOEV6Y",
-    "sk": "TIMETABLE",
+    "PK": "COURSE#5364SOEV6Y",
+    "SK": "TIMETABLE",
     "schedule": {
       "1": {
         "Tuesday": [["10:00 AM - 11:30 AM", "Lecture", "l.02"]],
@@ -74,8 +74,8 @@ timetable =[
     }
   },
   {
-    "pk": "COURSE#5062COMP6Y",
-    "sk": "TIMETABLE",
+    "PK": "COURSE#5062COMP6Y",
+    "SK": "TIMETABLE",
     "schedule": {
       "1": {
         "Monday": [["9:00 AM - 10:30 AM", "Lecture", "l.01"]],
@@ -111,8 +111,8 @@ timetable =[
     }
   },
   {
-    "pk": "COURSE#5364MBDC6Y",
-    "sk": "TIMETABLE",
+    "PK": "COURSE#5364MBDC6Y",
+    "SK": "TIMETABLE",
     "schedule": {
       "1": {
         "Monday": [["9:00 AM - 10:30 AM", "Lecture", "l.02"]],
@@ -148,8 +148,8 @@ timetable =[
     }
   },
   {
-    "pk": "COURSE#5364SSVT6Y",
-    "sk": "TIMETABLE",
+    "PK": "COURSE#5364SSVT6Y",
+    "SK": "TIMETABLE",
     "schedule": {
       "1": {
         "Monday": [["9:00 AM - 10:30 AM", "Lecture", "l.02"]],

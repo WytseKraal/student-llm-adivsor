@@ -36,7 +36,7 @@ trap cleanup SIGINT
 
 
 echo -e "${BLUE}Starting SAM local API on port 3001...${NC}"
-sam local start-api --env-vars env.json --warm-containers EAGER --port 3001 --parameter-overrides "Environment=dev" 2>&1 >/dev/null &
+sam local start-api --env-vars env.json --warm-containers EAGER --port 3001 --parameter-overrides "Environment=dev" --env-vars env.json  2>&1 >/dev/null &
 API_PID=$!
 
 

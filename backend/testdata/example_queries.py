@@ -25,7 +25,7 @@ def get_items(pk_value):
 def get_items_sk_begins_with(pk_value, sk_prefix):
     try:
         response = table.query(
-            KeyConditionExpression=Key('pk').eq(pk_value) & Key('sk').begins_with(sk_prefix)
+            KeyConditionExpression=Key('PK').eq(pk_value) & Key('SK').begins_with(sk_prefix)
         )
         items = response.get('Items', [])
         return items

@@ -1,6 +1,6 @@
 courses = [{
-    "pk": "COURSE#5364DCBS6Y",
-    "sk": "DETAILS",
+    "PK": "COURSE#5364DCBS6Y",
+    "SK": "DETAILS",
     "course_id": "5364DCBS6Y",
     "name": "DevOps and Cloud-based Software",
     "description": "DevOps is a modern software and applications development model that realizes continuous integration (CI), continuous deployment (CD), and continuous improvement of services and applications, deeply based on cloud virtualization, on-demand services deployment, and precision services monitoring currently available on major cloud platforms.",
@@ -40,8 +40,8 @@ courses = [{
 	"startdate": "2024-05-15" 
   },
   {
-    "pk": "COURSE#5364SOEV6Y",
-    "sk": "DETAILS",
+    "PK": "COURSE#5364SOEV6Y",
+    "SK": "DETAILS",
     "course_id": "5364SOEV6Y",
     "name": "Software Evolution",
     "description": "This course focuses on analyzing large software systems using software quality metrics and empirical techniques.",
@@ -53,10 +53,10 @@ courses = [{
     ],
     "contents": "The course is designed around lab sessions where students analyze large open-source software systems using Rascal. It includes lectures on software maintenance, guest lectures, and practical assignments on clone detection, maintainability metrics, and automated refactoring.",
     "prerequisites": [
-      "Advanced programming skills in multiple languages including functional programming.",
+      "Advanced programming ills in multiple languages including functional programming.",
       "Experience with large programming projects.",
       "Ideally, knowledge of compiler construction (parsing, ASTs, basic code analysis).",
-      "Good English reading and writing skills."
+      "Good English reading and writing ills."
     ],
     "registration_info": "More details can be found at https://student.uva.nl/en/topics/course-registration",
     "teaching_methods": [
@@ -81,11 +81,11 @@ courses = [{
 	"startdate": "2025-01-15" 
 },
 {
-    "pk": "COURSE#5062COMP6Y",
-    "sk": "DETAILS",
+    "PK": "COURSE#5062COMP6Y",
+    "SK": "DETAILS",
     "course_id": "5062COMP6Y",
     "name": "Compiler Construction",
-    "description": "As implementations of programming languages, compilers are integral parts of any computing system software stack. The general task of compilers to transform structured text from one format to another is ubiquitous in all areas of computing. This course covers all aspects of modern compiler design and implementation, including lexical and syntactical analysis, context/type checking and inference, high-level code transformations/optimizations, and target code generation.",
+    "description": "As implementations of programming languages, compilers are integral parts of any computing system software stack. The general ta of compilers to transform structured text from one format to another is ubiquitous in all areas of computing. This course covers all aspects of modern compiler design and implementation, including lexical and syntactical analysis, context/type checking and inference, high-level code transformations/optimizations, and target code generation.",
     "objectives": [
       "To develop a profound understanding of the inner workings of compilers.",
       "To develop the ability to design and implement compilers for varying purposes."
@@ -128,8 +128,8 @@ courses = [{
     "startdate": "2024-03-15" 
   },
   {
-    "pk": "COURSE#5364MBDC6Y",
-    "sk": "DETAILS",
+    "PK": "COURSE#5364MBDC6Y",
+    "SK": "DETAILS",
     "course_id": "5364MBDC6Y",
     "name": "Model-based Design of Cyber-physical Systems",
     "description": "Cyber-physical systems (CPS) integrate computation, sensing, actuation, and networking to interact with and control the physical world. This course focuses on the complexities of CPS and their model-based design methodologies to increase system quality and efficiency.",
@@ -164,8 +164,8 @@ courses = [{
     "startdate": "2025-03-15"
   },
   {
-    "pk": "COURSE#5364SSVT6Y",
-    "sk": "DETAILS",
+    "PK": "COURSE#5364SSVT6Y",
+    "SK": "DETAILS",
     "course_id": "5364SSVT6Y",
     "name": "Software Verification, Validation, and Testing (SVVT)",
     "description": "Software specification, verification, and testing entail checking whether a given software system satisfies given requirements and/or specifications. This course covers formal specifications, type-specification, abstraction, and automated testing methods with a focus on functional and imperative programming in Haskell.",

@@ -11,8 +11,8 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 REGION = 'eu-north-1'
-TABLENAME = 'application_database'
-STUDENT = 'STUDENT#10002'
+TABLENAME = 'prod-student-advisor-table'
+STUDENT = 'STUDENT#f05cc95c-4021-70f6-792e-1df97c8f6262'
 
 class ChatService(BaseService):
     def __init__(self, event, context):
@@ -22,6 +22,8 @@ class ChatService(BaseService):
         self.openai_api_key = os.getenv("OPENAI_API_KEY")
         if not self.openai_api_key:
             raise APIError("Missing OpenAI API key", status_code=500)
+        
+        logger.info(f"APIKEY: {self.openai_api_key}")
 
         self.client = openai.OpenAI(api_key=self.openai_api_key)
 
@@ -104,7 +106,7 @@ class ChatService(BaseService):
         table = dynamodb.Table(TABLENAME)
         response = None
         try:
-            response = table.query(KeyConditionExpression=Key('pk').eq(pk_value))
+            response = table.query(KeyConditionExpression=Key('PK').eq(pk_value))
         except Exception as e:
             print(f"Error fetching items for {pk_value}: {e}")
 
@@ -116,7 +118,7 @@ class ChatService(BaseService):
         table = dynamodb.Table(TABLENAME)
         try:
             response = table.query(
-                KeyConditionExpression=Key('pk').eq(pk_value) & Key('sk').begins_with(sk_prefix)
+                KeyConditionExpression=Key('PK').eq(pk_value) & Key('SK').begins_with(sk_prefix)
             )
             items = response.get('Items', [])
             return items

@@ -7,7 +7,7 @@ import datagenerator
 
 BATCHSIZE = 25
 REGION = 'eu-north-1'
-TABLENAME = 'application_database'
+TABLENAME = 'prod-student-advisor-table'
 
 
 def upload(items):
@@ -18,7 +18,7 @@ def upload(items):
         for i in range(0, len(items), BATCHSIZE):
             batch_items = items[i:i + BATCHSIZE]
             for item in batch_items:
-                print(f"Uploading: {item['pk']}")
+                print(f"Uploading: {item['PK']}")
                 batch.put_item(Item=item)
 
 
@@ -29,3 +29,7 @@ def main():
     enrollments, results = datagenerator.create_enrollments()
     upload(enrollments)
     print("uploaded data")
+
+if __name__ == "__main__":
+    print("going to upload")
+    main()

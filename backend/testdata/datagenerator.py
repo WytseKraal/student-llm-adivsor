@@ -19,8 +19,8 @@ def generate_random_grades(asss):
 def create_result_item(student_id, course_id, asss):
     grades, final_grade = generate_random_grades(asss)
     return {
-        "pk": f"STUDENT#{student_id}",
-        "sk": f"RESULT#{course_id}",
+        "PK": f"STUDENT#{student_id}",
+        "SK": f"RESULT#{course_id}",
         "course_id": course_id,
         "assessments": grades,
         # boto3 cant handle floats
@@ -35,8 +35,8 @@ def create_enrollments():
         student_courses = r.sample(c.courses, r.randint(1, len(c.courses)))
         for course in student_courses:
             enrollment = {
-                "pk": f"STUDENT#{student['student_id']}",
-                "sk": f"ENROLLMENT#{course['course_id']}",
+                "PK": f"STUDENT#{student['student_id']}",
+                "SK": f"ENROLLMENT#{course['course_id']}",
                 "course_id": course['course_id']
             }
             if (course["startdate"]) == "2025-03-15":
