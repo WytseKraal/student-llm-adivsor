@@ -13,6 +13,7 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Loader2 } from "lucide-react";
+import { env } from "@/environment";
 
 // Message type definition
 interface Message {
@@ -22,48 +23,81 @@ interface Message {
   timestamp: Date;
 }
 
-interface ChatServiceProps {
-  apiUrl?: string;
-  getToken?: () => Promise<string | null>;
+// LLM API response type
+interface LLMResponse {
+  content: string;
+  model: string;
+  usage: {
+    completion_tokens: number;
+    prompt_tokens: number;
+    total_tokens: number;
+  };
+  id: string;
 }
 
-export default function ChatService({}: ChatServiceProps) {
+interface ChatServiceProps {
+  apiUrl?: string;
+  getToken: () => Promise<string | null>;
+}
+
+export default function ChatService({ apiUrl, getToken }: ChatServiceProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [tokenUsage, setTokenUsage] = useState<{ total: number }>({ total: 0 });
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Use provided apiUrl or default from environment
+  const apiEndpoint = apiUrl || `${env.apiUrl}/llm`;
 
   // Auto-scroll to bottom when messages update
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const sendMessage = async (message: string): Promise<string> => {
-    // If we have a getToken function, use it to get auth token
+  const sendMessage = async (userMessage: string): Promise<LLMResponse> => {
+    // Get authentication token
+    const token = await getToken();
+    if (!token) {
+      throw new Error("Authentication failed - no token available");
+    }
+
+    // Format messages for LLM API
+    const apiMessages = messages.map((msg) => ({
+      role: msg.sender === "user" ? "user" : "assistant",
+      content: msg.content,
+    }));
+
+    // Add the current user message
+    apiMessages.push({
+      role: "user",
+      content: userMessage,
+    });
 
     try {
-      // In a real implementation, you would make an actual API call:
-      /*
-      const response = await fetch(apiUrl, {
+      const response = await fetch(apiEndpoint, {
         method: "POST",
-        headers,
-        body: JSON.stringify({ message }),
+        headers: {
+          Authorization: token,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "gpt-4o-mini", // Default model, could be made configurable
+          messages: apiMessages,
+          temperature: 0.7,
+          max_tokens: 100,
+        }),
       });
 
       if (!response.ok) {
-        throw new Error(`API error: ${response.status}`);
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          `API error: ${response.status} - ${JSON.stringify(errorData)}`
+        );
       }
 
       const data = await response.json();
-      return data.message;
-      */
-
-      // For now, we'll just mock the API response with a delay
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          resolve(message); // Echo back the same message
-        }, 1000);
-      });
+      return data as LLMResponse;
     } catch (error) {
       console.error("API call failed:", error);
       throw error;
@@ -87,16 +121,28 @@ export default function ChatService({}: ChatServiceProps) {
     setIsLoading(true);
 
     try {
-      const responseText = await sendMessage(input);
+      const llmResponse = await sendMessage(input);
 
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content: responseText,
+        content: llmResponse.content,
         sender: "bot",
         timestamp: new Date(),
       };
 
       setMessages((prev) => [...prev, botMessage]);
+
+      // Update token usage stats
+      setTokenUsage((prev) => ({
+        total: prev.total + llmResponse.usage.total_tokens,
+      }));
+
+      console.log(
+        `LLM Response - Model: ${llmResponse.model}, ID: ${llmResponse.id}`
+      );
+      console.log(
+        `Token Usage - Completion: ${llmResponse.usage.completion_tokens}, Prompt: ${llmResponse.usage.prompt_tokens}, Total: ${llmResponse.usage.total_tokens}`
+      );
     } catch (error) {
       console.error("Failed to send message:", error);
 
@@ -116,7 +162,12 @@ export default function ChatService({}: ChatServiceProps) {
   return (
     <Card className="w-full shadow-lg">
       <CardHeader className="border-b">
-        <CardTitle className="text-lg">Chat Service</CardTitle>
+        <CardTitle className="text-lg">AI Assistant</CardTitle>
+        {tokenUsage.total > 0 && (
+          <p className="text-xs text-muted-foreground">
+            Token usage: {tokenUsage.total} tokens
+          </p>
+        )}
       </CardHeader>
 
       <ScrollArea className="h-80 p-4">
@@ -138,7 +189,7 @@ export default function ChatService({}: ChatServiceProps) {
                     {message.sender === "bot" && (
                       <Avatar className="h-8 w-8">
                         <AvatarFallback className="bg-primary text-primary-foreground">
-                          B
+                          AI
                         </AvatarFallback>
                       </Avatar>
                     )}

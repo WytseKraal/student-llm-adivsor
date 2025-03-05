@@ -22,6 +22,14 @@ components:
           clientId: 29sfsu3nvhqfsjjnimcgh9ejab
           redirectUrl: http://localhost/oauth2-redirect.html
           scopes: {}
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        details:
+          type: object
 paths:
   /hello:
     get:
@@ -141,3 +149,104 @@ paths:
           description: Invalid request
         "500":
           description: Server error
+  /llm:
+    post:
+      summary: Generate text using LLM
+      description: Uses OpenAI API to generate text responses based on chat messages
+      security:
+        - CognitoAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [messages]
+              properties:
+                model:
+                  type: string
+                  description: The OpenAI model to use
+                  default: "gpt-4o-mini"
+                  example: "gpt-4o-mini"
+                messages:
+                  type: array
+                  description: Array of message objects representing a conversation
+                  items:
+                    type: object
+                    required: [role, content]
+                    properties:
+                      role:
+                        type: string
+                        description: The role of the message sender (system, user, or assistant)
+                        enum: [system, user, assistant]
+                        example: "user"
+                      content:
+                        type: string
+                        description: The content of the message
+                        example: "Write a short paragraph about student advising"
+                temperature:
+                  type: number
+                  description: Controls randomness (0-1). Lower values make responses more deterministic
+                  minimum: 0
+                  maximum: 1
+                  default: 0.7
+                  example: 0.7
+                max_tokens:
+                  type: integer
+                  description: Maximum number of tokens to generate (optional)
+                  example: 150
+      responses:
+        "200":
+          description: Successfully generated text
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  content:
+                    type: string
+                    description: The generated text from the LLM
+                    example: "Student advising is a collaborative process between advisors and students that helps students achieve their academic and career goals."
+                  model:
+                    type: string
+                    description: The model used for generation
+                    example: "gpt-4o-mini"
+                  usage:
+                    type: object
+                    properties:
+                      completion_tokens:
+                        type: integer
+                        description: Number of tokens in the completion
+                        example: 24
+                      prompt_tokens:
+                        type: integer
+                        description: Number of tokens in the prompt
+                        example: 21
+                      total_tokens:
+                        type: integer
+                        description: Total tokens used in the request and response
+                        example: 45
+                  id:
+                    type: string
+                    description: Unique identifier for the response
+                    example: "chatcmpl-123456789abcdef"
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "405":
+          description: Method not allowed
+        "500":
+          description: Server error or OpenAI API error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  options:
+    summary: CORS support
+    description: Enable CORS by returning correct headers
+    responses:
+      "200":
+        description: CORS enabled

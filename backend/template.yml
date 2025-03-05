@@ -36,7 +36,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handlers/hello_handler.lambda_handler
-      Runtime: python3.9
+      Runtime: python3.12
       CodeUri: .
       Environment:
         Variables:
@@ -53,7 +53,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handlers/goodbye_handler.lambda_handler
-      Runtime: python3.9
+      Runtime: python3.12
       CodeUri: .
       Environment:
         Variables:
@@ -77,7 +77,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handlers/database_handler.lambda_handler
-      Runtime: python3.9
+      Runtime: python3.12
       Timeout: 10
       CodeUri: .
       Environment:
@@ -102,6 +102,27 @@ Resources:
             Auth:
               Authorizer: CognitoAuthorizer
 
+  LLMFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handlers/llm_handler.lambda_handler
+      Timeout: 30
+      Runtime: python3.12
+      CodeUri: .
+      ReservedConcurrentExecutions: 5
+      Environment:
+        Variables:
+          Environment: !Ref Environment
+          OPENAI_API_KEY: !Ref OpenAIAPIKey
+      Events:
+        LLMEvent:
+          Type: Api
+          Properties:
+            Path: /llm
+            Method: POST
+            Auth:
+              Authorizer: CognitoAuthorizer
+
 
 Outputs:
   ApiUrl:
@@ -112,3 +133,4 @@ Conditions:
   IsDev: !Equals 
     - !Ref Environment
     - dev
+

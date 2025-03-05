@@ -6,7 +6,7 @@ import ChatService from "@/components/user/ChatService";
 
 export default function Profile() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const { user } = useAuth();
+  const { user, getToken } = useAuth();
 
   const handleAuthStateChange = (loggedIn: boolean) => {
     setIsLoggedIn(loggedIn);
@@ -18,7 +18,7 @@ export default function Profile() {
 
       <AuthComponent onAuthStateChange={handleAuthStateChange} />
 
-      {user && isLoggedIn && <ChatService />}
+      {user && isLoggedIn && <ChatService getToken={getToken} />}
     </div>
   );
 }
