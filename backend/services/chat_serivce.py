@@ -94,6 +94,8 @@ class ChatService(BaseService):
             profile = self.get_items_sk_begins_with(STUDENT, 'PROFILE')
             timetable = self.get_items_sk_begins_with(STUDENT, 'TIMETABLE')
 
+            logger.info("ENROLLMENT: ", enrollments)
+
             prompt = f"""
             You are an expert student helper.
             The profile of this student is: {profile}

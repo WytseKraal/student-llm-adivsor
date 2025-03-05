@@ -35,6 +35,8 @@ interface AuthContextType {
     name: string
   ) => Promise<CognitoUserSession>;
   challengeUser: CognitoUser | null;
+  verifyStudentExists: () => Promise<boolean>;
+  getUserAttributes: () => Promise<{ [key: string]: string }>;
 }
 
 interface AuthProviderProps {
@@ -53,6 +55,9 @@ const poolData: PoolData = {
 // Only initialize userPool in browser environment
 const userPool = isBrowser ? new CognitoUserPool(poolData) : null;
 
+// API base URL
+const API_BASE_URL = env.apiUrl;
+
 // Create context with default values
 const AuthContext = createContext<AuthContextType>({
   user: null,
@@ -69,6 +74,12 @@ const AuthContext = createContext<AuthContextType>({
   },
   completeNewPasswordChallenge: async () => {
     throw new Error("completeNewPasswordChallenge not implemented");
+  },
+  verifyStudentExists: async () => {
+    throw new Error("verifyStudentExists not implemented");
+  },
+  getUserAttributes: async () => {
+    throw new Error("getUserAttributes not implemented");
   },
 });
 
@@ -110,6 +121,87 @@ export function AuthProvider({ children }: AuthProviderProps) {
     } else {
       setUser(null);
       setLoading(false);
+    }
+  };
+
+  // Get user attributes from Cognito
+  const getUserAttributes = async (): Promise<{ [key: string]: string }> => {
+    if (!isBrowser || !userPool) {
+      return Promise.reject(
+        new Error("Authentication not available on server")
+      );
+    }
+
+    return new Promise((resolve, reject) => {
+      const cognitoUser = userPool.getCurrentUser();
+      if (!cognitoUser) {
+        reject(new Error("No user found"));
+        return;
+      }
+
+      cognitoUser.getSession((err: Error | null) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+
+        cognitoUser.getUserAttributes((err, attributes) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+
+          if (!attributes) {
+            resolve({});
+            return;
+          }
+
+          const userAttributes: { [key: string]: string } = {};
+          attributes.forEach((attribute) => {
+            userAttributes[attribute.getName()] = attribute.getValue();
+          });
+
+          resolve(userAttributes);
+        });
+      });
+    });
+  };
+
+  // Check if student exists using the sub from Cognito user
+  const verifyStudentExists = async (): Promise<boolean> => {
+    try {
+      // Get the current token for API request
+      const token = await getToken();
+
+      // Get user attributes to extract sub (unique identifier)
+      const attributes = await getUserAttributes();
+      const sub = attributes.sub;
+
+      if (!sub) {
+        console.error("No sub found in user attributes");
+        return false;
+      }
+
+      // Call the API endpoint to check if student exists
+      const response = await fetch(
+        `${API_BASE_URL}/student/check?student_id=${encodeURIComponent(sub)}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Error checking student: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      return data.exists;
+    } catch (error) {
+      console.error("Error verifying student:", error);
+      return false;
     }
   };
 
@@ -240,6 +332,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     getToken,
     completeNewPasswordChallenge,
     challengeUser,
+    verifyStudentExists,
+    getUserAttributes,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
