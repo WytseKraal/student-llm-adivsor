@@ -42,5 +42,5 @@ def main():
     print(enrollments)
     # get all info for enrolled courses
     for e in enrollments:
-        print(f"Course: {e['course_id']}")
-        print(get_items(f"COURSE#{e['course_id']}"))
+        print(f"Course: {e['COURSE_ID']}")
+        print(get_items(f"COURSE#{e['COURSE_ID']}"))

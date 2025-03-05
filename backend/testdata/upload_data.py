@@ -1,7 +1,6 @@
 # uploads data to dynamo db
 import boto3
 import courses
-import students
 import timetable
 import datagenerator
 
@@ -24,10 +23,13 @@ def upload(items):
 
 def main():
     upload(courses.courses)
-    upload(students.student_profile)
+    student_profiles = datagenerator.create_student_profiles(10)
+    print(student_profiles)
+    upload(student_profiles)
     upload(timetable.timetable)
-    enrollments, results = datagenerator.create_enrollments()
+    enrollments, results = datagenerator.create_enrollments(student_profiles)
     upload(enrollments)
+    upload(results)
     print("uploaded data")
 
 if __name__ == "__main__":

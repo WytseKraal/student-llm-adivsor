@@ -1,6 +1,6 @@
-import students as s
 import courses as c
 import random as r
+import names
 from decimal import Decimal
 
 
@@ -21,38 +21,56 @@ def create_result_item(student_id, course_id, asss):
     return {
         "PK": f"STUDENT#{student_id}",
         "SK": f"RESULT#{course_id}",
-        "course_id": course_id,
-        "assessments": grades,
+        "COURSE_ID": course_id,
+        "ASSESSMENTS": grades,
         # boto3 cant handle floats
-        "final_grade":  Decimal(str(final_grade)),
+        "FINAL_GRADE":  Decimal(str(final_grade)),
     }
 
 
-def create_enrollments():
+def create_enrollments(students):
     enrollments = []
     results = []
-    for student in s.student_profile:
+    for student in students:
         student_courses = r.sample(c.courses, r.randint(1, len(c.courses)))
         for course in student_courses:
             enrollment = {
-                "PK": f"STUDENT#{student['student_id']}",
-                "SK": f"ENROLLMENT#{course['course_id']}",
-                "course_id": course['course_id']
+                "PK": f"STUDENT#{student['STUDENT_ID']}",
+                "SK": f"ENROLLMENT#{course['COURSE_ID']}",
+                "COURSE_ID": course['COURSE_ID']
             }
-            if (course["startdate"]) == "2025-03-15":
-                enrollment["status"] = "upcoming"
-            elif (course["startdate"]) == "2025-01-15":
-                enrollment["status"] = "active"
+            if (course["STARTDATE"]) == "2025-03-15":
+                enrollment["STATUS"] = "upcoming"
+            elif (course["STARTDATE"]) == "2025-01-15":
+                enrollment["STATUS"] = "active"
             else:
                 result = create_result_item(
-                    student["student_id"],
-                    course['course_id'],
-                    course['assessment']
+                    student["STUDENT_ID"],
+                    course['COURSE_ID'],
+                    course['ASSESSMENT']
                 )
-                if (result["final_grade"] >= 5.5):
-                    enrollment["status"] = "passed"
+                if (result["FINAL_GRADE"] >= 5.5):
+                    enrollment["STATUS"] = "passed"
                 else:
-                    enrollment["status"] = "failed"
+                    enrollment["STATUS"] = "failed"
                 results.append(result)
             enrollments.append(enrollment)
     return (enrollments, results)
+
+
+def create_student_profiles(amount=10):
+    students = []
+    for i in range(0, amount):
+        student_id = r.randint(10000, 99999)
+        student = {
+            "PK": f"STUDENT#{student_id}",
+            "SK": "PROFILE",
+            "STUDENT_ID": student_id,
+            "FIRST_NAME": names.get_first_name(),
+            "LAST_NAME": names.get_last_name(),
+            "EMAIL": f"{student_id}@uva.nl",
+            "PROGRAM": "Master Software Engineering",
+            "YEAR": 1
+        }
+        students.append(student)
+    return students
