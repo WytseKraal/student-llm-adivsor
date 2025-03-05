@@ -1,0 +1,51 @@
+// Database Schema
+digraph {
+	Course_Details [label="Course_Details
+----------------------
+PK (COURSE#ID) [PK]
+SK (DETAILS)
+COURSE_ID
+NAME
+DESCRIPTION
+OBJECTIVES (List)
+CONTENTS (List)
+PREREQUISITES (List)
+TEACHING_METHODS (List)
+ASSESSMENT (List)
+STUDY_MATERIALS
+STARTDATE
+REGISTRATION_INFO"]
+	Student_Profile [label="Student_Profile
+----------------------
+PK (STUDENT#ID) [PK]
+SK (PROFILE)
+STUDENT_ID
+FIRST_NAME
+LAST_NAME
+EMAIL
+PROGRAM
+YEAR"]
+	Student_Enrollment [label="Student_Enrollment
+----------------------
+PK (STUDENT#ID) [PK]
+SK (ENROLLMENT#COURSE_ID)
+COURSE_ID
+STATUS"]
+	Student_Result [label="Student_Result
+----------------------
+PK (STUDENT#ID) [PK]
+SK (RESULT#COURSE_ID)
+COURSE_ID
+ASSESSMENTS (List)
+FINAL_GRADE"]
+	Course_Timetable [label="Course_Timetable
+----------------------
+PK (COURSE#ID) [PK]
+SK (TIMETABLE)
+SCHEDULE (Nested Dict)"]
+	Student_Profile -> Student_Enrollment [label="Enrolls in"]
+	Student_Profile -> Student_Result [label="Has results in"]
+	Course_Details -> Student_Enrollment [label="Enrollment for"]
+	Course_Details -> Student_Result [label="Assessment for"]
+	Course_Details -> Course_Timetable [label="Scheduled as"]
+}
