@@ -141,6 +141,37 @@ paths:
           description: Invalid request
         "500":
           description: Server error
+  /student/check:
+    get:
+      summary: Check if student exists
+      description: Checks if a student ID exists in the database
+      security:
+        - CognitoAuth: []
+      parameters:
+        - name: student_id
+          in: query
+          required: true
+          description: Student ID to check
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful check
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  exists:
+                    type: boolean
+                    description: True if student exists, false otherwise
+                    example: true
+        "400":
+          description: Invalid request (missing student_id parameter)
+        "401":
+          description: Unauthorized request (missing or invalid Cognito token)
+        "500":
+          description: Server error
   /chat:
     post:
       summary: Chat with the AI assistant

@@ -37,10 +37,48 @@ class ChatService(BaseService):
 
         if http_method == "OPTIONS":
             return self.options()
-        elif http_method == "POST":
+        elif http_method == "POST" and path == "/chat":
             return self.generate_response()
+        elif http_method == "GET" and path == "/student/check":
+            return self.check_student_exists()
         else:
             raise APIError("Method not allowed", status_code=405)
+
+    def check_student_exists(self) -> dict:
+        try:
+            # Extract student_id from query parameters
+            query_parameters = self.event.queryStringParameters or {}
+            student_id = query_parameters.get("student_id")
+            
+            if not student_id:
+                raise APIError("Missing 'student_id' in query parameters", status_code=400)
+            
+            # Format the student ID with the proper prefix
+            formatted_student_id = f"STUDENT#{student_id}"
+            
+            # Check if student exists in the database
+            dynamodb = boto3.resource('dynamodb', region_name=REGION)
+            table = dynamodb.Table(TABLENAME)
+            
+            # We only need to check if any item exists with this PK
+            # Using a limit of 1 to minimize read capacity usage
+            response = table.query(
+                KeyConditionExpression=Key('PK').eq(formatted_student_id),
+                Limit=1
+            )
+            
+            # If we got any items back, the student exists
+            student_exists = len(response.get('Items', [])) > 0
+            
+            return LambdaResponse(
+                statusCode=200,
+                headers=self.build_headers(),
+                body=json.dumps({"exists": student_exists})
+            ).dict()
+            
+        except Exception as e:
+            self.logger.error(f"Error checking student existence: {str(e)}")
+            raise APIError(f"Error checking student: {str(e)}", status_code=500)
 
     def generate_response(self) -> dict:
         try:
