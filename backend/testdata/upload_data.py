@@ -24,7 +24,10 @@ def upload(items):
 def main():
     upload(courses.courses)
     student_profiles = datagenerator.create_student_profiles(10)
-    print(student_profiles)
+    uuids = ['f05cc95c-4021-70f6-792e-1df97c8f6262']
+    for i in range(len(uuids)):
+        student_profiles[i]['STUDENT_ID'] = uuids[i]
+        student_profiles[i]['PK'] = f"STUDENT#{uuids[i]}"
     upload(student_profiles)
     upload(timetable.timetable)
     enrollments, results = datagenerator.create_enrollments(student_profiles)
