@@ -17,8 +17,7 @@ Parameters:
   OpenAIAPIKey:
     Type: String
     Description: OpenAI API Key for LLM access
-    NoEcho: true  # This prevents the key from being displayed in logs/console
-
+    NoEcho: true # This prevents the key from being displayed in logs/console
 
 Globals:
   Api:
@@ -26,7 +25,7 @@ Globals:
     Cors:
       AllowMethods: "'GET,PUT,POST,OPTIONS'"
       AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token, Origin'"
-      AllowOrigin: !If 
+      AllowOrigin: !If
         - IsDev
         - "'*'"
         - "'http://13.53.152.71'"
@@ -54,6 +53,7 @@ Resources:
             Method: GET
             Auth:
               Authorizer: CognitoAuthorizer
+
   GoodbyeFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -78,6 +78,7 @@ Resources:
             Method: GET
             Auth:
               Authorizer: CognitoAuthorizer
+
   DatabaseFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -106,6 +107,7 @@ Resources:
             Method: GET
             Auth:
               Authorizer: CognitoAuthorizer
+
   ChatFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -117,12 +119,22 @@ Resources:
         Variables:
           Environment: !Ref Environment
           OPENAI_API_KEY: !Ref OpenAIAPIKey
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Sub "${Environment}-student-advisor-table"
       Events:
         ChatEvent:
           Type: Api
           Properties:
             Path: /chat
             Method: POST
+            Auth:
+              Authorizer: CognitoAuthorizer
+        CheckStudentEvent:
+          Type: Api
+          Properties:
+            Path: /student/check
+            Method: GET
             Auth:
               Authorizer: CognitoAuthorizer
 
@@ -132,6 +144,6 @@ Outputs:
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod"
 
 Conditions:
-  IsDev: !Equals 
+  IsDev: !Equals
     - !Ref Environment
     - dev
