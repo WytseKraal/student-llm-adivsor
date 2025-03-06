@@ -22,8 +22,9 @@ REGISTRATION_INFO""")
 
 dot.node("Student_Profile", """Student_Profile
 ----------------------
-PK (STUDENT#ID) [PK]
+PK (STUDENT#UUID) [PK]
 SK (PROFILE)
+STUDENT_UUID
 STUDENT_ID
 FIRST_NAME
 LAST_NAME
@@ -33,14 +34,14 @@ YEAR""")
 
 dot.node("Student_Enrollment", """Student_Enrollment
 ----------------------
-PK (STUDENT#ID) [PK]
+PK (STUDENT#UUID) [PK]
 SK (ENROLLMENT#COURSE_ID)
 COURSE_ID
 STATUS""")
 
 dot.node("Student_Result", """Student_Result
 ----------------------
-PK (STUDENT#ID) [PK]
+PK (STUDENT#UUID) [PK]
 SK (RESULT#COURSE_ID)
 COURSE_ID
 ASSESSMENTS (List)
