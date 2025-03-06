@@ -53,9 +53,17 @@ PK (COURSE#ID) [PK]
 SK (TIMETABLE)
 SCHEDULE (Nested Dict)""")
 
+dot.node("Student_Query", """Student_Query
+----------------------
+PK (STUDENT#UUID) [PK]
+SK (REQUEST#TIMESTAMP)
+USAGE_TYPE
+TOKEN_USAGE""")
+
 # Define relationships
 dot.edge("Student_Profile", "Student_Enrollment", label="Enrolls in")
 dot.edge("Student_Profile", "Student_Result", label="Has results in")
+dot.edge("Student_Profile", "Student_Query", label="Does request in")
 dot.edge("Course_Details", "Student_Enrollment", label="Enrollment for")
 dot.edge("Course_Details", "Student_Result", label="Assessment for")
 dot.edge("Course_Details", "Course_Timetable", label="Scheduled as")
