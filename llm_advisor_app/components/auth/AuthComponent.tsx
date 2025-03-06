@@ -25,7 +25,6 @@ export default function AuthComponent({
     challengeUser,
     verifyStudentExists,
     signOut,
-    getUserAttributes,
   } = useAuth();
 
   useEffect(() => {
