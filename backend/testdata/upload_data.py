@@ -3,6 +3,7 @@ import boto3
 import courses
 import timetable
 import datagenerator
+import datetime as dt
 
 BATCHSIZE = 25
 REGION = 'eu-north-1'
@@ -21,7 +22,7 @@ def upload(items):
                 batch.put_item(Item=item)
 
 
-def main():
+def upload_random_students():
     upload(courses.courses)
     student_profiles = datagenerator.create_student_profiles(10)
     uuids = ['f05cc95c-4021-70f6-792e-1df97c8f6262', 'f0ece98c-40b1-701f-c788-74aafbe9bd90', '20fcf98c-b0d1-7016-0374-895b4b7a4ead']
@@ -36,6 +37,17 @@ def main():
     upload(enrollments)
     upload(results)
     print("uploaded data")
+
+
+def main():
+    fake_usage = {
+        "PK": "STUDENT#f05cc95c-4021-70f6-792e-1df97c8f6262",
+        "SK": f"REQUEST#{dt.datetime.timestamp(dt.datetime.now())}",
+        "USAGE_TYPE": "REQUEST",
+        "TOKEN_USAGE": 10
+    }
+    upload([fake_usage])
+
 
 if __name__ == "__main__":
     print("going to upload")
