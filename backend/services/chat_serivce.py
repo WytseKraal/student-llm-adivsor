@@ -92,21 +92,39 @@ class ChatService(BaseService):
             enrollments = self.get_items_sk_begins_with(STUDENT, 'ENROLLMENT')
             grades = self.get_items_sk_begins_with(STUDENT, 'RESULT')
             profile = self.get_items_sk_begins_with(STUDENT, 'PROFILE')
-            timetable = self.get_items_sk_begins_with(STUDENT, 'TIMETABLE')
 
-            logger.info("ENROLLMENT: ", enrollments)
+            course_ids = get_unique_course_ids(enrollments)
+
+            course_ids = get_unique_course_ids(enrollments)
+
+            # Initialize an empty dictionary to store timetables for all courses
+            all_timetables = {}
+
+            # Retrieve timetable for each course
+            for course_id in course_ids:
+                course_key = f"COURSE#{course_id}"
+                course_timetable = self.get_items_sk_begins_with(course_key, 'TIMETABLE')
+                all_timetables[course_id] = course_timetable
+
+            logger.info(f"ENROLLMENT-----------------: {enrollments}")
+            logger.info(f"GRADES {grades}")
+            logger.info(f"TIMETABLE: {all_timetables}")
 
             prompt = f"""
-            You are an expert student helper.
+            You are an expert student helper .
             The profile of this student is: {profile}
 
             The grades of this student is: {grades}
 
             This student is enrolled in: {enrollments}
 
-            This students time table is: {timetable}
+            This students time table is: {all_timetables}
 
             Help this student as best as you can with this message, but don't tell them that their grades are low if they are.
+
+            In addition, if you do not have information on a course say you dont have that information do not make guesses on what the course could be like. 
+            
+            Also very important, is that when someone asks about a class or class name you often give an ID back like HY12VBS0 But you should just check to have the actual course name thx.
 
             {user_message}
             """
@@ -156,12 +174,26 @@ class ChatService(BaseService):
     def get_items_sk_begins_with(self, pk_value, sk_prefix):
         dynamodb = boto3.resource('dynamodb', region_name=REGION)
         table = dynamodb.Table(TABLENAME)
+
         try:
             response = table.query(
                 KeyConditionExpression=Key('PK').eq(pk_value) & Key('SK').begins_with(sk_prefix)
             )
+            print(f"RESPONSE: {response}")
             items = response.get('Items', [])
             return items
         except Exception as e:
             print(f"Error fetching items for {pk_value} with sk prefix {sk_prefix}: {e}")
             return None
+    
+def get_unique_course_ids(data):
+    # Initialize an empty set to store unique course IDs
+    unique_course_ids = set()
+    
+    # Iterate through each dictionary in the data
+    for item in data:
+        # Add the course ID to the set
+        unique_course_ids.add(item['COURSE_ID'])
+    
+    # Convert the set to a list for easier use
+    return list(unique_course_ids)
