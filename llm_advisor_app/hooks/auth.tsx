@@ -11,6 +11,7 @@ import {
   CognitoUser,
   AuthenticationDetails,
   CognitoUserSession,
+  CognitoUserAttribute,
   ISignUpResult,
 } from "amazon-cognito-identity-js";
 import { env } from "@/environment";
@@ -28,6 +29,12 @@ interface AuthContextType {
     email: string,
     password: string
   ) => Promise<CognitoUserSession | { challengeName: string }>;
+  signUp: (
+    email: string,
+    password: string,
+    name: string,
+    birthday: string
+  ) => Promise<ISignUpResult>;
   signOut: () => void;
   getToken: () => Promise<string>;
   completeNewPasswordChallenge: (
@@ -43,28 +50,26 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
-// Check if we're running in a browser environment
 const isBrowser = typeof window !== "undefined";
 
-// Pool configuration
 const poolData: PoolData = {
   UserPoolId: env.cognitoConfig.UserPoolId,
   ClientId: env.cognitoConfig.ClientId,
 };
 
-// Only initialize userPool in browser environment
 const userPool = isBrowser ? new CognitoUserPool(poolData) : null;
 
-// API base URL
 const API_BASE_URL = env.apiUrl;
 
-// Create context with default values
 const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: true,
   challengeUser: null,
   signIn: async () => {
     throw new Error("signIn not implemented");
+  },
+  signUp: async () => {
+    throw new Error("signUp not implemented");
   },
   signOut: () => {
     throw new Error("signOut not implemented");
@@ -89,7 +94,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [challengeUser, setChallengeUser] = useState<CognitoUser | null>(null);
 
   useEffect(() => {
-    // Only check auth in the browser
     if (isBrowser) {
       checkAuth();
     } else {
@@ -98,7 +102,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, []);
 
   const checkAuth = () => {
-    // Ensure userPool exists (browser environment)
     if (!userPool) {
       setLoading(false);
       return;
@@ -124,7 +127,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
-  // Get user attributes from Cognito
   const getUserAttributes = async (): Promise<{ [key: string]: string }> => {
     if (!isBrowser || !userPool) {
       return Promise.reject(
@@ -167,13 +169,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
     });
   };
 
-  // Check if student exists using the sub from Cognito user
   const verifyStudentExists = async (): Promise<boolean> => {
     try {
-      // Get the current token for API request
       const token = await getToken();
 
-      // Get user attributes to extract sub (unique identifier)
       const attributes = await getUserAttributes();
       const sub = attributes.sub;
 
@@ -182,7 +181,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
         return false;
       }
 
-      // Call the API endpoint to check if student exists
       const response = await fetch(
         `${API_BASE_URL}/student/check?student_id=${encodeURIComponent(sub)}`,
         {
@@ -209,7 +207,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     email: string,
     password: string
   ): Promise<CognitoUserSession | { challengeName: string }> => {
-    // Check if we're in browser environment
     if (!isBrowser || !userPool) {
       return Promise.reject(
         new Error("Authentication not available on server")
@@ -237,7 +234,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
           reject(err);
         },
         newPasswordRequired: (userAttributes, requiredAttributes) => {
-          // Delete sensitive attributes before passing to completeNewPasswordChallenge
           delete userAttributes.email_verified;
           delete userAttributes.phone_number_verified;
 
@@ -248,11 +244,52 @@ export function AuthProvider({ children }: AuthProviderProps) {
     });
   };
 
+  const signUp = async (
+    email: string,
+    password: string,
+    name: string,
+    birthday: string
+  ): Promise<ISignUpResult> => {
+    if (!isBrowser || !userPool) {
+      return Promise.reject(
+        new Error("Authentication not available on server")
+      );
+    }
+
+    return new Promise((resolve, reject) => {
+      const attributeList = [
+        new CognitoUserAttribute({
+          Name: "name",
+          Value: name,
+        }),
+        new CognitoUserAttribute({
+          Name: "email",
+          Value: email,
+        }),
+        new CognitoUserAttribute({
+          Name: "birthdate",
+          Value: birthday,
+        }),
+      ];
+
+      userPool.signUp(email, password, attributeList, [], (err, result) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        if (!result) {
+          reject(new Error("Registration failed with an unknown error"));
+          return;
+        }
+        resolve(result);
+      });
+    });
+  };
+
   const completeNewPasswordChallenge = async (
     newPassword: string,
     name: string
   ): Promise<CognitoUserSession> => {
-    // Check if we're in browser environment
     if (!isBrowser) {
       return Promise.reject(
         new Error("Authentication not available on server")
@@ -328,6 +365,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     user,
     loading,
     signIn,
+    signUp,
     signOut,
     getToken,
     completeNewPasswordChallenge,
