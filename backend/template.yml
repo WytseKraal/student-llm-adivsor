@@ -108,6 +108,36 @@ Resources:
             Auth:
               Authorizer: CognitoAuthorizer
 
+  Resources:
+  TokenUsageFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handlers/token_usage_handler.lambda_handler
+      Runtime: python3.12
+      CodeUri: .
+      Environment:
+        Variables:
+          Environment: !Ref Environment
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Sub "${Environment}-student-advisor-table"
+      Events:
+        UploadTokenUsage:
+          Type: Api
+          Properties:
+            Path: /token-usage
+            Method: POST
+            Auth:
+              Authorizer: CognitoAuthorizer
+        GetTokenUsage:
+          Type: Api
+          Properties:
+            Path: /token-usage
+            Method: GET
+            Auth:
+              Authorizer: CognitoAuthorizer
+
+
   ChatFunction:
     Type: AWS::Serverless::Function
     Properties:

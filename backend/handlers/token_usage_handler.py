@@ -4,7 +4,7 @@ from pydantic import ValidationError
 from models.event import LambdaEvent
 from models.response import LambdaResponse
 from services.base_service import APIError
-from services.usage_service import UsageService
+from services.token_usage_service import TokenUsageService
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -13,7 +13,7 @@ logger.setLevel(logging.INFO)
 def lambda_handler(event: dict, context: object) -> dict:
     try:
         event_obj = LambdaEvent(**event)
-        service = UsageService(event_obj, context)
+        service = TokenUsageService(event_obj, context)
         return service.handle()
     except APIError as e:
         return LambdaResponse(

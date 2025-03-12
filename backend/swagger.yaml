@@ -206,3 +206,67 @@ paths:
           description: Unauthorized request (missing or invalid Cognito token)
         "500":
           description: Internal server error
+  /token-usage:
+    post:
+      summary: Upload token usage data
+      description: Uploads token usage data for an API call.
+      security:
+        - CognitoAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                total:
+                  type: integer
+                  example: 100
+                prompt:
+                  type: integer
+                  example: 60
+                completion:
+                  type: integer
+                  example: 40
+      responses:
+        "200":
+          description: Token usage data uploaded successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Token usage data uploaded successfully."
+        "400":
+          description: Invalid request (e.g., missing required fields)
+        "500":
+          description: Server error
+
+    get:
+      summary: Retrieve all token usage data
+      description: Retrieves all token usage data for all users.
+      security:
+        - CognitoAuth: []
+      responses:
+        "200":
+          description: Token usage data retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    total:
+                      type: integer
+                      example: 100
+                    prompt:
+                      type: integer
+                      example: 60
+                    completion:
+                      type: integer
+                      example: 40
+        "500":
+          description: Server error

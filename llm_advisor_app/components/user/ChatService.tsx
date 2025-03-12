@@ -110,7 +110,7 @@ export default function ChatService({ apiUrl, getToken }: ChatServiceProps) {
         throw new Error("No authentication token available.");
       }
 
-      const response = await fetch(`${apiUrl}/log-token-usage`, {
+      const response = await fetch(`${apiUrl}/token-usage`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -49,7 +49,7 @@ SCHEDULE (Nested Dict)"]
 PK (STUDENT#UUID) [PK]
 SK (REQUEST#TIMESTAMP)
 USAGE_TYPE
-TOKEN_USAGE"]
+TOKEN_USAGE { "total": number, "prompt": number, "completion": number }]
 	Student_Profile -> Student_Enrollment [label="Enrolls in"]
 	Student_Profile -> Student_Result [label="Has results in"]
 	Student_Profile -> Student_Query [label="Does request in"]
