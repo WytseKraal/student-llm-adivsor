@@ -37,6 +37,7 @@ export default function ChatService({ apiUrl, getToken }: ChatServiceProps) {
     prompt: number;
     completion: number;
   }>({ total: 0, prompt: 0, completion: 0 });
+  const [sessionUsage, setSesstionUsage] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll to bottom when messages update
@@ -82,11 +83,14 @@ export default function ChatService({ apiUrl, getToken }: ChatServiceProps) {
       const data = await response.json();
 
       const usage = data.usage;
-      setTokenUsage((prevUsage) => ({
-        total: prevUsage.total + usage.total_tokens,
+      setSesstionUsage(sessionUsage + usage.total_tokens);
+      setTokenUsage({
+        total: usage.total_tokens,
         prompt: usage.prompt_tokens,
         completion: usage.completion_tokens,
-      }));
+      });
+
+      logTokenUsage(tokenUsage);
 
       return data.response;
     } catch (error) {
@@ -94,6 +98,40 @@ export default function ChatService({ apiUrl, getToken }: ChatServiceProps) {
       throw error;
     }
   };
+
+  const logTokenUsage = async (usage: {
+    total: number;
+    prompt: number;
+    completion: number;
+  }) => {
+    try {
+      const token = await getToken();
+      if (!token) {
+        throw new Error("No authentication token available.");
+      }
+
+      const response = await fetch(`${apiUrl}/log-token-usage`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          PK: `STUDENT#${token}`,
+          SK: `REQUEST#${Date.now() / 1000}`,
+          USAGE_TYPE: "REQUEST",
+          TOKEN_USAGE: usage,
+        }),
+      });
+
+      if (!response.ok) {
+        console.error("Failed to log token usage:", response.status);
+      }
+    } catch (error) {
+      console.error("Error logging token usage:", error);
+    }
+  };
+
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -155,9 +193,8 @@ export default function ChatService({ apiUrl, getToken }: ChatServiceProps) {
               {messages.map((message) => (
                 <div
                   key={message.id}
-                  className={`flex ${
-                    message.sender === "user" ? "justify-end" : "justify-start"
-                  }`}
+                  className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"
+                    }`}
                 >
                   <div className="flex items-start max-w-[80%] gap-2">
                     {message.sender === "bot" && (
@@ -169,11 +206,10 @@ export default function ChatService({ apiUrl, getToken }: ChatServiceProps) {
                     )}
 
                     <div
-                      className={`rounded-lg px-3 py-2 ${
-                        message.sender === "user"
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-muted"
-                      }`}
+                      className={`rounded-lg px-3 py-2 ${message.sender === "user"
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted"
+                        }`}
                     >
                       {message.sender === "bot" ? (
                         <div className="prose prose-sm dark:prose-invert">
@@ -208,7 +244,7 @@ export default function ChatService({ apiUrl, getToken }: ChatServiceProps) {
 
       <CardFooter className="border-t p-4 flex flex-col gap-2">
         <div className="text-xs text-gray-500">
-          Total token usage (session): {tokenUsage.total} | Last prompt:{" "}
+          Total token usage (session): {sessionUsage} | Last prompt:{" "}
           {tokenUsage.prompt} | Last completion: {tokenUsage.completion}
         </div>
 
