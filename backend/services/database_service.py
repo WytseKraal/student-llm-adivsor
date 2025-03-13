@@ -80,13 +80,13 @@ class DatabaseService(BaseService):
         student_id = query_params.get('id')
         
         if not student_id:
-            raise APIError("Missing student ID in query parameters", status_code=400)
-            
+            raise APIError("Missing student ID in query parameters", status_code=400) 
         try:
             # Get the item from DynamoDB
             result = self.table.get_item(
                 Key={
-                    'id': student_id
+                    'PK': f"STUDENT#{student_id}",
+                    'SK': "PROFILE"
                 }
             )
             
