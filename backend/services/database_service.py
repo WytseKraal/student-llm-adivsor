@@ -97,8 +97,9 @@ class DatabaseService(BaseService):
             response = LambdaResponse(
                 statusCode=200,
                 headers=self.build_headers(),
-                body=json.dumps(result['Item'])
+                body=json.dumps(result['Item'], default=lambda x: str(x))
             )
+            print(response.dict())
             return response.dict()
             
         except Exception as e:

@@ -75,7 +75,7 @@ export default function UserProfile() {
             </div>
 
             <div className="space-y-1">
-              <p className="text-sm text-muted-foreground">User ID</p>
+              <p className="text-sm text-muted-foreground">Student ID</p>
               <p className="font-medium text-sm">{sub || "Not provided"}</p>
             </div>
           </div>

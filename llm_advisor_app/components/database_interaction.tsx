@@ -70,7 +70,12 @@ const StudentManager: React.FC<StudentManagerProps> = ({
 
       const data = await response.json();
       if (response.ok) {
-        setStudentData(data as StudentData);
+        const formattedData: StudentData = {
+          id: data.STUDENT_ID,
+          name: `${data.FIRST_NAME} ${data.LAST_NAME}`, // Combine first and last name
+          email: data.EMAIL,
+        };
+        setStudentData(formattedData);
         setResponseMessage("Student found!");
       } else {
         setResponseMessage(data.error || "Error retrieving student");
