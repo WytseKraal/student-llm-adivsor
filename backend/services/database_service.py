@@ -52,12 +52,16 @@ class DatabaseService(BaseService):
             return self.put_student()
         elif http_method == "GET":
             return self.get_student()
+        elif http_method == "PATCH":
+            return self.update_student()
         else:
+            print("not allowed")
             raise APIError("Method not allowed", status_code=405)
 
     def put_student(self) -> dict:
         try:
             body = json.loads(self.event.body)
+            print(body)
             if 'id' not in body:
                 raise APIError("Missing student ID", status_code=400)
                 
@@ -105,3 +109,44 @@ class DatabaseService(BaseService):
         except Exception as e:
             self.logger.error(f"Error retrieving student: {str(e)}")
             raise APIError("Error retrieving student", status_code=500)
+    
+    def update_student(self) -> dict:
+        try:
+            body = json.loads(self.event.body)
+            print(body)
+            if 'id' not in body:
+                raise APIError("Missing student ID", status_code=400)
+                
+            update_expressions = []
+            expression_attribute_values = {}
+
+            # Check for fields to update
+            if "preferredName" in body:
+                update_expressions.append("PREFERRED_NAME = :pn")
+                expression_attribute_values[":pn"] = body["preferredName"]
+
+            if "email" in body:
+                update_expressions.append("EMAIL = :em")
+                expression_attribute_values[":em"] = body["email"]
+
+            if not update_expressions:
+                raise APIError("No valid fields to update", status_code=400)
+
+            # Construct update expression
+            update_expression = "SET " + ", ".join(update_expressions)
+
+            # Update only provided fields
+            self.table.update_item(
+                Key={"PK": f"STUDENT#{body["id"]}", "SK": "PROFILE"},
+                UpdateExpression=update_expression,
+                ExpressionAttributeValues=expression_attribute_values
+            )
+            response = LambdaResponse(
+                statusCode=200,
+                headers=self.build_headers(),
+                body=json.dumps({"message": "Student updated successfully"})
+            )
+            return response.dict()
+            
+        except json.JSONDecodeError:
+            raise APIError("Invalid JSON in request body", status_code=400)

@@ -2,11 +2,14 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { useUserData } from "@/hooks/userDataHook";
+
 
 interface StudentData {
   id: string;
   name: string;
   email: string;
+  preferredName: string;
 }
 
 interface StudentManagerProps {
@@ -21,10 +24,13 @@ const StudentManager: React.FC<StudentManagerProps> = ({
   const [studentId, setStudentId] = useState<string>("");
   const [studentName, setStudentName] = useState<string>("");
   const [studentEmail, setStudentEmail] = useState<string>("");
+  const [studentPreferredName, setStudentPreferredName] = useState<string>("");
   const [searchId, setSearchId] = useState<string>("");
   const [responseMessage, setResponseMessage] = useState<string>("");
   const [studentData, setStudentData] = useState<StudentData | null>(null);
 
+  const { userName, userEmail, sub, isLoading, error } = useUserData();
+  
   const handleCreateStudent = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
@@ -74,6 +80,7 @@ const StudentManager: React.FC<StudentManagerProps> = ({
           id: data.STUDENT_ID,
           name: `${data.FIRST_NAME} ${data.LAST_NAME}`, // Combine first and last name
           email: data.EMAIL,
+          preferredName: data.PREFERRED_NAME,
         };
         setStudentData(formattedData);
         setResponseMessage("Student found!");
@@ -87,6 +94,35 @@ const StudentManager: React.FC<StudentManagerProps> = ({
           (error instanceof Error ? error.message : "Unknown error")
       );
       setStudentData(null);
+    }
+  };
+
+  const handleUpdateStudent = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    try {
+
+      const token = await getToken();
+      const response = await fetch(`${apiUrl}/student`, {
+        method: "PATCH",
+        headers: {
+          Authorization: token,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: sub,
+          preferredName: studentPreferredName,
+          email:studentEmail
+        }),
+      });
+
+      const data = await response.json();
+      setResponseMessage(data.message || "Student updated successfully");
+
+    } catch (error) {
+      setResponseMessage(
+        "Error updating student: " +
+          (error instanceof Error ? error.message : "Unknown error")
+      );
     }
   };
 
@@ -121,6 +157,32 @@ const StudentManager: React.FC<StudentManagerProps> = ({
               }
             />
             <Button type="submit">Save Student</Button>
+          </form>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Update Student</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleUpdateStudent} className="flex flex-col gap-4">
+            <Input
+              placeholder="Preferred name"
+              value={studentPreferredName}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setStudentPreferredName(e.target.value)
+              }
+            />
+            <Input
+              placeholder="Email"
+              type="email"
+              value={studentEmail}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setStudentEmail(e.target.value)
+              }
+            />
+            <Button type="submit">Update Student</Button>
           </form>
         </CardContent>
       </Card>

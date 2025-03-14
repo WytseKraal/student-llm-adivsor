@@ -43,8 +43,8 @@ def main():
         "SK": f"REQUEST#{dt.datetime.timestamp(dt.datetime.now())}",
         "USAGE_TYPE": "REQUEST",
         "TOTAL_USAGE": 10,
-        "PROMPT_USAGE" : 6,
-        "COMPLETION_USAGE" : 4
+        "PROMPT_USAGE": 6,
+        "COMPLETION_USAGE": 4
     }
     upload([fake_usage])
     upload_random_students()
