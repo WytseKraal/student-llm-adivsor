@@ -11,6 +11,10 @@ import datetime
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
+BATCHSIZE = 25
+REGION = 'eu-north-1'
+TABLENAME = 'application_database'
+
 TABLENAME = 'prod-student-advisor-table'
 table = dynamodb.Table(TABLENAME)
 
@@ -49,19 +53,24 @@ class TokenUsageService(BaseService):
                 raise APIError(
                     "Missing required fields: student_id, total_tokens, prompt_tokens, completion_tokens", status_code=400)
 
-            mock_response = {
-                "message": "Mock: Token usage data stored successfully",
-                "student_id": body["student_id"],
-                "timestamp": int(time.time()),
-                "total_tokens": body["total_tokens"],
-                "prompt_tokens": body["prompt_tokens"],
-                "completion_tokens": body["completion_tokens"]
+            usage = {
+                "PK": f"STUDENT#{body['student_id']}",
+                "SK": f"REQUEST#{dt.datetime.timestamp(dt.datetime.now())}",
+                "USAGE_TYPE": "REQUEST",
+                "TOTAL_TOKENS": body['total_tokens'],
+                "PROMPT_TOKENS": body['prompt_tokens'],
+                "COMPLETION_TOKENS": body['completion_tokens'],
             }
+
+            try:
+                self.upload(usage)
+            except Exception as e:
+                raise APIError(f"Could not upload usage to database: {str(e)}", status_code=500)
 
             return LambdaResponse(
                 statusCode=200,
                 headers=self.build_headers(),
-                body=json.dumps(mock_response)
+                body=json.dumps(usage)
             ).dict()
 
         except json.JSONDecodeError:
@@ -89,38 +98,6 @@ class TokenUsageService(BaseService):
             raise APIError("could not fetch token usage",
                            status_code=500)
 
-        try:
-            # Convert timestamps to integers
-            start_time = int(start_time)
-            end_time = int(end_time)
-
-            # Generate fake token usage data
-            mock_data = [
-                {
-                    "student_id": student_id,
-                    "timestamp": random.randint(start_time, end_time),
-                    "total_tokens": random.randint(500, 2000),
-                    "prompt_tokens": random.randint(200, 1000),
-                    "completion_tokens": random.randint(200, 1000)
-                }
-                for _ in range(3)  # Generate 2-5 mock records
-            ]
-
-            return LambdaResponse(
-                statusCode=200,
-                headers=self.build_headers(),
-                body=json.dumps({"mock_usage_data": mock_data})
-            ).dict()
-
-        except ValueError:
-            raise APIError(
-                "Invalid timestamp format. Use epoch time.", status_code=400)
-        except Exception as e:
-            logger.error(f"Mock error retrieving token usage: {str(e)}")
-            raise APIError("Mock error retrieving token usage",
-                           status_code=500)
-
-
     
     def get_requests(self, start_time, end_time, h=24):
         # ts_yesterday = dt.timestamp(dt.now() - datetime.timedelta(hours=h))
@@ -133,3 +110,14 @@ class TokenUsageService(BaseService):
                 ) & Key('USAGE_TYPE').eq('REQUEST')
         )
         return response.get('Items', [])
+
+    def upload(items):
+        dynamodb = boto3.resource('dynamodb', region_name=REGION)
+        # Select the table
+        table = dynamodb.Table(TABLENAME)
+        with table.batch_writer() as batch:
+            for i in range(0, len(items), BATCHSIZE):
+                batch_items = items[i:i + BATCHSIZE]
+                for item in batch_items:
+                    print(f"Uploading: {item['PK']}")
+                    batch.put_item(Item=item)
