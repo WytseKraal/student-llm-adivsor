@@ -206,10 +206,11 @@ paths:
           description: Unauthorized request (missing or invalid Cognito token)
         "500":
           description: Internal server error
+
   /token-usage:
     post:
       summary: Upload token usage data
-      description: Uploads token usage data for an API call.
+      description: Stores OpenAI API token usage data for a given student.
       security:
         - CognitoAuth: []
       requestBody:
@@ -218,55 +219,86 @@ paths:
           application/json:
             schema:
               type: object
+              required:
+                [student_id, total_tokens, prompt_tokens, completion_tokens]
               properties:
-                total:
+                student_id:
+                  type: string
+                  description: ID of the student.
+                total_tokens:
                   type: integer
-                  example: 100
-                prompt:
+                  description: Total tokens used in the request.
+                prompt_tokens:
                   type: integer
-                  example: 60
-                completion:
+                  description: Tokens used in the prompt.
+                completion_tokens:
                   type: integer
-                  example: 40
+                  description: Tokens used in the response.
+      responses:
+        "201":
+          description: Token usage recorded successfully.
+        "400":
+          description: Invalid request (e.g., missing fields, invalid data format).
+        "401":
+          description: Unauthorized request (missing or invalid Cognito token).
+        "500":
+          description: Internal server error.
+    get:
+      summary: Retrieve token usage data
+      description: Fetches token usage data for a given student ID within a specified timeframe.
+      security:
+        - CognitoAuth: []
+      parameters:
+        - name: student_id
+          in: query
+          required: true
+          description: ID of the student.
+          schema:
+            type: string
+        - name: start_time
+          in: query
+          required: true
+          description: Start timestamp (epoch format).
+          schema:
+            type: integer
+            example: 1710508800 # Example: 2024-03-15 00:00:00 UTC
+        - name: end_time
+          in: query
+          required: true
+          description: End timestamp (epoch format).
+          schema:
+            type: integer
+            example: 1710595200 # Example: 2024-03-16 00:00:00 UTC
       responses:
         "200":
-          description: Token usage data uploaded successfully
+          description: Successful retrieval of token usage data.
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  message:
+                  student_id:
                     type: string
-                    example: "Token usage data uploaded successfully."
+                  usage_records:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        total_tokens:
+                          type: integer
+                        prompt_tokens:
+                          type: integer
+                        completion_tokens:
+                          type: integer
+                        timestamp:
+                          type: integer
+                          description: Epoch timestamp (seconds since Unix epoch).
+                          example: 1710512400 # Example: 2024-03-15 01:00:00 UTC
         "400":
-          description: Invalid request (e.g., missing required fields)
+          description: Invalid request (e.g., missing fields, invalid timestamp format).
+        "401":
+          description: Unauthorized request (missing or invalid Cognito token).
+        "404":
+          description: No token usage data found for the given student ID and timeframe.
         "500":
-          description: Server error
-
-    get:
-      summary: Retrieve all token usage data
-      description: Retrieves all token usage data for all users.
-      security:
-        - CognitoAuth: []
-      responses:
-        "200":
-          description: Token usage data retrieved successfully
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    total:
-                      type: integer
-                      example: 100
-                    prompt:
-                      type: integer
-                      example: 60
-                    completion:
-                      type: integer
-                      example: 40
-        "500":
-          description: Server error
+          description: Internal server error.
