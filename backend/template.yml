@@ -108,7 +108,6 @@ Resources:
             Auth:
               Authorizer: CognitoAuthorizer
 
-  Resources:
   TokenUsageFunction:
     Type: AWS::Serverless::Function
     Properties:
