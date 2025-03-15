@@ -3,9 +3,11 @@ import logging
 import time
 import random
 from models.response import LambdaResponse
+import boto3
 from boto3.dynamodb.conditions import Key
 from services.base_service import BaseService, APIError
 from datetime import datetime as dt
+
 import datetime
 
 logger = logging.getLogger()
@@ -13,10 +15,8 @@ logger.setLevel(logging.INFO)
 
 BATCHSIZE = 25
 REGION = 'eu-north-1'
-TABLENAME = 'application_database'
 
-TABLENAME = 'prod-student-advisor-table'
-table = dynamodb.Table(TABLENAME)
+TABLENAME = 'dev-student-advisor-table'
 
 class TokenUsageService(BaseService):
     def __init__(self, event, context):
@@ -55,7 +55,7 @@ class TokenUsageService(BaseService):
 
             usage = {
                 "PK": f"STUDENT#{body['student_id']}",
-                "SK": f"REQUEST#{dt.datetime.timestamp(dt.datetime.now())}",
+                "SK": f"REQUEST#{dt.timestamp(dt.now())}",
                 "USAGE_TYPE": "REQUEST",
                 "TOTAL_TOKENS": body['total_tokens'],
                 "PROMPT_TOKENS": body['prompt_tokens'],
@@ -63,7 +63,7 @@ class TokenUsageService(BaseService):
             }
 
             try:
-                self.upload(usage)
+                self.upload([usage])
             except Exception as e:
                 raise APIError(f"Could not upload usage to database: {str(e)}", status_code=500)
 
@@ -88,6 +88,7 @@ class TokenUsageService(BaseService):
 
         try:
             token_usage = self.get_requests(start_time, end_time)
+            print(token_usage)
 
             return LambdaResponse(
                 statusCode=200,
@@ -95,23 +96,27 @@ class TokenUsageService(BaseService):
                 body=json.dumps({"token_usage": token_usage})
             ).dict()
         except Exception as e:
-            raise APIError("could not fetch token usage",
+            raise APIError(f"could not fetch token usage {e}",
                            status_code=500)
 
     
     def get_requests(self, start_time, end_time, h=24):
-        # ts_yesterday = dt.timestamp(dt.now() - datetime.timedelta(hours=h))
-        # ts_now = dt.timestamp(dt.now())
+        ts_yesterday = dt.timestamp(dt.now() - datetime.timedelta(hours=h))
+        ts_now = dt.timestamp(dt.now())
+        dynamodb = boto3.resource('dynamodb', region_name=REGION)
+        table = dynamodb.Table(TABLENAME)
         response = table.query(
-            TableName=table,
             IndexName='GSI_TOKENUSAGE_BY_TIME',
             KeyConditionExpression=Key('SK').between(
-                f"REQUEST#{end_time}", f"REQUEST#{start_time}"
+                f"REQUEST#{ts_yesterday}", f"REQUEST#{ts_now}"
                 ) & Key('USAGE_TYPE').eq('REQUEST')
         )
+        print('===')
+        print(response)
+        print('===')
         return response.get('Items', [])
 
-    def upload(items):
+    def upload(self, items):
         dynamodb = boto3.resource('dynamodb', region_name=REGION)
         # Select the table
         table = dynamodb.Table(TABLENAME)
