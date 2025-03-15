@@ -10,6 +10,8 @@ interface StudentData {
   name: string;
   email: string;
   preferredName: string;
+  program: string;
+  year: string;
 }
 
 interface StudentManagerProps {
@@ -29,7 +31,7 @@ const StudentManager: React.FC<StudentManagerProps> = ({
   const [responseMessage, setResponseMessage] = useState<string>("");
   const [studentData, setStudentData] = useState<StudentData | null>(null);
 
-  const { userName, userEmail, sub, isLoading, error } = useUserData();
+  const { userName, userEmail, sub, isLoading, error } = useUserData(apiUrl, getToken);
   
   const handleCreateStudent = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -81,6 +83,8 @@ const StudentManager: React.FC<StudentManagerProps> = ({
           name: `${data.FIRST_NAME} ${data.LAST_NAME}`, // Combine first and last name
           email: data.EMAIL,
           preferredName: data.PREFERRED_NAME,
+          program: data.PROGRAM,
+          year: data.YEAR,
         };
         setStudentData(formattedData);
         setResponseMessage("Student found!");
