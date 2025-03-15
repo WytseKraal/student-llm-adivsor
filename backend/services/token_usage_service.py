@@ -3,11 +3,16 @@ import logging
 import time
 import random
 from models.response import LambdaResponse
+from boto3.dynamodb.conditions import Key
 from services.base_service import BaseService, APIError
+from datetime import datetime as dt
+import datetime
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
+TABLENAME = 'prod-student-advisor-table'
+table = dynamodb.Table(TABLENAME)
 
 class TokenUsageService(BaseService):
     def __init__(self, event, context):
@@ -73,6 +78,18 @@ class TokenUsageService(BaseService):
                 "Missing required query parameters: student_id, start_time, end_time", status_code=400)
 
         try:
+            token_usage = self.get_requests(start_time, end_time)
+
+            return LambdaResponse(
+                statusCode=200,
+                headers=self.build_headers(),
+                body=json.dumps({"token_usage": token_usage})
+            ).dict()
+        except Exception as e:
+            raise APIError("could not fetch token usage",
+                           status_code=500)
+
+        try:
             # Convert timestamps to integers
             start_time = int(start_time)
             end_time = int(end_time)
@@ -102,3 +119,17 @@ class TokenUsageService(BaseService):
             logger.error(f"Mock error retrieving token usage: {str(e)}")
             raise APIError("Mock error retrieving token usage",
                            status_code=500)
+
+
+    
+    def get_requests(self, start_time, end_time, h=24):
+        # ts_yesterday = dt.timestamp(dt.now() - datetime.timedelta(hours=h))
+        # ts_now = dt.timestamp(dt.now())
+        response = table.query(
+            TableName=table,
+            IndexName='GSI_TOKENUSAGE_BY_TIME',
+            KeyConditionExpression=Key('SK').between(
+                f"REQUEST#{end_time}", f"REQUEST#{start_time}"
+                ) & Key('USAGE_TYPE').eq('REQUEST')
+        )
+        return response.get('Items', [])
