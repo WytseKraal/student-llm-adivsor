@@ -7,16 +7,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Loader2 } from "lucide-react";
 import { useStudentData } from "@/hooks/studentDataHook";
 
-
-interface StudentData {
-  id: string;
-  name: string;
-  email: string;
-  preferredName: string;
-  program: string;
-  year: string;
-}
-
 interface UserProfileProps {
   apiUrl: string;
   getToken: () => Promise<string | null>;
