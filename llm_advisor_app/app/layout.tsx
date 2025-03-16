@@ -1,9 +1,10 @@
 "use client";
-
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider, useAuth } from "@/hooks/auth";
 import Navbar from "@/components/navigation/NavBar";
+import { Suspense } from "react";
+import Loading from "@/components/ui/loading";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,29 +16,21 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// We can't use metadata with a client component, so we'll define it elsewhere
-// or use a different approach for page titles
+// Layout content with authentication awareness
 function LayoutContent({ children }: Readonly<{ children: React.ReactNode }>) {
-  const { user, loading } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
 
-  // Optional loading state for better UX
   if (loading) {
-    return (
-      <div className="flex flex-col min-h-screen">
-        <main className="flex-1 container mx-auto px-4 py-6">
-          <div className="flex items-center justify-center min-h-screen">
-            Loading...
-          </div>
-        </main>
-      </div>
-    );
+    return <Loading />;
   }
 
   return (
     <div className="flex flex-col min-h-screen">
-      {user && <Navbar />}
+      {isAuthenticated && <Navbar />}
       <main
-        className={`flex-1 container mx-auto px-4 py-6 ${!user ? "pt-0" : ""}`}
+        className={`flex-1 container mx-auto px-4 py-6 ${
+          !isAuthenticated ? "pt-0" : ""
+        }`}
       >
         {children}
       </main>
@@ -56,7 +49,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AuthProvider>
-          <LayoutContent>{children}</LayoutContent>
+          <Suspense fallback={<Loading />}>
+            <LayoutContent>{children}</LayoutContent>
+          </Suspense>
         </AuthProvider>
       </body>
     </html>
