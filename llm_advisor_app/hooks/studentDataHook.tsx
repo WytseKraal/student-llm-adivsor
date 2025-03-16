@@ -20,6 +20,7 @@ export const useStudentData = (
   
  
   useEffect(() => {
+    if (searchId === "") return;
   // Handle getting student data
   const handleGetStudent = async () => {
  
