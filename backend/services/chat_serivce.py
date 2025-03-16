@@ -13,7 +13,6 @@ logger.setLevel(logging.INFO)
 REGION = 'eu-north-1'
 environment = os.getenv('Environment', 'prod')
 TABLENAME = f'{environment}-student-advisor-table'
-STUDENT = 'STUDENT#f05cc95c-4021-70f6-792e-1df97c8f6262'
 
 
 class ChatService(BaseService):
@@ -87,14 +86,21 @@ class ChatService(BaseService):
         try:
             body = json.loads(self.event.body)
             user_message = body.get("message")
+            student_id = body.get("studentID")
 
             if not user_message:
                 raise APIError("Missing 'message' in request body",
                                status_code=400)
+            
+            if not student_id:
+                raise APIError("Missing 'studentID' in request body",
+                               status_code=400)
+            
+            student = f"STUDENT#{student_id}"
 
-            enrollments = self.get_items_sk_begins_with(STUDENT, 'ENROLLMENT')
-            grades = self.get_items_sk_begins_with(STUDENT, 'RESULT')
-            profile = self.get_items_sk_begins_with(STUDENT, 'PROFILE')
+            enrollments = self.get_items_sk_begins_with(student, 'ENROLLMENT')
+            grades = self.get_items_sk_begins_with(student, 'RESULT')
+            profile = self.get_items_sk_begins_with(student, 'PROFILE')
 
             course_ids = get_unique_course_ids(enrollments)
             
