@@ -63,7 +63,7 @@ def create_student_profiles(amount=10):
     for i in range(0, amount):
         student_id = r.randint(10000, 99999)
         first_name = names.get_first_name()
-        last_name =  names.get_last_name()
+        last_name = names.get_last_name()
         student = {
             "PK": f"STUDENT#{student_id}",
             "SK": "PROFILE",
