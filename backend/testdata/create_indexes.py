@@ -14,14 +14,36 @@ usage_index = {
         {
             "Create": {
                "IndexName": "GSI_TOKENUSAGE_BY_TIME",
-              "KeySchema": [
+               "KeySchema": [
                     {"AttributeName": "USAGE_TYPE", "KeyType": "HASH"},
                     {"AttributeName": "SK", "KeyType": "RANGE"}
                 ],
-                "Projection": {
+               "Projection": {
                     "ProjectionType": "ALL"
                 }
                 
+            }
+        }
+    ]
+}
+
+course_index = {
+    "TableName": TABLENAME,
+    "AttributeDefinitions": [
+        {"AttributeName": "PROGRAM", "AttributeType": "S"},
+        {"AttributeName": "CTYPE", "AttributeType": "S"}
+    ],
+    "GlobalSecondaryIndexUpdates": [
+        {
+            "Create": {
+               "IndexName": "GSI_COURSES_PER_PROGRAM",
+               "KeySchema": [
+                    {"AttributeName": "PROGRAM", "KeyType": "HASH"},
+                    {"AttributeName": "CTYPE", "KeyType": "RANGE"}
+                ],
+               "Projection": {
+                    "ProjectionType": "ALL"
+                }
             }
         }
     ]
@@ -31,7 +53,7 @@ usage_index = {
 def main():
     dynamodb = boto3.client('dynamodb')
     try:
-        response = dynamodb.update_table(**usage_index)
-        print("GSI creation initiated:", response)
+        response = dynamodb.update_table(**course_index)
+        print("course_index creation initiated:", response)
     except Exception as e:
         print("Error updating table:", e)

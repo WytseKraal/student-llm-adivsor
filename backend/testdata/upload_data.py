@@ -38,16 +38,17 @@ def upload_random_students():
 
 
 def main():
-    fake_usage = {
+    '''fake_usage = {
         "PK": "STUDENT#f05cc95c-4021-70f6-792e-1df97c8f6262",
         "SK": f"REQUEST#{dt.datetime.timestamp(dt.datetime.now())}",
         "USAGE_TYPE": "REQUEST",
         "TOTAL_USAGE": 10,
         "PROMPT_USAGE": 6,
         "COMPLETION_USAGE": 4
-    }
-    upload([fake_usage])
-    upload_random_students()
+    }'''
+    # upload([fake_usage])
+    # upload_random_students()
+    upload(courses.courses)
 
 
 if __name__ == "__main__":
