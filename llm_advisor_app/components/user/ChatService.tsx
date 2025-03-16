@@ -90,7 +90,7 @@ export default function ChatService({ apiUrl, getToken }: ChatServiceProps) {
         completion: usage.completion_tokens,
       });
 
-      // logTokenUsage(tokenUsage);
+      logTokenUsage(tokenUsage);
 
       return data.response;
     } catch (error) {
@@ -99,38 +99,39 @@ export default function ChatService({ apiUrl, getToken }: ChatServiceProps) {
     }
   };
 
-  // const logTokenUsage = async (usage: {
-  //   total: number;
-  //   prompt: number;
-  //   completion: number;
-  // }) => {
-  //   try {
-  //     const token = await getToken();
-  //     if (!token) {
-  //       throw new Error("No authentication token available.");
-  //     }
 
-  //     const response = await fetch(`${apiUrl}/token-usage`, {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //         Authorization: `Bearer ${token}`,
-  //       },
-  //       body: JSON.stringify({
-  //         PK: `STUDENT#${token}`,
-  //         SK: `REQUEST#${Date.now() / 1000}`,
-  //         USAGE_TYPE: "REQUEST",
-  //         TOKEN_USAGE: usage,
-  //       }),
-  //     });
+  const logTokenUsage = async (usage: {
+    total: number;
+    prompt: number;
+    completion: number;
+  }) => {
+    try {
+      const token = await getToken();
+      if (!token) {
+        throw new Error("No authentication token available.");
+      }
 
-  //     if (!response.ok) {
-  //       console.error("Failed to log token usage:", response.status);
-  //     }
-  //   } catch (error) {
-  //     console.error("Error logging token usage:", error);
-  //   }
-  // };
+      const response = await fetch(`${apiUrl}/token-usage`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          student_id: `STUDENT#${token}`,
+          total_usage: usage.total,
+          prompt_usage: usage.prompt,
+          completion_usage: usage.completion,
+        }),
+      });
+
+      if (!response.ok) {
+        console.error("Failed to log token usage:", response.status);
+      }
+    } catch (error) {
+      console.error("Error logging token usage:", error);
+    }
+  };
 
 
   const handleSendMessage = async (e: React.FormEvent) => {
