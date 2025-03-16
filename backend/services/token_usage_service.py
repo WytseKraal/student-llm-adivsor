@@ -2,11 +2,13 @@ import json
 import logging
 import time
 import random
+import calendar
 from models.response import LambdaResponse
 import boto3
 from boto3.dynamodb.conditions import Key, Attr
 from services.base_service import BaseService, APIError
 from datetime import datetime as dt
+from datetime import timezone
 from decimal import Decimal
 
 import datetime
@@ -102,14 +104,13 @@ class TokenUsageService(BaseService):
                 "Missing required query parameters: student_id", status_code=400)
 
         try:
-            token_usage = self.get_requests(student_id)
-            total_used = self.calculate_usage(token_usage)
+            ta = TokenAllocator()
+            remaining = ta.get_total_remaining_tokens(student_id)
 
-            used = MAX_TOTAL_TOKENS - total_used
             return LambdaResponse(
                 statusCode=200,
                 headers=self.build_headers(),
-                body=json.dumps({"tokens_remaining": 0 if used < 0 else used}, default=self.serialize)
+                body=json.dumps({"tokens_remaining": 0 if remaining < 0 else remaining}, default=self.serialize)
             ).dict()
         except Exception as e:
             raise APIError(f"could not fetch token usage {e}",
@@ -152,3 +153,88 @@ class TokenUsageService(BaseService):
                 for item in batch_items:
                     print(f"Uploading: {item['PK']}")
                     batch.put_item(Item=item)
+
+
+class TokenAllocator:
+    MAX_TOKENS = 100_000
+
+    def get_total_amount_of_tokens_used(self) -> int:
+        ts_now = dt.timestamp(dt.now())
+        dynamodb = boto3.resource('dynamodb', region_name=REGION)
+        first_day = self.get_timestamp_of_first_day()
+        table = dynamodb.Table(TABLENAME)
+        response = table.query(
+            IndexName='GSI_TOKENUSAGE_BY_TIME',
+            KeyConditionExpression=Key('SK').between(
+                f"REQUEST#{first_day}", f"REQUEST#{ts_now}"
+                ) & Key('USAGE_TYPE').eq('REQUEST'),
+        )
+
+        r = response.get('Items', [])
+
+        return self.calculate_usage(r)
+
+    def get_timestamp_of_first_day(self) -> int:
+        now = dt.now()
+        first_day = dt(now.year, now.month, 1, tzinfo=timezone.utc)
+
+        ts = int(first_day.timestamp())
+
+        return ts
+
+    def get_total_amount_of_tokens_used_by_user(self, student_id) -> int:
+        ts_yesterday = dt.timestamp(dt.now() - datetime.timedelta(hours=24))
+        ts_now = dt.timestamp(dt.now())
+        dynamodb = boto3.resource('dynamodb', region_name=REGION)
+        table = dynamodb.Table(TABLENAME)
+        response = table.query(
+            IndexName='GSI_TOKENUSAGE_BY_TIME',
+            KeyConditionExpression=Key('SK').between(
+                f"REQUEST#{ts_yesterday}", f"REQUEST#{ts_now}"
+                ) & Key('USAGE_TYPE').eq('REQUEST'),
+            FilterExpression=Attr('PK').eq(f'{student_id}')
+        )
+
+        r = response.get('Items', [])
+
+        return self.calculate_usage(r)
+
+    def get_total_days_remaining(self):
+        now = dt.now()
+        total_days = calendar.monthrange(now.year, now.month)[1]
+
+        days_left = total_days - now.day
+
+        return days_left
+
+    def get_total_number_of_students(self) -> int:
+        dynamodb = boto3.resource('dynamodb', region_name=REGION)
+        table = dynamodb.Table(TABLENAME)
+        response = table.query(
+            IndexName="GSI_STUDENTS",
+            KeyConditionExpression=Key("OTYPE").eq("STUDENT_PROFILE")
+        )
+        print(response)
+        return 10
+
+    def get_total_remaining_tokens(self, student_id) -> int:
+        days_left = self.get_total_days_remaining()
+        tokens_left = self.MAX_TOKENS - self.get_total_amount_of_tokens_used()
+        tokens_left_adjusted = tokens_left * 0.9 # keep 10%.
+        number_of_students = self.get_total_number_of_students()
+
+        daily_tokens = (tokens_left_adjusted / days_left) / number_of_students
+        max_per_user = daily_tokens * 2
+        used_by_user = self.get_total_amount_of_tokens_used_by_user(student_id)
+
+        return int(max_per_user - used_by_user)
+
+    
+    def calculate_usage(self, usage):
+        total = 0
+        if len(usage) > 0:
+            for total_count in usage:
+                if 'TOTAL_USAGE' in total_count:
+                    total = total + int(total_count['TOTAL_USAGE'])
+
+        return total
