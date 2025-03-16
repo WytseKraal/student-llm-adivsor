@@ -122,7 +122,7 @@ class ChatService(BaseService):
 
             prompt = f"""
             You are an expert student helper .
-            The profile of this student is: {profile}. Adress them by their preferredName if available.
+            The profile of this student is: {profile}. Adress them by their PREFERRED_NAME if available.
 
             The grades of this student is: {grades}
 
