@@ -15,6 +15,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Loader2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { useUserData } from "@/hooks/userDataHook";
+import { useTokenUsage } from "@/hooks/getTokenUsage";
 
 // Message type definition
 interface Message {
@@ -32,20 +33,21 @@ interface ChatServiceProps {
 export default function ChatService({ apiUrl, getToken }: ChatServiceProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const {sub} = useUserData();
-  const [input, setInput] = useState("");
+  const {alreadyUsedTokenUsage} = useTokenUsage(apiUrl, sub, getToken);
+  const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false);
   const [tokenUsage, setTokenUsage] = useState<{
     total: number;
     prompt: number;
     completion: number;
-  }>({ total: 0, prompt: 0, completion: 0 });
+  }>({ total: 10, prompt: 0, completion: 0 });
   const [sessionUsage, setSesstionUsage] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll to bottom when messages update
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, alreadyUsedTokenUsage, tokenUsage]);
 
   const sendMessage = async (message: string): Promise<string> => {
     try {
@@ -85,14 +87,16 @@ export default function ChatService({ apiUrl, getToken }: ChatServiceProps) {
       const data = await response.json();
 
       const usage = data.usage;
+      console.log(usage)
       setSesstionUsage(sessionUsage + usage.total_tokens);
-      setTokenUsage({
+      const updatedTokenUsage = {
         total: usage.total_tokens,
         prompt: usage.prompt_tokens,
         completion: usage.completion_tokens,
-      });
+      }
+      setTokenUsage(updatedTokenUsage);
 
-      logTokenUsage(tokenUsage);
+      await logTokenUsage(updatedTokenUsage);
 
       return data.response;
     } catch (error) {
@@ -107,6 +111,7 @@ export default function ChatService({ apiUrl, getToken }: ChatServiceProps) {
     prompt: number;
     completion: number;
   }) => {
+    console.log(usage.total)
     try {
       const token = await getToken();
       if (!token) {
@@ -119,6 +124,8 @@ export default function ChatService({ apiUrl, getToken }: ChatServiceProps) {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
+
+
         body: JSON.stringify({
           student_id: `STUDENT#${sub}`,
           total_usage: usage.total,
@@ -248,7 +255,7 @@ export default function ChatService({ apiUrl, getToken }: ChatServiceProps) {
       <CardFooter className="border-t p-4 flex flex-col gap-2">
         <div className="text-xs text-gray-500">
           Total token usage (session): {sessionUsage} | Last prompt:{" "}
-          {tokenUsage.prompt} | Last completion: {tokenUsage.completion}
+          {tokenUsage.prompt} | Last completion: {tokenUsage.completion} | Remaining Tokens: {alreadyUsedTokenUsage}
         </div>
 
         <form onSubmit={handleSendMessage} className="flex w-full gap-2">

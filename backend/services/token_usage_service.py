@@ -4,7 +4,7 @@ import time
 import random
 from models.response import LambdaResponse
 import boto3
-from boto3.dynamodb.conditions import Key
+from boto3.dynamodb.conditions import Key, Attr
 from services.base_service import BaseService, APIError
 from datetime import datetime as dt
 from decimal import Decimal
@@ -18,6 +18,8 @@ BATCHSIZE = 25
 REGION = 'eu-north-1'
 
 TABLENAME = 'dev-student-advisor-table'
+
+MAX_TOTAL_TOKENS = 10_000
 
 class TokenUsageService(BaseService):
     def __init__(self, event, context):
@@ -49,19 +51,39 @@ class TokenUsageService(BaseService):
     def upload_token_usage(self) -> dict:
         try:
             body = json.loads(self.event.body)
+            student_id = body['student_id']
+            total_tokens_used = body['total_usage']
+            prompt_usage = body['prompt_usage']
+            completion_usage = body['completion_usage']
             if 'student_id' not in body or 'total_usage' not in body or \
                     'prompt_usage' not in body or 'completion_usage' not in body:
                 raise APIError(
                     "Missing required fields: student_id, total_tokens, prompt_tokens, completion_tokens", status_code=400)
 
+            print('===')
+            print(total_tokens_used)
+
+            token_usage_already_made = self.get_requests(student_id)
+            total = self.calculate_usage(token_usage_already_made)
+            total = total + total_tokens_used
+
+            print(total)
+            print(token_usage_already_made)
+            print('===')
+
+            if total >= MAX_TOTAL_TOKENS:
+                raise APIError(f"Could not make more requests for student: {student_id}", status_code=400)
+
             usage = {
-                "PK": f"STUDENT#{body['student_id']}",
+                "PK": f"{body['student_id']}",
                 "SK": f"REQUEST#{dt.timestamp(dt.now())}",
                 "USAGE_TYPE": "REQUEST",
-                "TOTAL_USAGE": body['total_usage'],
-                "PROMPT_USAGE": body['prompt_usage'],
-                "COMPLETION_USAGE": body['completion_usage'],
+                "TOTAL_USAGE": total_tokens_used,
+                "PROMPT_USAGE": prompt_usage,
+                "COMPLETION_USAGE": completion_usage,
             }
+
+            print(usage)
 
             try:
                 self.upload([usage])
@@ -77,6 +99,7 @@ class TokenUsageService(BaseService):
         except json.JSONDecodeError:
             raise APIError("Invalid JSON in request body", status_code=400)
 
+
     def get_token_usage(self) -> dict:
         query_params = self.event.queryStringParameters or {}
         student_id = query_params.get('student_id')
@@ -86,13 +109,13 @@ class TokenUsageService(BaseService):
                 "Missing required query parameters: student_id", status_code=400)
 
         try:
-            token_usage = self.get_requests()
-            print(token_usage)
+            token_usage = self.get_requests(student_id)
+            total_used = self.calculate_usage(token_usage)
 
             return LambdaResponse(
                 statusCode=200,
                 headers=self.build_headers(),
-                body=json.dumps({"token_usage": token_usage}, default=self.serialize)
+                body=json.dumps({"tokens_remaining": MAX_TOTAL_TOKENS - total_used}, default=self.serialize)
             ).dict()
         except Exception as e:
             raise APIError(f"could not fetch token usage {e}",
@@ -103,7 +126,15 @@ class TokenUsageService(BaseService):
         if isinstance(obj, Decimal):
             return int(obj)
 
-    def get_requests(self, h=24):
+    def calculate_usage(self, usage):
+        total = 0
+        if len(usage) > 0:
+            for total_count in usage:
+                total = total + total_count['TOTAL_USAGE']
+
+        return total
+
+    def get_requests(self, student_id, h=24):
         ts_yesterday = dt.timestamp(dt.now() - datetime.timedelta(hours=h))
         ts_now = dt.timestamp(dt.now())
         dynamodb = boto3.resource('dynamodb', region_name=REGION)
@@ -112,7 +143,8 @@ class TokenUsageService(BaseService):
             IndexName='GSI_TOKENUSAGE_BY_TIME',
             KeyConditionExpression=Key('SK').between(
                 f"REQUEST#{ts_yesterday}", f"REQUEST#{ts_now}"
-                ) & Key('USAGE_TYPE').eq('REQUEST')
+                ) & Key('USAGE_TYPE').eq('REQUEST'),
+            FilterExpression=Attr('PK').eq(f'{student_id}')
         )
         return response.get('Items', [])
 
