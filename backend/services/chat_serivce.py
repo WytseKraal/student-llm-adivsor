@@ -11,7 +11,8 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 REGION = 'eu-north-1'
-TABLENAME = 'prod-student-advisor-table'
+environment = os.getenv('Environment', 'prod')
+TABLENAME = f'{environment}-student-advisor-table'
 STUDENT = 'STUDENT#f05cc95c-4021-70f6-792e-1df97c8f6262'
 
 

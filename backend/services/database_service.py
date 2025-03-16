@@ -4,7 +4,7 @@ from services.base_service import BaseService, APIError
 from boto3.dynamodb.conditions import Key
 import json
 import logging
-from ..generators import student_generator
+from generators import student_generator
 from typing import Dict, Any
 import os
 
@@ -70,7 +70,7 @@ class DatabaseService(BaseService):
             TableName=self.table_name,
             IndexName="GSI_COURSES_PER_PROGRAM",
             KeyConditionExpression=Key("CTYPE").begins_with("COURSE")
-                ) & Key("PROGRAM").eq(program)
+                 & Key("PROGRAM").eq(program))
         return response.get("Items", [])
 
     def handle(self) -> dict:
@@ -93,17 +93,21 @@ class DatabaseService(BaseService):
 
     def put_student(self) -> dict:
         try:
-            # body = json.loads(self.event.body)
+            body = json.loads(self.event.body)
             # Get student ID from query parameters
-            query_params = self.event.queryStringParameters or {}
-            student_uuid = query_params.get('id')
-        
+            
+            student_uuid = body['id']
+            student_name = body.get('name', 'Unknown')
+            student_email = body.get('email', 'Unknown')
+            print(f"Adding student{body}")
             if not student_uuid:
                 raise APIError("Missing student ID in query parameters",
                                status_code=400)
 
-            print(query_params)
-            student = student_generator.create_student_profile(student_uuid)
+            print(f"Body: {body}")
+            student = student_generator.create_student_profile(student_uuid,
+                                                               student_name,
+                                                               student_email)
             print(student)
             courses = self.get_courses(student["PROGRAM"])
             enrollments, results = student_generator.create_enrollments(
@@ -163,7 +167,8 @@ class DatabaseService(BaseService):
             print(body)
             if 'id' not in body:
                 raise APIError("Missing student ID", status_code=400)
-                
+
+            studentID = body["id"]    
             update_expressions = []
             expression_attribute_values = {}
 
@@ -184,7 +189,7 @@ class DatabaseService(BaseService):
 
             # Update only provided fields
             self.table.update_item(
-                Key={"PK": f"STUDENT#{body["id"]}", "SK": "PROFILE"},
+                Key={"PK": f"STUDENT#{studentID}", "SK": "PROFILE"},
                 UpdateExpression=update_expression,
                 ExpressionAttributeValues=expression_attribute_values
             )

@@ -32,7 +32,7 @@ export default function AuthComponent() {
 
     try {
       const result = await signIn(email, password);
-
+      console.log(result);
       if (!result.success) {
         if (result.requiresNewPassword) {
           setNeedsNewPassword(true);
@@ -69,7 +69,7 @@ export default function AuthComponent() {
 
       setApiResponse({
         message:
-          "Registration successful! Please check your email for verification and then sign in.",
+          "Registration successful!",
         isError: false,
       });
 

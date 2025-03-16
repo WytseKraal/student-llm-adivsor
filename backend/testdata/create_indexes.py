@@ -49,11 +49,31 @@ course_index = {
     ]
 }
 
+students_index = {
+    "TableName": TABLENAME,
+    "AttributeDefinitions": [
+        {"AttributeName": "SK", "AttributeType": "S"},
+    ],
+    "GlobalSecondaryIndexUpdates": [
+        {
+            "Create": {
+               "IndexName": "GSI_STUDENTS",
+               "KeySchema": [
+                    {"AttributeName": "SK", "KeyType": "HASH"},
+                ],
+               "Projection": {
+                    "ProjectionType": "ALL"
+                }
+            }
+        }
+    ]
+}
+
 
 def main():
     dynamodb = boto3.client('dynamodb')
     try:
-        response = dynamodb.update_table(**course_index)
-        print("course_index creation initiated:", response)
+        response = dynamodb.update_table(**students_index)
+        print("student_index creation initiated:", response)
     except Exception as e:
         print("Error updating table:", e)
