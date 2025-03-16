@@ -117,28 +117,6 @@ class TokenUsageService(BaseService):
         if isinstance(obj, Decimal):
             return int(obj)
 
-    def calculate_usage(self, usage):
-        total = 0
-        if len(usage) > 0:
-            for total_count in usage:
-                total = total + total_count['TOTAL_USAGE']
-
-        return total
-
-    def get_requests(self, student_id, h=24):
-        ts_yesterday = dt.timestamp(dt.now() - datetime.timedelta(hours=h))
-        ts_now = dt.timestamp(dt.now())
-        dynamodb = boto3.resource('dynamodb', region_name=REGION)
-        table = dynamodb.Table(TABLENAME)
-        response = table.query(
-            IndexName='GSI_TOKENUSAGE_BY_TIME',
-            KeyConditionExpression=Key('SK').between(
-                f"REQUEST#{ts_yesterday}", f"REQUEST#{ts_now}"
-                ) & Key('USAGE_TYPE').eq('REQUEST'),
-            FilterExpression=Attr('PK').eq(f'{student_id}')
-        )
-        return response.get('Items', [])
-
     def upload(self, items):
         dynamodb = boto3.resource('dynamodb', region_name=REGION)
         # Select the table
