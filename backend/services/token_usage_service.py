@@ -62,11 +62,6 @@ class TokenUsageService(BaseService):
                 raise APIError(
                     "Missing required fields: student_id, total_tokens, prompt_tokens, completion_tokens", status_code=400)
 
-            ta = TokenAllocator()
-            total = ta.get_total_amount_of_tokens_used_by_user(student_id)
-
-            total = total + total_tokens_used
-
             usage = {
                 "PK": f"{body['student_id']}",
                 "SK": f"REQUEST#{dt.timestamp(dt.now())}",
@@ -188,8 +183,8 @@ class TokenAllocator:
             IndexName="GSI_STUDENTS",
             KeyConditionExpression=Key("OTYPE").eq("STUDENT_PROFILE")
         )
-        print(response)
-        return 10
+        
+        return len(response['Items'])
 
     def get_total_remaining_tokens(self, student_id) -> int:
         days_left = self.get_total_days_remaining()
