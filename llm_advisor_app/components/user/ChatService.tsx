@@ -81,7 +81,7 @@ export default function ChatService({ apiUrl, getToken }: ChatServiceProps) {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ message: enhancedMessage }),
+        body: JSON.stringify({ message: enhancedMessage, studentID: sub }),
       });
 
       if (!response.ok) {
