@@ -97,29 +97,40 @@ class ChatService(BaseService):
             profile = self.get_items_sk_begins_with(STUDENT, 'PROFILE')
 
             course_ids = get_unique_course_ids(enrollments)
+            
+            for course_id in course_ids:
+                course_key = f"COURSE#{course_id}"
+                
 
             # Initialize an empty dictionary to store timetables for all courses
+            # initialize a list to store all courses
             all_timetables = {}
+            all_courses = []
 
             # Retrieve timetable for each course
             for course_id in course_ids:
                 course_key = f"COURSE#{course_id}"
                 course_timetable = self.get_items_sk_begins_with(course_key, 'TIMETABLE')
+                course = self.get_items_sk_begins_with(course_key, "DETAILS")
                 all_timetables[course_id] = course_timetable
+                all_courses.append(course)
 
             logger.info(f"ENROLLMENT-----------------: {enrollments}")
             logger.info(f"GRADES {grades}")
             logger.info(f"TIMETABLE: {all_timetables}")
+            logger.info(f"COURSES {all_courses}")
 
             prompt = f"""
             You are an expert student helper .
-            The profile of this student is: {profile}
+            The profile of this student is: {profile}. Adress them by their preferredName if available.
 
             The grades of this student is: {grades}
 
             This student is enrolled in: {enrollments}
 
             This students time table is: {all_timetables}
+
+            The info for his courses are: {all_courses}
 
             Help this student as best as you can with this message, but don't tell them that their grades are low if they are.
 
