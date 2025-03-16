@@ -23,6 +23,7 @@ STUDENT_UUID
 STUDENT_ID
 FIRST_NAME
 LAST_NAME
+PREFERRED_NAME
 EMAIL
 PROGRAM
 YEAR"]
@@ -49,7 +50,9 @@ SCHEDULE (Nested Dict)"]
 PK (STUDENT#UUID) [PK]
 SK (REQUEST#TIMESTAMP)
 USAGE_TYPE
-TOKEN_USAGE { "total": number, "prompt": number, "completion": number }]
+PROMPT_USAGE
+COMPLETION_USAGE
+TOTAL_USAGE"]
 	Student_Profile -> Student_Enrollment [label="Enrolls in"]
 	Student_Profile -> Student_Result [label="Has results in"]
 	Student_Profile -> Student_Query [label="Does request in"]

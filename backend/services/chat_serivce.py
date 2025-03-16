@@ -95,8 +95,6 @@ class ChatService(BaseService):
 
             course_ids = get_unique_course_ids(enrollments)
 
-            course_ids = get_unique_course_ids(enrollments)
-
             # Initialize an empty dictionary to store timetables for all courses
             all_timetables = {}
 

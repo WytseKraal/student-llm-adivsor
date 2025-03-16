@@ -1,36 +1,39 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useAuth } from "@/hooks/auth";
 import { env } from "@/environment";
-import AuthComponent from "@/components/auth/AuthComponent";
+import { useRouter } from "next/navigation";
 import ApiService from "@/components/testing/ApiTest";
 import UserProfile from "@/components/user/UserProfile";
 import StudentManager from "@/components/database_interaction";
 
-export default function Test() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const { user, getToken } = useAuth();
+export default function TestPage() {
+  const { isAuthenticated, loading, getToken } = useAuth();
+  const router = useRouter();
   const apiUrl = env.apiUrl;
 
+  // If not authenticated, redirect to login page with return URL
   useEffect(() => {
-    if (user) {
-      setIsLoggedIn(true);
+    if (!isAuthenticated && !loading) {
+      router.push("/login?returnUrl=/test");
     }
-  }, [user]);
-
-  const handleAuthStateChange = (loggedIn: boolean) => {
-    setIsLoggedIn(loggedIn);
-  };
+  }, [isAuthenticated, loading, router]);
 
   return (
     <div className="flex flex-col items-center min-h-screen p-8 pb-20 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <AuthComponent onAuthStateChange={handleAuthStateChange} />
+      {isAuthenticated ? (
+        <div className="w-full max-w-4xl">
+          <h1 className="text-2xl font-bold mb-8 text-center">Test Page</h1>
 
-      {user && isLoggedIn && (
-        <div className="flex flex-col gap-8 items-center w-full max-w-md mt-8">
-          <UserProfile />
-          <ApiService getToken={getToken} />
-          <StudentManager apiUrl={apiUrl} getToken={getToken} />
+          <div className="flex flex-col gap-8 items-center w-full mt-8">
+            <UserProfile />
+            <ApiService getToken={getToken} />
+            <StudentManager apiUrl={apiUrl} getToken={getToken} />
+          </div>
+        </div>
+      ) : (
+        <div className="flex items-center justify-center h-64">
+          <p className="text-muted-foreground">Loading test components...</p>
         </div>
       )}
     </div>

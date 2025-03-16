@@ -23,7 +23,7 @@ Globals:
   Api:
     Auth:
     Cors:
-      AllowMethods: "'GET,PUT,POST,OPTIONS'"
+      AllowMethods: "'GET,PUT,POST,PATCH,OPTIONS'"
       AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token, Origin'"
       AllowOrigin: !If
         - IsDev
@@ -105,6 +105,13 @@ Resources:
           Properties:
             Path: /student
             Method: GET
+            Auth:
+              Authorizer: CognitoAuthorizer
+        PatchStudent:
+          Type: Api
+          Properties:
+            Path: /student
+            Method: PATCH
             Auth:
               Authorizer: CognitoAuthorizer
 

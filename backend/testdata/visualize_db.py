@@ -28,6 +28,7 @@ STUDENT_UUID
 STUDENT_ID
 FIRST_NAME
 LAST_NAME
+PREFERRED_NAME
 EMAIL
 PROGRAM
 YEAR""")
@@ -58,7 +59,9 @@ dot.node("Student_Query", """Student_Query
 PK (STUDENT#UUID) [PK]
 SK (REQUEST#TIMESTAMP)
 USAGE_TYPE
-TOKEN_USAGE""")
+PROMPT_USAGE
+COMPLETION_USAGE
+TOTAL_USAGE""")
 
 # Define relationships
 dot.edge("Student_Profile", "Student_Enrollment", label="Enrolls in")

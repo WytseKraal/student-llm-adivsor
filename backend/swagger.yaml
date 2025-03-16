@@ -141,6 +141,44 @@ paths:
           description: Invalid request
         "500":
           description: Server error
+    patch:
+      summary: Partially update student information
+      description: Updates only the `preferred_name` and `email` fields of a student record
+      security:
+        - CognitoAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id:
+                  type: string
+                preferred_name:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                  description: The updated email of the student
+      responses:
+        "200":
+          description: Student updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Student updated successfully"
+        "400":
+          description: Invalid request
+        "404":
+          description: Student not found
+        "500":
+          description: Server error
   /student/check:
     get:
       summary: Check if student exists
