@@ -40,7 +40,7 @@ export default function ChatService({ apiUrl, getToken }: ChatServiceProps) {
     total: number;
     prompt: number;
     completion: number;
-  }>({ total: 10, prompt: 0, completion: 0 });
+  }>({ total: 0, prompt: 0, completion: 0 });
   const [sessionUsage, setSesstionUsage] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -54,6 +54,10 @@ export default function ChatService({ apiUrl, getToken }: ChatServiceProps) {
       const token = await getToken();
       if (!token) {
         throw new Error("No authentication token available.");
+      }
+
+      if(alreadyUsedTokenUsage <= 0) {
+        return "Could not make any more API requests.";
       }
 
       // Format the conversation history into a context string
