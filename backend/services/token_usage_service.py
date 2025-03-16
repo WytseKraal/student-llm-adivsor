@@ -67,13 +67,6 @@ class TokenUsageService(BaseService):
             total = self.calculate_usage(token_usage_already_made)
             total = total + total_tokens_used
 
-            print(total)
-            print(token_usage_already_made)
-            print('===')
-
-            if total >= MAX_TOTAL_TOKENS:
-                raise APIError(f"Could not make more requests for student: {student_id}", status_code=400)
-
             usage = {
                 "PK": f"{body['student_id']}",
                 "SK": f"REQUEST#{dt.timestamp(dt.now())}",
@@ -112,10 +105,11 @@ class TokenUsageService(BaseService):
             token_usage = self.get_requests(student_id)
             total_used = self.calculate_usage(token_usage)
 
+            used = MAX_TOTAL_TOKENS - total_used
             return LambdaResponse(
                 statusCode=200,
                 headers=self.build_headers(),
-                body=json.dumps({"tokens_remaining": MAX_TOTAL_TOKENS - total_used}, default=self.serialize)
+                body=json.dumps({"tokens_remaining": 0 if used < 0 else used}, default=self.serialize)
             ).dict()
         except Exception as e:
             raise APIError(f"could not fetch token usage {e}",
