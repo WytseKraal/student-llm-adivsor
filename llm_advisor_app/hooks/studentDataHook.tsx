@@ -41,7 +41,7 @@ export const useStudentData = (
       if (response.ok) {
         const formattedData: StudentData = {
           id: data.STUDENT_ID,
-          name: `${data.FIRST_NAME} ${data.LAST_NAME}`, // Combine first and last name
+          name: data.NAME, // Combine first and last name
           email: data.EMAIL,
           preferredName: data.PREFERRED_NAME,
           program: data.PROGRAM,
@@ -66,6 +66,9 @@ export const useStudentData = (
   
   handleGetStudent();
 }, [searchId, apiUrl, getToken]);
+
+
+  
   return {
     studentData,
     responseMessage,

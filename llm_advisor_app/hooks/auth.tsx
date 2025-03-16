@@ -16,6 +16,7 @@ import {
 } from "amazon-cognito-identity-js";
 import { env } from "@/environment";
 import { useRouter, usePathname } from "next/navigation";
+import { handleCreateStudent } from "@/hooks/createStudentHook";
 import Cookies from "js-cookie";
 
 // Type definitions
@@ -306,6 +307,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
               setIsStudent(isStudentResult);
 
               if (!isStudentResult) {
+                const attributes = await getUserAttributes();
+                const sub = attributes.sub;
+                const name = attributes.name;
+                const email = attributes.email;
+                const birthdate = attributes.birthdate;
+                
+                await handleCreateStudent(env.apiUrl, getToken, sub, name, email, birthdate);
+                
+                const isStudentResult = await verifyStudentExists();
+                setIsStudent(isStudentResult);
+  
+                if (!isStudentResult) {
                 signOut();
                 resolve({
                   success: false,
@@ -313,6 +326,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
                 });
                 return;
               }
+            }
 
               resolve({
                 success: true,

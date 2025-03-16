@@ -11,8 +11,10 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 REGION = 'eu-north-1'
-TABLENAME = 'prod-student-advisor-table'
+environment = os.getenv('Environment', 'prod')
+TABLENAME = f'{environment}-student-advisor-table'
 STUDENT = 'STUDENT#f05cc95c-4021-70f6-792e-1df97c8f6262'
+
 
 class ChatService(BaseService):
     def __init__(self, event, context):
@@ -78,7 +80,8 @@ class ChatService(BaseService):
             
         except Exception as e:
             self.logger.error(f"Error checking student existence: {str(e)}")
-            raise APIError(f"Error checking student: {str(e)}", status_code=500)
+            raise APIError(f"Error checking student: {str(e)}",
+                           status_code=500)
 
     def generate_response(self) -> dict:
         try:
@@ -162,12 +165,12 @@ class ChatService(BaseService):
         table = dynamodb.Table(TABLENAME)
         response = None
         try:
-            response = table.query(KeyConditionExpression=Key('PK').eq(pk_value))
+            response = table.query(KeyConditionExpression=Key('PK').eq(
+                pk_value))
         except Exception as e:
             print(f"Error fetching items for {pk_value}: {e}")
 
         return response
-
 
     def get_items_sk_begins_with(self, pk_value, sk_prefix):
         dynamodb = boto3.resource('dynamodb', region_name=REGION)
@@ -175,15 +178,18 @@ class ChatService(BaseService):
 
         try:
             response = table.query(
-                KeyConditionExpression=Key('PK').eq(pk_value) & Key('SK').begins_with(sk_prefix)
+                KeyConditionExpression=Key('PK').eq(pk_value) & 
+                Key('SK').begins_with(sk_prefix)
             )
             print(f"RESPONSE: {response}")
             items = response.get('Items', [])
             return items
         except Exception as e:
-            print(f"Error fetching items for {pk_value} with sk prefix {sk_prefix}: {e}")
+            print(f'''Error fetching items for {pk_value} with sk prefix
+                   {sk_prefix}: {e}''')
             return None
-    
+
+
 def get_unique_course_ids(data):
     # Initialize an empty set to store unique course IDs
     unique_course_ids = set()
