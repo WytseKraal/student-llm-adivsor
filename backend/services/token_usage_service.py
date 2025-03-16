@@ -62,11 +62,9 @@ class TokenUsageService(BaseService):
                 raise APIError(
                     "Missing required fields: student_id, total_tokens, prompt_tokens, completion_tokens", status_code=400)
 
-            print('===')
-            print(total_tokens_used)
+            ta = TokenAllocator()
+            total = ta.get_total_amount_of_tokens_used_by_user(student_id)
 
-            token_usage_already_made = self.get_requests(student_id)
-            total = self.calculate_usage(token_usage_already_made)
             total = total + total_tokens_used
 
             usage = {
@@ -77,8 +75,6 @@ class TokenUsageService(BaseService):
                 "PROMPT_USAGE": prompt_usage,
                 "COMPLETION_USAGE": completion_usage,
             }
-
-            print(usage)
 
             try:
                 self.upload([usage])
