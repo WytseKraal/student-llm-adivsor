@@ -14,6 +14,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Loader2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
+import { useUserData } from "@/hooks/userDataHook";
 
 // Message type definition
 interface Message {
@@ -30,6 +31,7 @@ interface ChatServiceProps {
 
 export default function ChatService({ apiUrl, getToken }: ChatServiceProps) {
   const [messages, setMessages] = useState<Message[]>([]);
+  const {sub} = useUserData();
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [tokenUsage, setTokenUsage] = useState<{
@@ -118,7 +120,7 @@ export default function ChatService({ apiUrl, getToken }: ChatServiceProps) {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          student_id: `STUDENT#${token}`,
+          student_id: `STUDENT#${sub}`,
           total_usage: usage.total,
           prompt_usage: usage.prompt,
           completion_usage: usage.completion,
