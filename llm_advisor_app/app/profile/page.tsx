@@ -1,11 +1,15 @@
 "use client";
 import { useEffect } from "react";
 import { useAuth } from "@/hooks/auth";
+import { env } from "@/environment";
 import UserProfile from "@/components/user/UserProfileManager";
 import { useRouter } from "next/navigation";
 
 export default function ProfilePage() {
   const { isAuthenticated, loading } = useAuth();
+  const { user, getToken } = useAuth();
+  const apiUrl = env.apiUrl;
+
   const router = useRouter();
 
   // If not authenticated, redirect to login page with return URL
@@ -20,7 +24,7 @@ export default function ProfilePage() {
       {isAuthenticated ? (
         <div className="w-full max-w-3xl">
           <h1 className="text-2xl font-bold mb-8">Your Profile</h1>
-          <UserProfile />
+          <UserProfile apiUrl={apiUrl} getToken={getToken}/>
         </div>
       ) : (
         <div className="flex items-center justify-center h-64">

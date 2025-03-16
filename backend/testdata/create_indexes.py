@@ -2,7 +2,7 @@
 import boto3
 
 REGION = 'eu-north-1'
-TABLENAME = 'prod-student-advisor-table'
+TABLENAME = 'dev-student-advisor-table'
 
 usage_index = {
     "TableName": TABLENAME,

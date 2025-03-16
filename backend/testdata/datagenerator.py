@@ -62,13 +62,16 @@ def create_student_profiles(amount=10):
     students = []
     for i in range(0, amount):
         student_id = r.randint(10000, 99999)
+        first_name = names.get_first_name()
+        last_name = names.get_last_name()
         student = {
             "PK": f"STUDENT#{student_id}",
             "SK": "PROFILE",
             "STUDENT_ID": student_id,
-            "FIRST_NAME": names.get_first_name(),
-            "LAST_NAME": names.get_last_name(),
-            "EMAIL": f"{student_id}@uva.nl",
+            "FIRST_NAME": first_name,
+            "PREFERRED_NAME": first_name,
+            "LAST_NAME": last_name,
+            "EMAIL": f"{first_name}.{last_name}@uva.nl",
             "PROGRAM": "Master Software Engineering",
             "YEAR": 1
         }
