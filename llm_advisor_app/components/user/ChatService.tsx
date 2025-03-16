@@ -57,7 +57,7 @@ export default function ChatService({ apiUrl, getToken }: ChatServiceProps) {
       }
 
       if(alreadyUsedTokenUsage <= 0) {
-        return "Could not make any more API requests.";
+        return "You dont have any more remaining tokens to make requests.";
       }
 
       // Format the conversation history into a context string
