@@ -49,8 +49,8 @@ class TokenUsageService(BaseService):
     def upload_token_usage(self) -> dict:
         try:
             body = json.loads(self.event.body)
-            if 'student_id' not in body or 'total_tokens' not in body or \
-                    'prompt_tokens' not in body or 'completion_tokens' not in body:
+            if 'student_id' not in body or 'total_usage' not in body or \
+                    'prompt_usage' not in body or 'completion_usage' not in body:
                 raise APIError(
                     "Missing required fields: student_id, total_tokens, prompt_tokens, completion_tokens", status_code=400)
 
@@ -58,9 +58,9 @@ class TokenUsageService(BaseService):
                 "PK": f"STUDENT#{body['student_id']}",
                 "SK": f"REQUEST#{dt.timestamp(dt.now())}",
                 "USAGE_TYPE": "REQUEST",
-                "TOTAL_TOKENS": body['total_tokens'],
-                "PROMPT_TOKENS": body['prompt_tokens'],
-                "COMPLETION_TOKENS": body['completion_tokens'],
+                "TOTAL_USAGE": body['total_usage'],
+                "PROMPT_USAGE": body['prompt_usage'],
+                "COMPLETION_USAGE": body['completion_usage'],
             }
 
             try:
