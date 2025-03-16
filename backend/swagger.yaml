@@ -255,20 +255,6 @@ paths:
           description: ID of the student.
           schema:
             type: string
-        - name: start_time
-          in: query
-          required: true
-          description: Start timestamp (epoch format).
-          schema:
-            type: integer
-            example: 1710508800 # Example: 2024-03-15 00:00:00 UTC
-        - name: end_time
-          in: query
-          required: true
-          description: End timestamp (epoch format).
-          schema:
-            type: integer
-            example: 1710595200 # Example: 2024-03-16 00:00:00 UTC
       responses:
         "200":
           description: Successful retrieval of token usage data.

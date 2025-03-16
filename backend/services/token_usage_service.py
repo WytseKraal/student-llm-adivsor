@@ -7,6 +7,7 @@ import boto3
 from boto3.dynamodb.conditions import Key
 from services.base_service import BaseService, APIError
 from datetime import datetime as dt
+from decimal import Decimal
 
 import datetime
 
@@ -79,28 +80,30 @@ class TokenUsageService(BaseService):
     def get_token_usage(self) -> dict:
         query_params = self.event.queryStringParameters or {}
         student_id = query_params.get('student_id')
-        start_time = query_params.get('start_time')
-        end_time = query_params.get('end_time')
 
-        if not student_id or not start_time or not end_time:
+        if not student_id:
             raise APIError(
-                "Missing required query parameters: student_id, start_time, end_time", status_code=400)
+                "Missing required query parameters: student_id", status_code=400)
 
         try:
-            token_usage = self.get_requests(start_time, end_time)
+            token_usage = self.get_requests()
             print(token_usage)
 
             return LambdaResponse(
                 statusCode=200,
                 headers=self.build_headers(),
-                body=json.dumps({"token_usage": token_usage})
+                body=json.dumps({"token_usage": token_usage}, default=self.serialize)
             ).dict()
         except Exception as e:
             raise APIError(f"could not fetch token usage {e}",
                            status_code=500)
 
     
-    def get_requests(self, start_time, end_time, h=24):
+    def serialize(self, obj):
+        if isinstance(obj, Decimal):
+            return int(obj)
+
+    def get_requests(self, h=24):
         ts_yesterday = dt.timestamp(dt.now() - datetime.timedelta(hours=h))
         ts_now = dt.timestamp(dt.now())
         dynamodb = boto3.resource('dynamodb', region_name=REGION)
@@ -111,9 +114,6 @@ class TokenUsageService(BaseService):
                 f"REQUEST#{ts_yesterday}", f"REQUEST#{ts_now}"
                 ) & Key('USAGE_TYPE').eq('REQUEST')
         )
-        print('===')
-        print(response)
-        print('===')
         return response.get('Items', [])
 
     def upload(self, items):
