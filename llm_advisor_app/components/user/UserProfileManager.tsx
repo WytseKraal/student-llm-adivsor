@@ -23,7 +23,7 @@ interface UserProfileProps {
 }
 
 export default function UserProfile({ apiUrl, getToken }: UserProfileProps) {
-  const { userName, userEmail, sub, isLoading, error } = useUserData();
+  const { sub, isLoading, error } = useUserData();
   const [isLoadingStudent, setIsLoadingStudent] = useState<boolean>(false);
   const { studentData } = useStudentData(sub,
     apiUrl,
@@ -59,7 +59,7 @@ export default function UserProfile({ apiUrl, getToken }: UserProfileProps) {
     );
   }
 
-  // Get user initials for avatar fallback
+  /*/ Get user initials for avatar fallback
   const getInitials = () => {
     if (!userName) return "U";
     return userName
@@ -68,7 +68,7 @@ export default function UserProfile({ apiUrl, getToken }: UserProfileProps) {
       .join("")
       .toUpperCase()
       .substring(0, 2);
-  };
+  };*/
 
   return (
     <Card className="w-full shadow-lg">

@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 
 export default function ProfilePage() {
   const { isAuthenticated, loading } = useAuth();
-  const { user, getToken } = useAuth();
+  const { getToken } = useAuth();
   const apiUrl = env.apiUrl;
 
   const router = useRouter();
