@@ -326,3 +326,70 @@ paths:
           description: No token usage data found for the given student ID and timeframe.
         "500":
           description: Internal server error.
+  /embedding:
+    post:
+      summary: Generate and store course embedding
+      description: Generates an embedding for a course description and stores it in OpenSearch.
+      security:
+        - CognitoAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [course_id, text]
+              properties:
+                course_id:
+                  type: string
+                  example: "5364DCBS6Y"
+                text:
+                  type: string
+                  example: "DOCS focusses on CI/CD and cloud."
+      responses:
+        "200":
+          description: Embedding stored successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Embedding stored successfully"
+        "400":
+          description: Missing course_id or text
+        "500":
+          description: Internal server error
+    get:
+      summary: Retrieve course embedding
+      description: Retrieves a stored embedding for a specific course.
+      security:
+        - CognitoAuth: []
+      parameters:
+        - name: course_id
+          in: query
+          required: true
+          description: Course ID
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful retrieval of embedding
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  course_id:
+                    type: string
+                  embedding:
+                    type: array
+                    items:
+                      type: number
+        "404":
+          description: Course embedding not found
+        "400":
+          description: Invalid request (e.g., missing course_id)
+        "500":
+          description: Internal server error

@@ -174,6 +174,37 @@ Resources:
             Auth:
               Authorizer: CognitoAuthorizer
 
+  EmbeddingFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handlers/embedding_handler.lambda_handler
+      Runtime: python3.12
+      CodeUri: .
+      Environment:
+        Variables:
+          Environment: !Ref Environment
+          OPENAI_API_KEY: !Ref OpenAIAPIKey
+          OPENSEARCH_HOST: !Ref OpensearchHost
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Sub "${Environment}-student-advisor-table"
+        # Possible TODO: AWS IAM or ES Policy
+      Events:
+        GenerateCourseEmbedding:
+          Type: Api
+          Properties:
+            Path: /embedding
+            Method: POST
+            Auth:
+              Authorizer: CognitoAuthorizer
+        RetrieveCourseEmbedding:
+          Type: Api
+          Properties:
+            Path: /embedding
+            Method: GET
+            Auth:
+              Authorizer: CognitoAuthorizer
+
 Outputs:
   ApiUrl:
     Description: "URL of the API Gateway endpoint"
