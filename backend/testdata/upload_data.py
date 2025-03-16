@@ -7,7 +7,7 @@ import datetime as dt
 
 BATCHSIZE = 25
 REGION = 'eu-north-1'
-TABLENAME = 'application_database'
+TABLENAME = 'dev-student-advisor-table'
 
 
 def upload(items):
@@ -30,9 +30,7 @@ def upload_random_students():
         student_profiles[i]['STUDENT_ID'] = uuids[i]
         student_profiles[i]['PK'] = f"STUDENT#{uuids[i]}"
     upload(student_profiles)
-    print("DOING THE TIMETABLE....")
     upload(timetable.timetable)
-    print("FINSIHED DOING TIMETABLE")
     enrollments, results = datagenerator.create_enrollments(student_profiles)
     upload(enrollments)
     upload(results)
@@ -44,9 +42,12 @@ def main():
         "PK": "STUDENT#f05cc95c-4021-70f6-792e-1df97c8f6262",
         "SK": f"REQUEST#{dt.datetime.timestamp(dt.datetime.now())}",
         "USAGE_TYPE": "REQUEST",
-        "TOKEN_USAGE": 10
+        "TOTAL_USAGE": 10,
+        "PROMPT_USAGE": 6,
+        "COMPLETION_USAGE": 4
     }
     upload([fake_usage])
+    upload_random_students()
 
 
 if __name__ == "__main__":

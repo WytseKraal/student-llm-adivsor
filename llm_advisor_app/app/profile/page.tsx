@@ -1,8 +1,8 @@
 "use client";
 import { useEffect } from "react";
 import { useAuth } from "@/hooks/auth";
-import UserProfile from "@/components/user/UserProfileManager";
-import { useRouter } from "next/navigation";
+import { env } from "@/environment";
+import AuthComponent from "@/components/auth/AuthComponent";
 
 export default function ProfilePage() {
   const { isAuthenticated, loading } = useAuth();
