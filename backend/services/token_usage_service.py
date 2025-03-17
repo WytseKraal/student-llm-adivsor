@@ -63,7 +63,7 @@ class TokenUsageService(BaseService):
                     "Missing required fields: student_id, total_tokens, prompt_tokens, completion_tokens", status_code=400)
 
             ta = TokenAllocator()
-            amount_of_requests = ta.get_amount_of_requests_by_user(student_id)
+            amount_of_requests = ta.get_total_amount_of_requests_by_user(student_id)
 
             # Students get first 3 requests for free.
             if len(amount_of_requests) < 3:
@@ -151,6 +151,19 @@ class TokenAllocator:
         r = response.get('Items', [])
 
         return self.calculate_usage(r)
+
+    def get_total_amount_of_requests_by_user(student_id):
+        dynamodb = boto3.resource('dynamodb', region_name=REGION)
+        table = dynamodb.Table(TABLENAME)
+        response = table.query(
+            IndexName='GSI_TOKENUSAGE_BY_TIME',
+            KeyConditionExpression=Key('USAGE_TYPE').eq('REQUEST'),
+            FilterExpression=Attr('PK').eq(f'{student_id}')
+        )
+
+        r = response.get('Items', [])
+        
+        return r
 
     def get_timestamp_of_first_day(self) -> int:
         now = dt.now()
