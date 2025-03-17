@@ -21,10 +21,9 @@ Parameters:
 
 Globals:
   Api:
-    Auth:
     Cors:
       AllowMethods: "'GET,PUT,POST,PATCH,OPTIONS'"
-      AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token, Origin'"
+      AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,Origin'"
       AllowOrigin: !If
         - IsDev
         - "'*'"
@@ -34,8 +33,42 @@ Globals:
         UpdatedApiAuth:
           UserPoolArn: !Ref UserPoolArn
           AuthType: COGNITO_USER_POOLS
+          Identity:
+            Header: Authorization
 
 Resources:
+  ApiGatewayCloudWatchLogsRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: apigateway.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs
+
+  ApiGatewayAccount:
+    Type: AWS::ApiGateway::Account
+    Properties:
+      CloudWatchRoleArn: !GetAtt ApiGatewayCloudWatchLogsRole.Arn
+
+  ApiGatewayStage:
+  Type: AWS::ApiGateway::Stage
+  DependsOn: ApiGatewayAccount
+  Properties:
+    DeploymentId: !Ref ServerlessHttpApi # Note: For SAM, use ServerlessHttpApi or ServerlessRestApi as appropriate
+    RestApiId: !Ref ServerlessHttpApi # Same here
+    StageName: Prod
+    MethodSettings:
+      - ResourcePath: "/*"
+        HttpMethod: "*"
+        LoggingLevel: INFO
+        DataTraceEnabled: true
+        MetricsEnabled: true
+
   HelloFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -142,7 +175,6 @@ Resources:
             Method: GET
             Auth:
               Authorizer: UpdatedApiAuth
-
 
   ChatFunction:
     Type: AWS::Serverless::Function
