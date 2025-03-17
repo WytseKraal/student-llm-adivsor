@@ -16,7 +16,7 @@ export default function ApiService({ getToken }: ApiServiceProps) {
       const token = await getToken();
       const res = await fetch(`${apiUrl}/hello`, {
         headers: {
-          Authorization: token,
+          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       });
@@ -34,7 +34,7 @@ export default function ApiService({ getToken }: ApiServiceProps) {
       const token = await getToken();
       const res = await fetch(`${apiUrl}/goodbye/bye`, {
         headers: {
-          Authorization: token,
+          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       });
@@ -52,7 +52,7 @@ export default function ApiService({ getToken }: ApiServiceProps) {
       const token = await getToken();
       const res = await fetch(`${apiUrl}/goodbye/seeya`, {
         headers: {
-          Authorization: token,
+          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       });
