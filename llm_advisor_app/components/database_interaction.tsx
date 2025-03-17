@@ -167,32 +167,6 @@ const StudentManager: React.FC<StudentManagerProps> = ({
 
       <Card>
         <CardHeader>
-          <CardTitle>Update Student</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleUpdateStudent} className="flex flex-col gap-4">
-            <Input
-              placeholder="Preferred name"
-              value={studentPreferredName}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setStudentPreferredName(e.target.value)
-              }
-            />
-            <Input
-              placeholder="Email"
-              type="email"
-              value={studentEmail}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setStudentEmail(e.target.value)
-              }
-            />
-            <Button type="submit">Update Student</Button>
-          </form>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
           <CardTitle>Retrieve Student</CardTitle>
         </CardHeader>
         <CardContent>
