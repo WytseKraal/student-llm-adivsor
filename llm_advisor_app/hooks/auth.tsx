@@ -341,7 +341,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
                 {
                   method: "GET",
                   headers: {
-                    Authorization: token,
+                    Authorization: `Bearer ${token}`,
                   },
                 }
               );
