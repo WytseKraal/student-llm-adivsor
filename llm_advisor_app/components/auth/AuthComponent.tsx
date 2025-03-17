@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/auth";
@@ -19,13 +19,65 @@ export default function AuthComponent() {
   const [isRegistering, setIsRegistering] = useState(false);
   const [needsNewPassword, setNeedsNewPassword] = useState(false);
 
-  const { signIn, signUp, completeNewPasswordChallenge } = useAuth();
+  const {
+    signIn,
+    signUp,
+    completeNewPasswordChallenge,
+    initiateGoogleSignIn,
+    handleGoogleCallback,
+  } = useAuth();
 
   const router = useRouter();
   const searchParams = useSearchParams();
   const returnUrl = searchParams.get("returnUrl") || "/";
+  const code = searchParams.get("code");
+  const state = searchParams.get("state");
 
-  const handleSignIn = async (e: React.FormEvent) => {
+  // Handle Google OAuth callback
+  useEffect(() => {
+    const handleCallback = async () => {
+      if (code && state) {
+        setLoading(true);
+        setApiResponse({
+          message: "Processing Google sign-in...",
+          isError: false,
+        });
+
+        try {
+          const result = await handleGoogleCallback(code, state);
+          if (result.success) {
+            setApiResponse({
+              message: "Successfully signed in with Google!",
+              isError: false,
+            });
+
+            // Redirect to the returnUrl or dashboard
+            setTimeout(() => {
+              router.push(returnUrl);
+            }, 1000);
+          } else {
+            setApiResponse({ message: result.message, isError: true });
+          }
+        } catch (error) {
+          console.error("Google sign-in error:", error);
+          if (error instanceof Error) {
+            setApiResponse({ message: error.message, isError: true });
+          } else {
+            setApiResponse({
+              message: "An unknown error occurred",
+              isError: true,
+            });
+          }
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
+    handleCallback();
+  }, [code, state, handleGoogleCallback, router, returnUrl]);
+
+  const handleSignIn = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
     setLoading(true);
     setApiResponse({ message: "", isError: false });
@@ -59,7 +111,13 @@ export default function AuthComponent() {
     }
   };
 
-  const handleSignUp = async (e: React.FormEvent) => {
+  const handleGoogleSignIn = () => {
+    setLoading(true);
+    setApiResponse({ message: "Redirecting to Google...", isError: false });
+    initiateGoogleSignIn(returnUrl);
+  };
+
+  const handleSignUp = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
     setLoading(true);
     setApiResponse({ message: "", isError: false });
@@ -68,8 +126,7 @@ export default function AuthComponent() {
       await signUp(email, password, name, birthday);
 
       setApiResponse({
-        message:
-          "Registration successful!",
+        message: "Registration successful!",
         isError: false,
       });
 
@@ -92,7 +149,7 @@ export default function AuthComponent() {
     }
   };
 
-  const handleNewPassword = async (e: React.FormEvent) => {
+  const handleNewPassword = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
     setLoading(true);
     setApiResponse({ message: "", isError: false });
@@ -231,6 +288,38 @@ export default function AuthComponent() {
             {loading ? "Registering..." : "Register"}
           </Button>
 
+          <div className="relative my-4">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-white text-gray-500">Or</span>
+            </div>
+          </div>
+
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleGoogleSignIn}
+            disabled={loading}
+            className="w-full flex items-center justify-center gap-2"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              width="24"
+              height="24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <g transform="matrix(1, 0, 0, 1, 0, 0)">
+                <path
+                  d="M21.35,11.1H12.18V13.83H18.69C18.36,17.64 15.19,19.27 12.19,19.27C8.36,19.27 5,16.25 5,12C5,7.9 8.2,4.73 12.2,4.73C15.29,4.73 17.1,6.7 17.1,6.7L19,4.72C19,4.72 16.56,2 12.1,2C6.42,2 2.03,6.8 2.03,12C2.03,17.05 6.16,22 12.25,22C17.6,22 21.5,18.33 21.5,12.91C21.5,11.76 21.35,11.1 21.35,11.1Z"
+                  fill="#4285F4"
+                ></path>
+              </g>
+            </svg>
+            Register with Google
+          </Button>
+
           <p className="text-center text-sm">
             Already have an account?{" "}
             <button
@@ -271,6 +360,38 @@ export default function AuthComponent() {
 
           <Button type="submit" disabled={loading} className="w-full">
             {loading ? "Signing in..." : "Sign In"}
+          </Button>
+
+          <div className="relative my-4">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-white text-gray-500">Or</span>
+            </div>
+          </div>
+
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleGoogleSignIn}
+            disabled={loading}
+            className="w-full flex items-center justify-center gap-2"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              width="24"
+              height="24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <g transform="matrix(1, 0, 0, 1, 0, 0)">
+                <path
+                  d="M21.35,11.1H12.18V13.83H18.69C18.36,17.64 15.19,19.27 12.19,19.27C8.36,19.27 5,16.25 5,12C5,7.9 8.2,4.73 12.2,4.73C15.29,4.73 17.1,6.7 17.1,6.7L19,4.72C19,4.72 16.56,2 12.1,2C6.42,2 2.03,6.8 2.03,12C2.03,17.05 6.16,22 12.25,22C17.6,22 21.5,18.33 21.5,12.91C21.5,11.76 21.35,11.1 21.35,11.1Z"
+                  fill="#4285F4"
+                ></path>
+              </g>
+            </svg>
+            Sign in with Google
           </Button>
 
           <p className="text-center text-sm">
