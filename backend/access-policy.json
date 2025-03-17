@@ -1,0 +1,13 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "arn:aws:iam::565393034649:root"
+      },
+      "Action": "es:*",
+      "Resource": "arn:aws:es:eu-north-1:565393034649:domain/student-llm-os/*"
+    }
+  ]
+}
