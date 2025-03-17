@@ -35,10 +35,6 @@ Globals:
           AuthType: COGNITO_USER_POOLS
           Identity:
             Header: Authorization
-            AuthorizationScopes:
-              - email
-              - openid
-              - profile
 
     MethodSettings:
       - ResourcePath: "/*"
