@@ -886,47 +886,43 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   const getToken = async (): Promise<string> => {
-    // Check if we're in browser environment
     if (!isBrowser || !userPool) {
       return Promise.reject(
         new Error("Authentication not available on server")
       );
     }
 
-    // First try to get token from cookie (for Google SSO)
-    const cookieToken = Cookies.get("auth-token");
-    if (cookieToken) {
-      try {
-        // Verify token is valid
-        const decodedToken = parseJwt(cookieToken);
-        const currentTime = Math.floor(Date.now() / 1000);
-        if (decodedToken.exp && decodedToken.exp > currentTime) {
-          return cookieToken;
-        }
-      } catch (err) {
-        console.error("Error parsing token from cookie:", err);
-      }
-    }
-
-    // Then try to get token from Cognito session
     return new Promise((resolve, reject) => {
       const cognitoUser = userPool.getCurrentUser();
-      if (cognitoUser) {
-        cognitoUser.getSession(
-          (err: Error | null, session: CognitoUserSession | null) => {
-            if (err) {
-              reject(err);
-            } else if (session) {
-              // Explicitly use the Access token, not ID token
-              resolve(session.getAccessToken().getJwtToken());
-            } else {
-              reject(new Error("No valid session"));
-            }
-          }
-        );
-      } else {
+      if (!cognitoUser) {
         reject(new Error("No user found"));
+        return;
       }
+
+      cognitoUser.getSession(
+        (err: Error | null, session: CognitoUserSession | null) => {
+          if (err) {
+            console.error("Session error:", err);
+            reject(err);
+            return;
+          }
+
+          if (!session) {
+            reject(new Error("No valid session"));
+            return;
+          }
+
+          try {
+            // Get a fresh access token
+            const accessToken = session.getAccessToken().getJwtToken();
+            console.log("Fresh access token generated");
+            resolve(accessToken);
+          } catch (e) {
+            console.error("Error getting access token:", e);
+            reject(e);
+          }
+        }
+      );
     });
   };
 
