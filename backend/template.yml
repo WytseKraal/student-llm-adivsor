@@ -18,6 +18,13 @@ Parameters:
     Type: String
     Description: OpenAI API Key for LLM access
     NoEcho: true # This prevents the key from being displayed in logs/console
+  OpensearchHost:
+    Type: String
+    Description: Hostname of the OpenSearch domain
+  AWSRegion:
+    Type: String
+    Description: AWS Region
+    Default: eu-north-1
 
 Globals:
   Api:
@@ -189,7 +196,15 @@ Resources:
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Sub "${Environment}-student-advisor-table"
-        # Possible TODO: AWS::IAM::Policy
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: "Allow"
+              Action:
+                - "es:ESHttpGet"
+                - "es:ESHttpPut"
+                - "es:ESHttpPost"
+                - "es:ESHttpDelete"
+              Resource: !Sub "arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/my-domain/*"
       Events:
         GenerateTextEmbedding:
           Type: Api
@@ -208,7 +223,7 @@ Resources:
         RetrieveCourseEmbedding:
           Type: Api
           Properties:
-            Path: /embedding/get-embedding
+            Path: /embedding
             Method: GET
             Auth:
               Authorizer: CognitoAuthorizer
