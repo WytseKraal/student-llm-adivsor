@@ -911,6 +911,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
             if (err) {
               reject(err);
             } else if (session) {
+              // Explicitly use the Access token, not ID token
               resolve(session.getAccessToken().getJwtToken());
             } else {
               reject(new Error("No valid session"));
