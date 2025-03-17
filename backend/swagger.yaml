@@ -327,55 +327,21 @@ paths:
         "500":
           description: Internal server error.
   /embedding:
-    post:
-      summary: Generate and store course embedding
-      description: Generates an embedding for a course description and stores it in OpenSearch.
-      security:
-        - CognitoAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required: [course_id, text]
-              properties:
-                course_id:
-                  type: string
-                  example: "5364DCBS6Y"
-                text:
-                  type: string
-                  example: "DOCS focusses on CI/CD and cloud."
-      responses:
-        "200":
-          description: Embedding stored successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "Embedding stored successfully"
-        "400":
-          description: Missing course_id or text
-        "500":
-          description: Internal server error
     get:
       summary: Retrieve course embedding
-      description: Retrieves a stored embedding for a specific course.
+      description: Retrieves the embedding for a given course.
       security:
         - CognitoAuth: []
       parameters:
         - name: course_id
           in: query
           required: true
-          description: Course ID
+          description: The course ID to retrieve the embedding.
           schema:
             type: string
       responses:
         "200":
-          description: Successful retrieval of embedding
+          description: Successfully retrieved course embedding
           content:
             application/json:
               schema:
@@ -387,9 +353,82 @@ paths:
                     type: array
                     items:
                       type: number
+                    description: The retrieved embedding vector.
+        "400":
+          description: Invalid request (e.g., missing course_id or malformed query)
         "404":
           description: Course embedding not found
-        "400":
-          description: Invalid request (e.g., missing course_id)
         "500":
-          description: Internal server error
+          description: Internal server error.
+  /embedding/text-embedding:
+    post:
+      summary: Generate a text embedding
+      description: Generates an embedding for the provided text using OpenAI's embedding model.
+      security:
+        - CognitoAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - text
+              properties:
+                text:
+                  type: string
+                  description: The text to be embedded.
+      responses:
+        "200":
+          description: Successful embedding generation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  embedding:
+                    type: array
+                    items:
+                      type: number
+                    description: The generated embedding vector.
+        "400":
+          description: Invalid request (e.g., missing text or malformed JSON)
+        "500":
+          description: Internal server error.
+  /embedding/course-embedding:
+    post:
+      summary: Store course embedding
+      description: Generates and stores an embedding for a course.
+      security:
+        - CognitoAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - course_id
+                - text
+              properties:
+                course_id:
+                  type: string
+                  description: The ID of the course.
+                text:
+                  type: string
+                  description: The course description to be embedded.
+      responses:
+        "200":
+          description: Successfully stored course embedding
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Embedding stored successfully"
+        "400":
+          description: Invalid request (e.g., missing course_id, text, or malformed JSON)
+        "500":
+          description: Internal server error.

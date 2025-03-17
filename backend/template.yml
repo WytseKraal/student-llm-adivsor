@@ -185,30 +185,37 @@ Resources:
           Environment: !Ref Environment
           OPENAI_API_KEY: !Ref OpenAIAPIKey
           OPENSEARCH_HOST: !Ref OpensearchHost
+          AWS_REGION: !Ref AWSRegion
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Sub "${Environment}-student-advisor-table"
-        # Possible TODO: AWS IAM or ES Policy
+        # Possible TODO: AWS::IAM::Policy
       Events:
-        GenerateCourseEmbedding:
+        GenerateTextEmbedding:
           Type: Api
           Properties:
-            Path: /embedding
+            Path: /embedding/text-embedding
+            Method: POST
+            Auth:
+              Authorizer: CognitoAuthorizer
+        PostCourseEmbedding:
+          Type: Api
+          Properties:
+            Path: /embedding/course-embedding
             Method: POST
             Auth:
               Authorizer: CognitoAuthorizer
         RetrieveCourseEmbedding:
           Type: Api
           Properties:
-            Path: /embedding
+            Path: /embedding/get-embedding
             Method: GET
             Auth:
               Authorizer: CognitoAuthorizer
-
-Outputs:
-  ApiUrl:
-    Description: "URL of the API Gateway endpoint"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod"
+  Outputs:
+    ApiUrl:
+      Description: "URL of the API Gateway endpoint"
+      Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod"
 
 Conditions:
   IsDev: !Equals
