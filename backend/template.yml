@@ -227,6 +227,39 @@ Resources:
             Method: GET
             Auth:
               Authorizer: CognitoAuthorizer
+  RAGFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handlers/rag_handler.lambda_handler
+      Runtime: python3.12
+      CodeUri: .
+      Environment:
+        Variables:
+          Environment: !Ref Environment
+          OPENAI_API_KEY: !Ref OpenAIAPIKey
+          OPENSEARCH_HOST: !Ref OpensearchHost
+          AWS_REGION: !Ref AWSRegion
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Sub "${Environment}-student-advisor-table"
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: "Allow"
+              Action:
+                - "es:ESHttpGet"
+                - "es:ESHttpPut"
+                - "es:ESHttpPost"
+                - "es:ESHttpDelete"
+              Resource: !Sub "arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/my-domain/*"
+      Events:
+        GetCourseInformation:
+          Type: Api
+          Properties:
+            Path: /rag
+            Method: GET
+            Auth:
+              Authorizer: CognitoAuthorizer
+
   Outputs:
     ApiUrl:
       Description: "URL of the API Gateway endpoint"
