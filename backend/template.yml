@@ -55,13 +55,12 @@ Resources:
     Properties:
       CloudWatchRoleArn: !GetAtt ApiGatewayCloudWatchLogsRole.Arn
 
-  ApiGatewayStage:
+  ServerlessRestApiProdStageSettings:
     Type: AWS::ApiGateway::Stage
-    DependsOn: ApiGatewayAccount
     Properties:
-      DeploymentId: !Ref ServerlessRestApi
-      RestApiId: !Ref ServerlessRestApi
       StageName: Prod
+      RestApiId: !Ref ServerlessRestApi
+      DeploymentId: !Ref ServerlessRestApiDeployment
       MethodSettings:
         - ResourcePath: "/*"
           HttpMethod: "*"
