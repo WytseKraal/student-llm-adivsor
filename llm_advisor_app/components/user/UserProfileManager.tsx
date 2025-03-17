@@ -194,7 +194,7 @@ export default function UserProfile({ apiUrl, getToken }: UserProfileProps) {
         {responseMessage && <p className="mt-2 text-sm text-green-600">{responseMessage}</p>}
 =======
         {/* Update Student Form */}
-      <div className="flex flex-col gap-8 w-full max-w-2xl">
+        <div className="mt-6 border-t pt-6">
           <h3 className="text-lg font-semibold">Update Student Information</h3>
           <form onSubmit={handleUpdateStudent} className="flex flex-col gap-2 mt-4">
             <label className="flex flex-col">
