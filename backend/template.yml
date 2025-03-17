@@ -50,10 +50,10 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs
 
-    ApiGatewayAccount:
-      Type: AWS::ApiGateway::Account
-      Properties:
-        CloudWatchRoleArn: !GetAtt ApiGatewayCloudWatchLogsRole.Arn
+  ApiGatewayAccount:
+    Type: AWS::ApiGateway::Account
+    Properties:
+      CloudWatchRoleArn: !GetAtt ApiGatewayCloudWatchLogsRole.Arn
 
   ApiGatewayStageProdSettings:
     Type: AWS::ApiGateway::MethodSettings
