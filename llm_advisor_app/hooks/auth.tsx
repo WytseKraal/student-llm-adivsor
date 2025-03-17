@@ -136,7 +136,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           } else if (session && session.isValid()) {
             handleSuccessfulAuth(
               cognitoUser,
-              session.getIdToken().getJwtToken()
+              session.getAccessToken().getJwtToken()
             );
           } else {
             fallbackToTokenAuth();
@@ -322,7 +322,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
               return;
             }
 
-            const token = session.getIdToken().getJwtToken();
+            const token = session.getAccessToken().getJwtToken();
 
             try {
               const attributes = await getUserAttributes();
@@ -397,7 +397,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
             setIsAuthenticated(true);
 
             // Store token in cookie for middleware
-            const token = result.getIdToken().getJwtToken();
+            const token = result.getAccessToken().getJwtToken();
             Cookies.set("auth-token", token, {
               expires: 1, // 1 day
               sameSite: "strict",
@@ -814,7 +814,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
             setIsAuthenticated(true);
 
             // Store token in cookie for middleware
-            const token = result.getIdToken().getJwtToken();
+            const token = result.getAccessToken().getJwtToken();
             Cookies.set("auth-token", token, {
               expires: 1, // 1 day
               sameSite: "strict",
@@ -911,7 +911,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
             if (err) {
               reject(err);
             } else if (session) {
-              resolve(session.getIdToken().getJwtToken());
+              resolve(session.getAccessToken().getJwtToken());
             } else {
               reject(new Error("No valid session"));
             }
