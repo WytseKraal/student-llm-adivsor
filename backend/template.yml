@@ -35,6 +35,12 @@ Globals:
           AuthType: COGNITO_USER_POOLS
           Identity:
             Header: Authorization
+    MethodSettings:
+      - ResourcePath: "/*"
+        HttpMethod: "*"
+        LoggingLevel: INFO
+        DataTraceEnabled: true
+        MetricsEnabled: true
 
 Resources:
   ApiGatewayCloudWatchLogsRole:
@@ -54,18 +60,6 @@ Resources:
     Type: AWS::ApiGateway::Account
     Properties:
       CloudWatchRoleArn: !GetAtt ApiGatewayCloudWatchLogsRole.Arn
-
-  ApiGatewayStageProdSettings:
-    Type: AWS::ApiGateway::MethodSettings
-    Properties:
-      RestApiId: !Ref ServerlessRestApi
-      StageName: Prod
-      MethodSettings:
-        - ResourcePath: "/*"
-          HttpMethod: "*"
-          LoggingLevel: INFO
-          DataTraceEnabled: true
-          MetricsEnabled: true
 
   HelloFunction:
     Type: AWS::Serverless::Function
