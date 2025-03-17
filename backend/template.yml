@@ -56,18 +56,18 @@ Resources:
       CloudWatchRoleArn: !GetAtt ApiGatewayCloudWatchLogsRole.Arn
 
   ApiGatewayStage:
-  Type: AWS::ApiGateway::Stage
-  DependsOn: ApiGatewayAccount
-  Properties:
-    DeploymentId: !Ref ServerlessHttpApi # Note: For SAM, use ServerlessHttpApi or ServerlessRestApi as appropriate
-    RestApiId: !Ref ServerlessHttpApi # Same here
-    StageName: Prod
-    MethodSettings:
-      - ResourcePath: "/*"
-        HttpMethod: "*"
-        LoggingLevel: INFO
-        DataTraceEnabled: true
-        MetricsEnabled: true
+    Type: AWS::ApiGateway::Stage
+    DependsOn: ApiGatewayAccount
+    Properties:
+      DeploymentId: !Ref ServerlessRestApi
+      RestApiId: !Ref ServerlessRestApi
+      StageName: Prod
+      MethodSettings:
+        - ResourcePath: "/*"
+          HttpMethod: "*"
+          LoggingLevel: INFO
+          DataTraceEnabled: true
+          MetricsEnabled: true
 
   HelloFunction:
     Type: AWS::Serverless::Function
