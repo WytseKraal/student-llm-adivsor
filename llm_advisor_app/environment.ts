@@ -28,12 +28,12 @@ const prod: Environment = {
     region: "eu-north-1",
     domain: "eu-north-1yxtyealzb.auth.eu-north-1.amazoncognito.com",
   },
-  corsOrigin: "http://13.53.152.71",
+  corsOrigin: "https://smartstudentadvisor.nl",
 };
 
 const getEnvironment = (): Environment => {
   if (typeof window !== "undefined") {
-    const isProd = window.location.origin.includes("13.53");
+    const isProd = window.location.origin.includes("smart");
     return isProd ? prod : dev;
   }
   return process.env.NEXT_PUBLIC_ENV === "production" ? prod : dev;
