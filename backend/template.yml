@@ -6,7 +6,7 @@ Parameters:
   UserPoolArn:
     Type: String
     Description: ARN of the Cognito User Pool
-    Default: "arn:aws:cognito-idp:eu-north-1:565393034649:userpool/eu-north-1_cXdMnsSwH"
+    Default: "arn:aws:cognito-idp:eu-north-1:565393034649:userpool/eu-north-1_YxTYEALZB"
   Environment:
     Type: String
     Default: prod
@@ -31,7 +31,7 @@ Globals:
         - "'https://smartstudentadvisor.nl'"
     Auth:
       Authorizers:
-        CognitoAuthorizer:
+        UpdatedApiAuth:
           UserPoolArn: !Ref UserPoolArn
           AuthType: COGNITO_USER_POOLS
 
@@ -52,7 +52,7 @@ Resources:
             Path: /hello
             Method: GET
             Auth:
-              Authorizer: CognitoAuthorizer
+              Authorizer: UpdatedApiAuth
 
   GoodbyeFunction:
     Type: AWS::Serverless::Function
@@ -70,14 +70,14 @@ Resources:
             Path: /goodbye/bye
             Method: GET
             Auth:
-              Authorizer: CognitoAuthorizer
+              Authorizer: UpdatedApiAuth
         SeeyaEvent:
           Type: Api
           Properties:
             Path: /goodbye/seeya
             Method: GET
             Auth:
-              Authorizer: CognitoAuthorizer
+              Authorizer: UpdatedApiAuth
 
   DatabaseFunction:
     Type: AWS::Serverless::Function
@@ -99,21 +99,21 @@ Resources:
             Path: /student
             Method: PUT
             Auth:
-              Authorizer: CognitoAuthorizer
+              Authorizer: UpdatedApiAuth
         GetStudent:
           Type: Api
           Properties:
             Path: /student
             Method: GET
             Auth:
-              Authorizer: CognitoAuthorizer
+              Authorizer: UpdatedApiAuth
         PatchStudent:
           Type: Api
           Properties:
             Path: /student
             Method: PATCH
             Auth:
-              Authorizer: CognitoAuthorizer
+              Authorizer: UpdatedApiAuth
 
   TokenUsageFunction:
     Type: AWS::Serverless::Function
@@ -134,14 +134,14 @@ Resources:
             Path: /token-usage
             Method: POST
             Auth:
-              Authorizer: CognitoAuthorizer
+              Authorizer: UpdatedApiAuth
         GetTokenUsage:
           Type: Api
           Properties:
             Path: /token-usage
             Method: GET
             Auth:
-              Authorizer: CognitoAuthorizer
+              Authorizer: UpdatedApiAuth
 
 
   ChatFunction:
@@ -165,14 +165,14 @@ Resources:
             Path: /chat
             Method: POST
             Auth:
-              Authorizer: CognitoAuthorizer
+              Authorizer: UpdatedApiAuth
         CheckStudentEvent:
           Type: Api
           Properties:
             Path: /student/check
             Method: GET
             Auth:
-              Authorizer: CognitoAuthorizer
+              Authorizer: UpdatedApiAuth
 
 Outputs:
   ApiUrl:
