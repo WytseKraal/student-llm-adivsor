@@ -55,6 +55,12 @@ export default function UserProfile({ apiUrl, getToken }: UserProfileProps) {
     e.preventDefault();
     try {
       const token = await getToken();
+
+      if(studentEmail == "") {
+        setResponseMessage("Email was not provided.");
+        return;
+      }
+
       const response = await fetch(`${apiUrl}/student`, {
         method: "PATCH",
         headers: {
@@ -121,7 +127,7 @@ export default function UserProfile({ apiUrl, getToken }: UserProfileProps) {
         </div>
 
         {/* Update Student Form */}
-        <div className="mt-6 border-t pt-4">
+      <div className="flex flex-col gap-8 w-full max-w-2xl">
           <h3 className="text-lg font-semibold">Update Student Information</h3>
           <form onSubmit={handleUpdateStudent} className="flex flex-col gap-2 mt-4">
             <label className="flex flex-col">
