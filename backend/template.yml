@@ -28,7 +28,7 @@ Globals:
       AllowOrigin: !If
         - IsDev
         - "'*'"
-        - "'http://13.53.152.71'"
+        - "'https://smartstudentadvisor.nl'"
     Auth:
       Authorizers:
         CognitoAuthorizer:
