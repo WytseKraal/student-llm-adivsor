@@ -323,6 +323,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
             }
 
             const token = session.getAccessToken().getJwtToken();
+            console.log("Token issuer:", parseJwt(token).iss);
+            console.log(
+              "Token expiration:",
+              new Date(parseJwt(token).exp * 1000).toISOString()
+            );
+            console.log("Token scopes:", parseJwt(token).scope);
 
             try {
               const attributes = await getUserAttributes();
