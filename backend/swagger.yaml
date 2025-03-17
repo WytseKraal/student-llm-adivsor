@@ -432,3 +432,39 @@ paths:
           description: Invalid request (e.g., missing course_id, text, or malformed JSON)
         "500":
           description: Internal server error.
+  /rag:
+    get:
+      summary: Retrieve relevant courses details.
+      description: Retrieves relevant course details for a given user query.
+      security:
+        - CognitoAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - query
+              properties:
+                query:
+                  type: string
+                  description: The user query to search for relevant courses.
+      responses:
+        "200":
+          description: Successfully retrieved course details.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    course_id:
+                      type: string
+                    course_dedetails:
+                      type: string
+        "400":
+          description: Bad request (missing query parameter).
+        "500":
+          description: Internal server error.

@@ -146,13 +146,13 @@ class RAGService(BaseService):
                 f"Failed to search OpenSearch: {str(e)}", status_code=500)
 
     def fetch_course_information(self, course_ids):
-        course_information = []
+        course_information = {}
         for course_id in course_ids:
             response = self.table.get_item(Key={"course_id": course_id})
             if "Item" not in response:
                 raise APIError(
                     f"Course {course_id} not found", status_code=404)
-            course_information.append(response["Item"])
+            course_information[course_id] = response
         return course_information
 
     def get_course_information(self):
