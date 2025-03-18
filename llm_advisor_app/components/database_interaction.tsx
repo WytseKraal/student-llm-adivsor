@@ -30,7 +30,7 @@ const StudentManager: React.FC<StudentManagerProps> = ({
   const [responseMessage, setResponseMessage] = useState<string>("");
   const [studentData, setStudentData] = useState<StudentData | null>(null);
 
-  const { sub } = useUserData();
+  // const { sub } = useUserData();
 
   const handleCreateStudent = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
