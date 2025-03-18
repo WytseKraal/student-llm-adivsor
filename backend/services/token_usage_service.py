@@ -2,6 +2,7 @@ import json
 import logging
 import time
 import random
+import os
 import calendar
 from models.response import LambdaResponse
 import boto3
@@ -19,7 +20,8 @@ logger.setLevel(logging.INFO)
 BATCHSIZE = 25
 REGION = 'eu-north-1'
 
-TABLENAME = 'dev-student-advisor-table'
+environment = os.getenv('Environment', 'prod')
+TABLENAME = f'{environment}-student-advisor-table'
 
 MAX_TOTAL_TOKENS = 10_000
 
