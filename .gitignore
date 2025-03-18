@@ -212,3 +212,6 @@ jspm_packages
 
 # AWS
 backend/.aws-sam/build.toml
+
+# Debugging
+backend/to_ignore
