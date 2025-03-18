@@ -27,6 +27,9 @@ PROGRAMMES = ["Master Security and Network Engineering",
 
 class IndexingService(BaseService):
     def __init__(self, event, context):
+        """
+        Initialize the IndexingService with event and context.
+        """
         super().__init__(event, context)
 
         logger.info(f"Received event: {json.dumps(self.event.model_dump())}")
@@ -51,22 +54,22 @@ class IndexingService(BaseService):
         self.table = dynamodb.Table(DYNAMODB_TABLE_NAME)
 
     def handle(self) -> dict:
+        """
+        Handle the incoming request based on the HTTP method and path.
+        """
         http_method = self.event.httpMethod.upper()
         path = self.event.path
 
         logger.info("Handling request: %s %s", http_method, path)
 
         if http_method == "POST" and path == "/indexing":
-            # Index all courses
             return self.index_all_courses()
 
         elif http_method == "GET" and path == "/indexing/health-check":
-            # Health check
             return self.health_check()
 
         elif http_method == "POST" and path.startswith("/indexing/"):
-            # Index a specific course
-            course_id = path.lstrip("/")
+            course_id = path.removeprefix("/indexing/")
             if course_id:
                 return self.index_course(course_id)
             else:
@@ -74,8 +77,7 @@ class IndexingService(BaseService):
                 raise APIError("Missing course ID in URL", status_code=400)
 
         elif http_method == "DELETE" and path.startswith("/indexing/"):
-            # Delete a specific course
-            course_id = path.lstrip("/")
+            course_id = path.removeprefix("/indexing/")
             if course_id:
                 return self.delete_course(course_id)
             else:
@@ -88,98 +90,131 @@ class IndexingService(BaseService):
 
     def index_all_courses(self):
         """
-        Index all courses by retrieving course IDs from the database and 
+        Index all courses by retrieving course IDs from the database and
         calling index_course for each.
         """
         logger.info("Indexing all courses in Pinecone")
 
-        course_ids = self.get_all_course_ids()
-        for course_id in course_ids:
-            self.index_course(course_id)
+        try:
+            course_ids = self.get_all_course_ids()
+            for course_id in course_ids:
+                self.index_course(course_id)
 
-        logger.info("Indexed %d courses in Pinecone.", len(course_ids))
+            logger.info("Indexed %d courses in Pinecone.", len(course_ids))
 
-        response = LambdaResponse(
-            statusCode=200,
-            headers=self.build_headers(),
-            body=json.dumps(
-                {"message": f"Indexed {len(course_ids)} courses in Pinecone."})
-        )
-        return response.model_dump()
-
-    def index_course(self, course_id):
-        """Index a single course in Pinecone using the course_id"""
-        if not course_id:
-            logger.error("Missing course ID in request")
-            raise APIError("Missing course ID in request", status_code=400)
-
-        course_details = self.get_course_details(course_id)
-        timetable = self.get_timetable(course_id)
-
-        if not course_details:
-            logger.error(f"Course details not found for {course_id}")
-            raise APIError(f"Course {course_id} not found", status_code=404)
-
-        # Combine course details with timetable
-        course_details["SCHEDULE"] = timetable
-
-        logger.info(f"Indexing course {course_id} in Pinecone")
-
-        sections = {
-            "general": {
-                "name": course_details.get("NAME"),
-                "description": course_details.get("DESCRIPTION"),
-                "startdate": course_details.get("STARTDATE"),
-                "registration_info": course_details.get("REGISTRATION_INFO"),
-                "remarks": course_details.get("REMARKS")
-            },
-            "content_obj_methods": {
-                "content": course_details.get("CONTENTS"),
-                "objectives": course_details.get("OBJECTIVES"),
-                "teaching_methods": course_details.get("TEACHING_METHODS")
-            },
-            "assessment_prereq_studymat": {
-                "assessment": course_details.get("ASSESSMENT"),
-                "prerequisites": course_details.get("PREREQUISITES"),
-                "study_materials": course_details.get("STUDY_MATERIALS")
-            },
-            "schedule": course_details.get("SCHEDULE")
-        }
-
-        vectors = []
-        for section, content in sections.items():
-            if content:
-                chunks = self.split_text(content)
-                for i, chunk in enumerate(chunks):
-                    embedding = self.get_openai_embedding(chunk)
-                    if embedding:
-                        vector_id = f"{course_id}_{section}_{i}"
-                        metadata = {"course_id": course_id,
-                                    "section": section, "text": chunk}
-                        vectors.append((vector_id, embedding, metadata))
-
-        if vectors:
-            upsert_response = self.index.upsert(vectors=vectors)
-            logger.info("Upserted %d vectors for course %s.",
-                        len(vectors), course_id)
-            return upsert_response
-        else:
-            logger.info("No vectors to upsert for course %s.", course_id)
-            return LambdaResponse(
+            response = LambdaResponse(
                 statusCode=200,
                 headers=self.build_headers(),
                 body=json.dumps(
-                    {"message": f"No vectors to upsert for course {course_id}."})
-            ).model_dump()
+                    {"message": f"Indexed {len(course_ids)} courses in Pinecone."})
+            )
+            return response.model_dump()
+        except Exception as e:
+            logger.error(f"Error indexing all courses: {e}")
+            raise APIError("Failed to index all courses", status_code=500)
 
-    def delete_course(self, course_id):
-        """Delete a singl course from the index using the course_id"""
+    def index_course(self, course_id):
+        """
+        Index a single course in Pinecone using the course_id.
+        """
         if not course_id:
             logger.error("Missing course ID in request")
             raise APIError("Missing course ID in request", status_code=400)
 
         try:
-            self.index.delete(vector_ids=[f"{course_id}_*"])
+            course_details = self.get_course_details(course_id)
+            timetable = self.get_timetable(course_id)
+
+            if not course_details:
+                logger.error(f"Course details not found for {course_id}")
+                raise APIError(
+                    f"Course {course_id} not found", status_code=404)
+
+            # Combine course details with timetable
+            course_details["SCHEDULE"] = timetable
+
+            logger.info(f"Indexing course {course_id} in Pinecone")
+
+            sections = {
+                "general": {
+                    "name": course_details.get("NAME"),
+                    "description": course_details.get("DESCRIPTION"),
+                    "startdate": course_details.get("STARTDATE"),
+                    "registration_info": course_details.get("REGISTRATION_INFO"),
+                    "remarks": course_details.get("REMARKS")
+                },
+                "content_obj_methods": {
+                    "content": course_details.get("CONTENTS"),
+                    "objectives": course_details.get("OBJECTIVES"),
+                    "teaching_methods": course_details.get("TEACHING_METHODS")
+                },
+                "assessment_prereq_studymat": {
+                    "assessment": course_details.get("ASSESSMENT"),
+                    "prerequisites": course_details.get("PREREQUISITES"),
+                    "study_materials": course_details.get("STUDY_MATERIALS")
+                },
+                "schedule": course_details.get("SCHEDULE")
+            }
+
+            vectors = []
+            for section, content in sections.items():
+                if isinstance(content, dict):
+                    for key, value in content.items():
+                        if value:
+                            chunks = self.split_text(value)
+                            for i, chunk in enumerate(chunks):
+                                embedding = self.get_openai_embedding(chunk)
+                                if embedding:
+                                    vector_id = f"{course_id}_{section}_{key}_{i}"
+                                    metadata = {"course_id": course_id,
+                                                "section": section, "key": key, "text": chunk}
+                                    vectors.append(
+                                        (vector_id, embedding, metadata))
+                elif isinstance(content, str):
+                    chunks = self.split_text(content)
+                    for i, chunk in enumerate(chunks):
+                        embedding = self.get_openai_embedding(chunk)
+                        if embedding:
+                            vector_id = f"{course_id}_{section}_{i}"
+                            metadata = {"course_id": course_id,
+                                        "section": section, "text": chunk}
+                            vectors.append((vector_id, embedding, metadata))
+
+            if vectors:
+                self.index.upsert(vectors=vectors)
+                logger.info("Upserted %d vectors for course %s.",
+                            len(vectors), course_id)
+                return LambdaResponse(
+                    statusCode=200,
+                    headers=self.build_headers(),
+                    body=json.dumps(
+                        {"message": f"Upserted {len(vectors)} vectors to " +
+                         f"upsert for course {course_id}."})
+                ).model_dump()
+            else:
+                logger.info("No vectors to upsert for course %s.", course_id)
+                return LambdaResponse(
+                    statusCode=200,
+                    headers=self.build_headers(),
+                    body=json.dumps(
+                        {"message": f"No vectors to upsert for course {course_id}."})
+                ).model_dump()
+        except Exception as e:
+            logger.error(f"Error indexing course {course_id}: {e}")
+            raise APIError("Failed to index course", status_code=500)
+
+    def delete_course(self, course_id):
+        """
+        Delete a single course from the index using the course_id.
+        """
+        if not course_id:
+            logger.error("Missing course ID in request")
+            raise APIError("Missing course ID in request", status_code=400)
+
+        try:
+            for ids in self.index.list(prefix=course_id):
+                self.index.delete(ids=ids)
+
             logger.info(
                 f"Deleted all vectors for course {course_id} from Pinecone.")
             return LambdaResponse(
@@ -246,14 +281,15 @@ class IndexingService(BaseService):
         Generate embedding for a given text using
         OpenAI's text-embedding-3-small model.
         """
-        response = self.client.embeddings. \
-            create(input=[text], model="text-embedding-3-small")
-        embedding = response.data[0].embedding
-        # logger.info(
-        #     f"Generated embedding for text: {text} \nEmbedding: {embedding}")
-        return embedding
+        try:
+            response = self.client.embeddings.create(
+                input=[text], model="text-embedding-3-small")
+            return response.data[0].embedding
+        except Exception as e:
+            logger.error(f"OpenAI embedding request failed: {e}")
+            raise APIError("OpenAI embedding generation failed",
+                           status_code=500)
 
-    # TODO: Figure out what the best max_chunk_size is <<====================<<
     def split_text(self, text, max_chunk_size=500):
         """
         Splits text into chunks no larger than max_chunk_size.
@@ -278,42 +314,56 @@ class IndexingService(BaseService):
         return chunks
 
     def get_all_course_ids(self):
-        """ Get all course IDs from DynamoDB for all programs """
+        """
+        Get all course IDs from DynamoDB for all programs.
+        """
         logger.info("Retrieving all course IDs from DynamoDB")
         course_ids = []
 
-        for program in PROGRAMMES:
-            response = self.table.query(
-                IndexName="GSI_COURSES_PER_PROGRAM",
-                KeyConditionExpression=Key("CTYPE").begins_with("COURSE")
-                & Key("PROGRAM").eq(program)
-            )
-            courses = response.get("Items", [])
+        try:
+            for program in PROGRAMMES:
+                response = self.table.query(
+                    IndexName="GSI_COURSES_PER_PROGRAM",
+                    KeyConditionExpression=Key("CTYPE").begins_with("COURSE")
+                    & Key("PROGRAM").eq(program)
+                )
+                courses = response.get("Items", [])
 
-            for course in courses:
-                course_ids.append(course['COURSE_ID'])
+                for course in courses:
+                    course_ids.append(course['COURSE_ID'])
 
-        logger.info(f"Retrieved {len(course_ids)} course IDs.")
-        return course_ids
+            return course_ids
+        except Exception as e:
+            logger.error(f"Error retrieving course IDs: {e}")
+            raise APIError("Failed to retrieve course IDs", status_code=500)
 
     def get_course_details(self, course_id):
-        """ Get the details of a course from DynamoDB """
-        response = self.table.query(
-            KeyConditionExpression=Key("PK").eq(
-                f"COURSE#{course_id}") & Key("SK").eq("DETAILS")
-        )
-        items = response.get("Items", [])
-        if items:
-            return items[0]
-        return None
+        """
+        Get the details of a course from DynamoDB.
+        """
+        try:
+            response = self.table.query(
+                KeyConditionExpression=Key("PK").eq(
+                    f"COURSE#{course_id}") & Key("SK").eq("DETAILS")
+            )
+            items = response.get("Items", [])
+            return items[0] if items else None
+        except Exception as e:
+            logger.error(f"Error fetching course details for {course_id}: {e}")
+            raise APIError("Failed to fetch course details", status_code=500)
 
     def get_timetable(self, course_id):
-        """ Get the timetable for a course from DynamoDB """
-        response = self.table.query(
-            KeyConditionExpression=Key("PK").eq(
-                f"COURSE#{course_id}") & Key("SK").eq("TIMETABLE")
-        )
-        items = response.get("Items", [])
-        if items:
-            return items[0].get("SCHEDULE")
-        return None
+        """
+        Get the timetable for a course from DynamoDB.
+        """
+        try:
+            response = self.table.query(
+                KeyConditionExpression=Key("PK").eq(
+                    f"COURSE#{course_id}") & Key("SK").eq("TIMETABLE")
+            )
+            items = response.get("Items", [])
+            return items[0].get("SCHEDULE") if items else None
+        except Exception as e:
+            logger.error(
+                f"Error fetching course schedule for {course_id}: {e}")
+            raise APIError("Failed to fetch course schedule", status_code=500)
