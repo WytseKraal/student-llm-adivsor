@@ -62,6 +62,15 @@ class TokenUsageService(BaseService):
                 raise APIError(
                     "Missing required fields: student_id, total_tokens, prompt_tokens, completion_tokens", status_code=400)
 
+            ta = TokenAllocator()
+            amount_of_requests = ta.get_total_amount_of_requests_by_user(student_id)
+
+            # Students get first 3 requests for free.
+            if len(amount_of_requests) < 3:
+                total_tokens_used = 0
+                prompt_usage = 0
+                completion_usage = 0
+
             usage = {
                 "PK": f"{body['student_id']}",
                 "SK": f"REQUEST#{dt.timestamp(dt.now())}",
@@ -143,6 +152,19 @@ class TokenAllocator:
 
         return self.calculate_usage(r)
 
+    def get_total_amount_of_requests_by_user(student_id):
+        dynamodb = boto3.resource('dynamodb', region_name=REGION)
+        table = dynamodb.Table(TABLENAME)
+        response = table.query(
+            IndexName='GSI_TOKENUSAGE_BY_TIME',
+            KeyConditionExpression=Key('USAGE_TYPE').eq('REQUEST'),
+            FilterExpression=Attr('PK').eq(f'{student_id}')
+        )
+
+        r = response.get('Items', [])
+        
+        return r
+
     def get_timestamp_of_first_day(self) -> int:
         now = dt.now()
         first_day = dt(now.year, now.month, 1, tzinfo=timezone.utc)
@@ -151,7 +173,7 @@ class TokenAllocator:
 
         return ts
 
-    def get_total_amount_of_tokens_used_by_user(self, student_id) -> int:
+    def get_amount_of_requests_by_user(self, student_id):
         ts_yesterday = dt.timestamp(dt.now() - datetime.timedelta(hours=24))
         ts_now = dt.timestamp(dt.now())
         dynamodb = boto3.resource('dynamodb', region_name=REGION)
@@ -165,6 +187,11 @@ class TokenAllocator:
         )
 
         r = response.get('Items', [])
+        
+        return r
+
+    def get_total_amount_of_tokens_used_by_user(self, student_id) -> int:
+        r = self.get_amount_of_requests_by_user(student_id)
 
         return self.calculate_usage(r)
 
