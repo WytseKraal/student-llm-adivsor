@@ -82,6 +82,16 @@ class ChatService(BaseService):
             self.logger.error(f"Error checking student existence: {str(e)}")
             raise APIError(f"Error checking student: {str(e)}",
                            status_code=500)
+    
+    def removeStudentId(self, data, studentID):
+        replacement = "1"
+        if isinstance(data, dict):
+            return {key: self.removeStudentId(value, studentID) for key, value in data.items()}
+        elif isinstance(data, list):
+            return [self.removeStudentId(item, studentID) for item in data]
+        elif isinstance(data, str):
+            return data.replace(studentID, replacement)
+        return data
 
     def generate_response(self) -> dict:
         try:
@@ -153,6 +163,9 @@ class ChatService(BaseService):
                     )
                 }
             ]
+
+            messages = self.removeStudentId(messages, student_id)
+            print(messages)
 
             # Call OpenAI API
             response = self.client.chat.completions.create(
