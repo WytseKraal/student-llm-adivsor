@@ -221,7 +221,7 @@ Resources:
     Properties:
       Handler: handlers/indexing_handler.lambda_handler
       Runtime: python3.12
-      Timeout: 15
+      Timeout: 300
       CodeUri: .
       Environment:
         Variables:

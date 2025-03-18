@@ -21,6 +21,8 @@ OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 AWS_ENVIRONMENT = os.environ.get("AWS_ENVIRONMENT", "prod")
 AWS_REGION = os.environ.get("AWS_REGION", "eu-north-1")
 DYNAMODB_TABLE_NAME = f"{AWS_ENVIRONMENT}-student-advisor-table"
+PROGRAMMES = ["Master Security and Network Engineering",
+              "Master Software Engineering"]
 
 
 class IndexingService(BaseService):
@@ -86,58 +88,62 @@ class IndexingService(BaseService):
 
     def index_all_courses(self):
         """
-        Index all courses in the database.
+        Index all courses by retrieving course IDs from the database and 
+        calling index_course for each.
         """
         logger.info("Indexing all courses in Pinecone")
-        courses = self.get_all_course_details_with_schedule()
 
-        for course in courses:
-            course_id = course.get("COURSE_ID")
-            if not course_id:
-                logger.error("A course is missing COURSE_ID; skipping.")
-                continue
-            # Set event body to the course JSON so index_course can use it.
-            self.event.body = json.dumps(course)
+        course_ids = self.get_all_course_ids()
+        for course_id in course_ids:
             self.index_course(course_id)
 
-        logger.info("Indexed %d courses in Pinecone.", len(courses))
+        logger.info("Indexed %d courses in Pinecone.", len(course_ids))
+
         response = LambdaResponse(
             statusCode=200,
             headers=self.build_headers(),
             body=json.dumps(
-                {"message": f"Indexed {len(courses)} courses in Pinecone."})
+                {"message": f"Indexed {len(course_ids)} courses in Pinecone."})
         )
         return response.model_dump()
 
     def index_course(self, course_id):
-        """Index a single course in Pinecone, splitting it by attributes."""
-        course = json.loads(self.event.body)
-        if course.get("COURSE_ID") != course_id:
-            logger.error("Missing course ID in request body")
-            raise APIError("Missing course ID in request body",
-                           status_code=400)
+        """Index a single course in Pinecone using the course_id"""
+        if not course_id:
+            logger.error("Missing course ID in request")
+            raise APIError("Missing course ID in request", status_code=400)
+
+        course_details = self.get_course_details(course_id)
+        timetable = self.get_timetable(course_id)
+
+        if not course_details:
+            logger.error(f"Course details not found for {course_id}")
+            raise APIError(f"Course {course_id} not found", status_code=404)
+
+        # Combine course details with timetable
+        course_details["SCHEDULE"] = timetable
 
         logger.info(f"Indexing course {course_id} in Pinecone")
 
         sections = {
             "general": {
-                "name": course.get("NAME"),
-                "desc": course.get("DESCRIPTION"),
-                "start": course.get("STARTDATE"),
-                "register": course.get("REGISTRATION_INFO"),
-                "remarks": course.get("REMARKS")
+                "name": course_details.get("NAME"),
+                "description": course_details.get("DESCRIPTION"),
+                "startdate": course_details.get("STARTDATE"),
+                "registration_info": course_details.get("REGISTRATION_INFO"),
+                "remarks": course_details.get("REMARKS")
             },
             "content_obj_methods": {
-                "content": course.get("CONTENTS"),
-                "objectives": course.get("OBJECTIVES"),
-                "methods": course.get("TEACHING_METHODS")
+                "content": course_details.get("CONTENTS"),
+                "objectives": course_details.get("OBJECTIVES"),
+                "teaching_methods": course_details.get("TEACHING_METHODS")
             },
             "assessment_prereq_studymat": {
-                "assessment": course.get("ASSESSMENT"),
-                "prerequisites": course.get("PREREQUISITES"),
-                "materials": course.get("STUDY_MATERIALS")
+                "assessment": course_details.get("ASSESSMENT"),
+                "prerequisites": course_details.get("PREREQUISITES"),
+                "study_materials": course_details.get("STUDY_MATERIALS")
             },
-            "schedule": course.get("SCHEDULE")
+            "schedule": course_details.get("SCHEDULE")
         }
 
         vectors = []
@@ -167,9 +173,7 @@ class IndexingService(BaseService):
             ).model_dump()
 
     def delete_course(self, course_id):
-        """
-        Delete a course from the index.
-        """
+        """Delete a singl course from the index using the course_id"""
         if not course_id:
             logger.error("Missing course ID in request")
             raise APIError("Missing course ID in request", status_code=400)
@@ -255,6 +259,9 @@ class IndexingService(BaseService):
         Splits text into chunks no larger than max_chunk_size.
         Splitting is done on sentence boundaries.
         """
+        # Ensure the input is a string
+        if not isinstance(text, str):
+            text = str(text)  # Convert to string if it's not already a string
         sentences = re.split(r'(?<=[.!?])\s+', text)
         chunks = []
         current_chunk = ""
@@ -270,46 +277,43 @@ class IndexingService(BaseService):
             chunks.append(current_chunk)
         return chunks
 
-    def get_items_sk_begins_with(self, pk_value, sk_prefix):
-        try:
+    def get_all_course_ids(self):
+        """ Get all course IDs from DynamoDB for all programs """
+        logger.info("Retrieving all course IDs from DynamoDB")
+        course_ids = []
+
+        for program in PROGRAMMES:
             response = self.table.query(
-                KeyConditionExpression=Key('PK').begins_with(
-                    pk_value) & Key('SK').begins_with(sk_prefix)
+                IndexName="GSI_COURSES_PER_PROGRAM",
+                KeyConditionExpression=Key("CTYPE").begins_with("COURSE")
+                & Key("PROGRAM").eq(program)
             )
-            items = response.get('Items', [])
-            return items
-        except Exception as e:
-            logger.error(f"Error fetching items for {sk_prefix}: {e}")
+            courses = response.get("Items", [])
+
+            for course in courses:
+                course_ids.append(course['COURSE_ID'])
+
+        logger.info(f"Retrieved {len(course_ids)} course IDs.")
+        return course_ids
+
+    def get_course_details(self, course_id):
+        """ Get the details of a course from DynamoDB """
+        response = self.table.query(
+            KeyConditionExpression=Key("PK").eq(
+                f"COURSE#{course_id}") & Key("SK").eq("DETAILS")
+        )
+        items = response.get("Items", [])
+        if items:
+            return items[0]
         return None
 
-    def get_all_course_details_with_schedule(self):
-        """
-        Get all course details with schedule DynamoDB.
-        """
-        logger.info("Getting course details and schedules from DynamoDB")
-
-        # TODO: Fix course detail and schedule retrieval
-        # # Scan the table to get all course details
-        # courses = self.table.scan(
-        #     FilterExpression=Key('SK').eq('DETAILS')
-        # ).get('Items', [])
-
-        # # Scan the table to get all timetables
-        # timetables = self.table.scan(
-        #     FilterExpression=Key('SK').eq('TIME_TABLE')
-        # ).get('Items', [])
-
-        # # Create a dictionary of timetables keyed by COURSE_ID
-        # timetable_dict = {timetable['PK'].split(
-        #     '#')[1]: timetable['SCHEDULE'] for timetable in timetables}
-
-        # course_details = {}
-        # for course in courses:
-        #     course_id = course['COURSE_ID']
-        #     # Add the timetable to the course details if it exists
-        #     if course_id in timetable_dict:
-        #         course['SCHEDULE'] = timetable_dict[course_id]
-        #     course_details[course_id] = course
-
-        logger.info("Retrieved %d courses with schedules.", len(courses))
-        return []
+    def get_timetable(self, course_id):
+        """ Get the timetable for a course from DynamoDB """
+        response = self.table.query(
+            KeyConditionExpression=Key("PK").eq(
+                f"COURSE#{course_id}") & Key("SK").eq("TIMETABLE")
+        )
+        items = response.get("Items", [])
+        if items:
+            return items[0].get("SCHEDULE")
+        return None
