@@ -4,7 +4,7 @@ from datetime import datetime as dt
 import datetime
 
 REGION = 'eu-north-1'
-TABLENAME = 'prod-student-advisor-table'
+TABLENAME = 'dev-student-advisor-table'
 STUDENT = 'STUDENT#f05cc95c-4021-70f6-792e-1df97c8f6262'
 
 
@@ -34,7 +34,7 @@ def get_items_sk_begins_with(pk_value, sk_prefix):
     except Exception as e:
         print(f"Error fetching items for {pk_value} with sk prefix {sk_prefix}: {e}")
         return None
-    
+ 
 
 # Returns the tokens of the previous 24 hours
 def get_requests(h=24):
@@ -48,6 +48,26 @@ def get_requests(h=24):
             ) & Key('USAGE_TYPE').eq('REQUEST')
     )
     return response.get('Items', [])
+
+# Returns the tokens of the previous 24 hours
+def get_students():
+    response = table.query(
+        TableName=TABLENAME,
+        IndexName='GSI_STUDENTS',
+        KeyConditionExpression=Key('SK').between(
+            f"REQUEST#{ts_yesterday}", f"REQUEST#{ts_now}"
+            ) & Key('USAGE_TYPE').eq('REQUEST')
+    )
+    return response.get('Items', [])
+
+
+def students_count():
+    response = table.query(
+        TableName=TABLENAME,
+        IndexName="GSI_STUDENTS",
+        KeyConditionExpression=Key('OTYPE').eq("STUDENT_PROFILE"),
+        Select='COUNT') # Only return the count of items
+    print(response)
 
 
 def main():
