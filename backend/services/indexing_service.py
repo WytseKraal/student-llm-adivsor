@@ -62,7 +62,9 @@ class IndexingService(BaseService):
 
         logger.info("Handling request: %s %s", http_method, path)
 
-        if http_method == "POST" and path == "/indexing":
+        if http_method == "OPTIONS":
+            return self.options()
+        elif http_method == "POST" and path == "/indexing":
             return self.index_all_courses()
 
         elif http_method == "GET" and path == "/indexing/health-check":
