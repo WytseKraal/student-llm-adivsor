@@ -1,4 +1,4 @@
-timetable =[
+timetable = [
   {
     "PK": "COURSE#5364DCBS6Y",
     "SK": "TIMETABLE",

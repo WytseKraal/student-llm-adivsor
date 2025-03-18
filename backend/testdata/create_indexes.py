@@ -2,7 +2,7 @@
 import boto3
 
 REGION = 'eu-north-1'
-TABLENAME = 'dev-student-advisor-table'
+TABLENAME = 'prod-student-advisor-table'
 
 usage_index = {
     "TableName": TABLENAME,
@@ -52,14 +52,14 @@ course_index = {
 students_index = {
     "TableName": TABLENAME,
     "AttributeDefinitions": [
-        {"AttributeName": "SK", "AttributeType": "S"},
+        {"AttributeName": "OTYPE", "AttributeType": "S"},
     ],
     "GlobalSecondaryIndexUpdates": [
         {
             "Create": {
                "IndexName": "GSI_STUDENTS",
                "KeySchema": [
-                    {"AttributeName": "SK", "KeyType": "HASH"},
+                    {"AttributeName": "OTYPE", "KeyType": "HASH"},
                 ],
                "Projection": {
                     "ProjectionType": "ALL"
@@ -70,10 +70,18 @@ students_index = {
 }
 
 
-def main():
+def create_index(index, name):
     dynamodb = boto3.client('dynamodb')
     try:
-        response = dynamodb.update_table(**students_index)
-        print("student_index creation initiated:", response)
+        response = dynamodb.update_table(**index)
+        print(f"{name} creation initiated:", response)
     except Exception as e:
         print("Error updating table:", e)
+
+
+def main():
+    indexes = [(course_index, "course_per_program")]
+              # ,(usage_index, "usage_index")]
+    for i in indexes:
+        (index, name) = i
+        create_index(index, name)

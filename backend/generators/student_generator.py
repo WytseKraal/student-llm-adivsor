@@ -1,7 +1,8 @@
 import random as r
 from decimal import Decimal
+import datetime as dt
 
-programs = ["Master Software Engineering"]
+programs = ["Master Software Engineering", "Master Security and Network Engineering"]
 
 
 # Generate a dictionary of random grades for assessments.
@@ -32,15 +33,17 @@ def create_enrollments(student, courses):
     enrollments = []
     results = []
     student_courses = r.sample(courses, r.randint(1, len(courses)))
+    sNow = str(dt.datetime.now())
+    sStartPeriod = str(dt.datetime.now() - dt.timedelta(days=60))
     for course in student_courses:
         enrollment = {
             "PK": student["PK"],
             "SK": f"ENROLLMENT#{course["COURSE_ID"]}",
             "COURSE_ID": course["COURSE_ID"]
         }
-        if (course["STARTDATE"]) == "2025-03-15":
+        if (course["STARTDATE"]) > sNow:
             enrollment["STATUS"] = "upcoming"
-        elif (course["STARTDATE"]) == "2025-01-15":
+        elif (course["STARTDATE"]) > sStartPeriod:
             enrollment["STATUS"] = "active"
         else:
             result = create_result_item(
@@ -62,7 +65,7 @@ def create_student_profile(student_uuid, name, email):
     student = {
             "PK": f"STUDENT#{student_uuid}",
             "SK": "PROFILE",
-            "STUDENT_ID": student_uuid,
+            "STUDENT_ID": student_id,
             "STUDENT_UUID": student_uuid,
             "NAME": name,
             "PREFERRED_NAME": name,
