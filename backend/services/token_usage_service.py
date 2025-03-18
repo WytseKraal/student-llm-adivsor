@@ -157,8 +157,7 @@ class TokenAllocator:
         table = dynamodb.Table(TABLENAME)
         response = table.query(
             IndexName='GSI_TOKENUSAGE_BY_TIME',
-            KeyConditionExpression=Key('USAGE_TYPE').eq('REQUEST'),
-            FilterExpression=Attr('PK').eq(f'{student_id}')
+            KeyConditionExpression=Key('USAGE_TYPE').eq('REQUEST') & Key('SK').eq(f'STUDENT#{student_id}')
         )
 
         r = response.get('Items', [])
