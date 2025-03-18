@@ -74,43 +74,6 @@ timetable = [
     }
   },
   {
-    "PK": "COURSE#5062COMP6Y",
-    "SK": "TIMETABLE",
-    "SCHEDULE": {
-      "WEEK_1": {
-        "Monday": [["9:00 AM - 10:30 AM", "Lecture", "l.01"]],
-        "Wednesday": [["11:00 AM - 12:30 PM", "Work college", "1.23"]]
-      },
-      "WEEK_2": {
-        "Monday": [["9:00 AM - 10:30 AM", "Lecture", "l.02"]],
-        "Wednesday": [["11:00 AM - 12:30 PM", "Work college", "2.34"]]
-      },
-      "WEEK_3": {
-        "Monday": [["9:00 AM - 10:30 AM", "Lecture", "l.01"]],
-        "Wednesday": [["11:00 AM - 12:30 PM", "Work college", "3.12"]]
-      },
-      "WEEK_4": {
-        "Monday": [["9:00 AM - 10:30 AM", "Lecture", "l.02"]],
-        "Wednesday": [["11:00 AM - 12:30 PM", "Work college", "4.01"]]
-      },
-      "WEEK_5": {
-        "Monday": [["9:00 AM - 10:30 AM", "Lecture", "l.01"]],
-        "Wednesday": [["11:00 AM - 12:30 PM", "Work college", "1.22"]]
-      },
-      "WEEK_6": {
-        "Monday": [["9:00 AM - 10:30 AM", "Lecture", "l.01"]],
-        "Wednesday": [["11:00 AM - 12:30 PM", "Work college", "4.34"]]
-      },
-      "WEEK_7": {
-        "Monday": [["9:00 AM - 10:30 AM", "Lecture", "l.01"]],
-        "Wednesday": [["11:00 AM - 12:30 PM", "Work college", "3.11"]]
-      },
-      "WEEK_8": {
-        "Wednesday": [["11:00 AM - 12:30 PM", "Exam", "l.02"]]
-      }
-    }
-  },
-  {
     "PK": "COURSE#5364MBDC6Y",
     "SK": "TIMETABLE",
     "SCHEDULE": {

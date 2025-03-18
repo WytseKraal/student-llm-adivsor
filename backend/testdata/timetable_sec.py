@@ -110,6 +110,80 @@ timetable = [{
       }
     },
     {
+    "PK": "COURSE#5364SOPR6Y",
+    "SK": "TIMETABLE",
+    "SCHEDULE": {
+      "WEEK_1": {
+        "Monday": [["9:00 AM - 10:30 AM", "Lecture", "l.01"]],
+        "Wednesday": [["11:00 AM - 12:30 PM", "Work college", "1.23"]]
+      },
+      "WEEK_2": {
+        "Monday": [["9:00 AM - 10:30 AM", "Lecture", "l.02"]],
+        "Wednesday": [["11:00 AM - 12:30 PM", "Work college", "2.34"]]
+      },
+      "WEEK_3": {
+        "Monday": [["9:00 AM - 10:30 AM", "Lecture", "l.01"]],
+        "Wednesday": [["11:00 AM - 12:30 PM", "Work college", "3.12"]]
+      },
+      "WEEK_4": {
+        "Monday": [["9:00 AM - 10:30 AM", "Lecture", "l.02"]],
+        "Wednesday": [["11:00 AM - 12:30 PM", "Work college", "4.01"]]
+      },
+      "WEEK_5": {
+        "Monday": [["9:00 AM - 10:30 AM", "Lecture", "l.01"]],
+        "Wednesday": [["11:00 AM - 12:30 PM", "Work college", "1.22"]]
+      },
+      "WEEK_6": {
+        "Monday": [["9:00 AM - 10:30 AM", "Lecture", "l.01"]],
+        "Wednesday": [["11:00 AM - 12:30 PM", "Work college", "4.34"]]
+      },
+      "WEEK_7": {
+        "Monday": [["9:00 AM - 10:30 AM", "Lecture", "l.01"]],
+        "Wednesday": [["11:00 AM - 12:30 PM", "Work college", "3.11"]]
+      },
+      "WEEK_8": {
+        "Wednesday": [["11:00 AM - 12:30 PM", "Exam", "l.02"]]
+      }
+    }
+  },
+  {
+    "PK": "COURSE#5364REEN6Y",
+    "SK": "TIMETABLE",
+    "SCHEDULE": {
+      "WEEK_1": {
+        "Tuesday": [["10:00 AM - 11:30 AM", "Lecture", "A.101"]],
+        "Thursday": [["2:00 PM - 3:30 PM", "Lab", "B.202"]]
+      },
+      "WEEK_2": {
+        "Tuesday": [["10:00 AM - 11:30 AM", "Lecture", "A.102"]],
+        "Thursday": [["2:00 PM - 3:30 PM", "Lab", "B.204"]]
+      },
+      "WEEK_3": {
+        "Tuesday": [["10:00 AM - 11:30 AM", "Lecture", "A.101"]],
+        "Thursday": [["2:00 PM - 3:30 PM", "Lab", "C.303"]]
+      },
+      "WEEK_4": {
+        "Tuesday": [["10:00 AM - 11:30 AM", "Lecture", "A.103"]],
+        "Thursday": [["2:00 PM - 3:30 PM", "Lab", "D.401"]]
+      },
+      "WEEK_5": {
+        "Tuesday": [["10:00 AM - 11:30 AM", "Lecture", "A.101"]],
+        "Thursday": [["2:00 PM - 3:30 PM", "Lab", "E.501"]]
+      },
+      "WEEK_6": {
+        "Tuesday": [["10:00 AM - 11:30 AM", "Lecture", "A.102"]],
+        "Thursday": [["2:00 PM - 3:30 PM", "Lab", "F.601"]]
+      },
+      "WEEK_7": {
+        "Tuesday": [["10:00 AM - 11:30 AM", "Lecture", "A.103"]],
+        "Thursday": [["2:00 PM - 3:30 PM", "Lab", "G.701"]]
+      },
+      "WEEK_8": {
+        "Thursday": [["10:00 AM - 12:00 PM", "Final Exam", "H.801"]]
+      }
+    }
+  },
+    {
       "PK": "COURSE#5384LASY6Y",
       "SK": "TIMETABLE",
       "SCHEDULE": {

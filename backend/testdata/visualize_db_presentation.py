@@ -8,61 +8,37 @@ dot.node("Course_Details", """Course_Details
 ----------------------
 PK (COURSE#ID) [PK]
 SK (DETAILS)
-COURSE_ID
-NAME
-DESCRIPTION
-OBJECTIVES (List)
-CONTENTS (List)
-PREREQUISITES (List)
-TEACHING_METHODS (List)
-ASSESSMENT (List)
-STUDY_MATERIALS
-STARTDATE
-REGISTRATION_INFO""")
+""")
 
 dot.node("Student_Profile", """Student_Profile
 ----------------------
 PK (STUDENT#UUID) [PK]
 SK (PROFILE)
-STUDENT_UUID
-STUDENT_ID
-OTYPE (STUDENT_PROFILE)
-FIRST_NAME
-LAST_NAME
-PREFERRED_NAME
-EMAIL
-PROGRAM
-YEAR""")
+""")
 
 dot.node("Student_Enrollment", """Student_Enrollment
 ----------------------
 PK (STUDENT#UUID) [PK]
 SK (ENROLLMENT#COURSE_ID)
-COURSE_ID
-STATUS""")
+""")
 
 dot.node("Student_Result", """Student_Result
 ----------------------
 PK (STUDENT#UUID) [PK]
 SK (RESULT#COURSE_ID)
-COURSE_ID
-ASSESSMENTS (List)
-FINAL_GRADE""")
+""")
 
 dot.node("Course_Timetable", """Course_Timetable
 ----------------------
 PK (COURSE#ID) [PK]
 SK (TIMETABLE)
-SCHEDULE (Nested Dict)""")
+""")
 
 dot.node("Student_Query", """Student_Query
 ----------------------
 PK (STUDENT#UUID) [PK]
 SK (REQUEST#TIMESTAMP)
-USAGE_TYPE
-PROMPT_USAGE
-COMPLETION_USAGE
-TOTAL_USAGE""")
+""")
 
 # Define relationships
 dot.edge("Student_Profile", "Student_Enrollment", label="Enrolls in")
