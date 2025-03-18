@@ -95,15 +95,15 @@ Resources:
           Properties:
             Path: /goodbye/bye
             Method: GET
-            Auth:
-              Authorizer: uudAuth
+            # Auth:
+            #   Authorizer: uudAuth
         SeeyaEvent:
           Type: Api
           Properties:
             Path: /goodbye/seeya
             Method: GET
-            Auth:
-              Authorizer: uudAuth
+            # Auth:
+            #   Authorizer: uudAuth
 
   DatabaseFunction:
     Type: AWS::Serverless::Function
@@ -124,22 +124,22 @@ Resources:
           Properties:
             Path: /student
             Method: PUT
-            Auth:
-              Authorizer: uudAuth
+            # Auth:
+            #   Authorizer: uudAuth
         GetStudent:
           Type: Api
           Properties:
             Path: /student
             Method: GET
-            Auth:
-              Authorizer: uudAuth
+            # Auth:
+            #   Authorizer: uudAuth
         PatchStudent:
           Type: Api
           Properties:
             Path: /student
             Method: PATCH
-            Auth:
-              Authorizer: uudAuth
+            # Auth:
+            #   Authorizer: uudAuth
 
   TokenUsageFunction:
     Type: AWS::Serverless::Function
@@ -159,15 +159,15 @@ Resources:
           Properties:
             Path: /token-usage
             Method: POST
-            Auth:
-              Authorizer: uudAuth
+            # Auth:
+            #   Authorizer: uudAuth
         GetTokenUsage:
           Type: Api
           Properties:
             Path: /token-usage
             Method: GET
-            Auth:
-              Authorizer: uudAuth
+            # Auth:
+            #   Authorizer: uudAuth
 
   ChatFunction:
     Type: AWS::Serverless::Function
@@ -189,15 +189,15 @@ Resources:
           Properties:
             Path: /chat
             Method: POST
-            Auth:
-              Authorizer: uudAuth
+            # Auth:
+            #   Authorizer: uudAuth
         CheckStudentEvent:
           Type: Api
           Properties:
             Path: /student/check
             Method: GET
-            Auth:
-              Authorizer: uudAuth
+            # Auth:
+            #   Authorizer: uudAuth
 
 Outputs:
   ApiUrl:
