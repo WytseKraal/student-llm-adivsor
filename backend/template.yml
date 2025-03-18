@@ -261,6 +261,30 @@ Resources:
             Auth:
               Authorizer: uudAuth
 
+  RAGServiceFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handlers/rag_handler.lambda_handler
+      Runtime: python3.12
+      Timeout: 300
+      CodeUri: .
+      Environment:
+        Variables:
+          Environment: !Ref Environment
+          OPENAI_API_KEY: !Ref OpenAIAPIKey
+          PINECONE_API_KEY: !Ref PineconeApiKey
+          PINECONE_ENVIRONMENT: !Ref PineconeEnvironment
+          PINECONE_INDEX_NAME: !Ref PineconeIndexName
+          PINECONE_HOST: !Ref PineconeHost
+      Events:
+        RAGQuery:
+          Type: Api
+          Properties:
+            Path: /rag
+            Method: POST
+            Auth:
+              Authorizer: uudAuth
+
   Outputs:
     ApiUrl:
       Description: "URL of the API Gateway endpoint"

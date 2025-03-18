@@ -425,3 +425,42 @@ paths:
                     example: "OK"
         "500":
           description: Internal server error during health check.
+
+  /rag:
+    post:
+      summary: Retrieval-Augmented Generation (RAG) query
+      description: Processes a query by retrieving relevant context from the index using OpenAI.
+      security:
+        - CognitoAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [query]
+              properties:
+                query:
+                  type: string
+                  example: "What are the course details for Master Software Engineering?"
+      responses:
+        "200":
+          description: Successful RAG query response.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  response:
+                    type: string
+                    example: "Here is the detailed course information..."
+                  retrieved_contexts:
+                    type: array
+                    items:
+                      type: string
+        "400":
+          description: Invalid request (e.g., missing query).
+        "401":
+          description: Unauthorized request (missing or invalid Cognito token).
+        "500":
+          description: Internal server error.

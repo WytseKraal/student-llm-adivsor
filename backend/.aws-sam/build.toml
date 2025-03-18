@@ -7,6 +7,6 @@ architecture = "x86_64"
 handler = "handlers/hello_handler.lambda_handler"
 manifest_hash = ""
 packagetype = "Zip"
-functions = ["HelloFunction", "GoodbyeFunction", "DatabaseFunction", "TokenUsageFunction", "ChatFunction", "IndexingServiceFunction"]
+functions = ["HelloFunction", "GoodbyeFunction", "DatabaseFunction", "TokenUsageFunction", "ChatFunction", "IndexingServiceFunction", "RAGServiceFunction"]
 
 [layer_build_definitions]
