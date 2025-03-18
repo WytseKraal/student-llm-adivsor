@@ -4,7 +4,7 @@ from pydantic import ValidationError
 from models.event import LambdaEvent
 from models.response import LambdaResponse
 from services.base_service import APIError
-from services.embedding_service import EmbeddingService
+from services.indexing_service import IndexingService
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -13,7 +13,7 @@ logger.setLevel(logging.INFO)
 def lambda_handler(event: dict, context: object) -> dict:
     try:
         event_obj = LambdaEvent(**event)
-        service = EmbeddingService(event_obj, context)
+        service = IndexingService(event_obj, context)
         return service.handle()
     except APIError as e:
         return LambdaResponse(
@@ -28,10 +28,10 @@ def lambda_handler(event: dict, context: object) -> dict:
             body=json.dumps({"error": "Invalid event structure",
                              "details": ve.errors()})
         ).model_dump()
-    except Exception:
+    except Exception as e:
         logger.exception("Unhandled exception")
         return LambdaResponse(
             statusCode=500,
             headers={},
-            body=json.dumps({"error": "Internal server error"})
+            body=json.dumps({"error": f"Internal server error: {e}"})
         ).model_dump()

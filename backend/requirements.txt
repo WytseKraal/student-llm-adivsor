@@ -1,6 +1,6 @@
 pydantic
 openai
-dotenv
+python-dotenv
 boto3
-opensearch-py
 requests-aws4auth
+pinecone

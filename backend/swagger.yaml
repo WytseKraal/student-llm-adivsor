@@ -326,3 +326,102 @@ paths:
           description: No token usage data found for the given student ID and timeframe.
         "500":
           description: Internal server error.
+
+  /indexing:
+    post:
+      summary: Index all courses
+      description: Indexes all courses in the Pinecone database.
+      security:
+        - CognitoAuth: []
+      responses:
+        "200":
+          description: Courses indexed successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "All courses indexed successfully"
+        "500":
+          description: Internal server error due to Pinecone, OpenAI, or DynamoDB failure.
+
+  /indexing/{course_id}:
+    post:
+    summary: Index a specific course
+    description: Indexes a specific course in the Pinecone database.
+    security:
+      - CognitoAuth: []
+    parameters:
+      - name: course_id
+        in: path
+        required: true
+        description: ID of the course to index.
+        schema:
+          type: string
+    responses:
+      "200":
+        description: Course indexed successfully.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: "Course indexed successfully"
+      "400":
+        description: Bad request due to missing course ID in request body.
+      "500":
+        description: Internal server error during Pinecone indexing.
+
+    delete:
+      summary: Delete a course from the index
+      description: Removes a course from the Pinecone database.
+      security:
+        - CognitoAuth: []
+      parameters:
+        - name: course_id
+          in: path
+          required: true
+          description: ID of the course to delete.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Course deleted successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Course deleted successfully"
+        "400":
+          description: Bad request due to missing course ID.
+        "404":
+          description: Course not found in Pinecone database.
+        "500":
+          description: Internal server error during Pinecone deletion.
+
+  /indexing/health-check:
+    get:
+      summary: Indexing service health check
+      description: Checks if the indexing service is running and available.
+      security:
+        - CognitoAuth: []
+      responses:
+        "200":
+          description: Service is operational.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "OK"
+        "500":
+          description: Internal server error during health check.
