@@ -152,7 +152,7 @@ class TokenAllocator:
 
         return self.calculate_usage(r)
 
-    def get_total_amount_of_requests_by_user(student_id):
+    def get_total_amount_of_requests_by_user(self, student_id):
         dynamodb = boto3.resource('dynamodb', region_name=REGION)
         table = dynamodb.Table(TABLENAME)
         response = table.query(
