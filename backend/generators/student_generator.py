@@ -2,7 +2,7 @@ import random as r
 from decimal import Decimal
 import datetime as dt
 
-programs = ["Master Software Engineering"]
+programs = ["Master Software Engineering", "Master Security and Network Engineering"]
 
 
 # Generate a dictionary of random grades for assessments.
