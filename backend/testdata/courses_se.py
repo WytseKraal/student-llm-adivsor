@@ -1,4 +1,87 @@
 courses = [{
+    "PK": "COURSE#5364REEN6Y",
+    "SK": "DETAILS",
+    "COURSE_ID": "5364REEN6Y",
+    "PROGRAM": "Master Software Engineering",
+    "CTYPE": "COURSE",
+    "NAME": "Requirements Engineering",
+    "DESCRIPTION": "At the heart of Requirements Engineering is making careful decisions about what system to construct. To understand what decisions to make, we must gather and structure knowledge about the domain and feasibility. Humans are not infallible truth-finding machines, and our decision-making is often flawed. This interactive course explores requirements engineering approaches and pitfalls by discussing real-life cases. Students will explore psychological and philosophical sources and practice extensively, with a primary focus on interviewing techniques.",
+    "OBJECTIVES": [
+        "You will understand why organizational and stakeholder needs are hard to express, capture, and understand.",
+        "You will learn the shortcomings in the (agile) methods and best practices that are widely used.",
+        "You will practice knowledge gathering and system modeling techniques."
+    ],
+    "CONTENTS": [
+        "Introduction to Requirements Engineering: challenges, fundamental concepts, and decision-making.",
+        "Stakeholder and organizational needs: capturing, expressing, and structuring knowledge.",
+        "Agile methods and their shortcomings in requirements gathering.",
+        "Psychological and philosophical aspects of decision-making in requirements engineering.",
+        "Knowledge gathering and system modeling techniques: UML diagrams and related tools.",
+        "Interviewing techniques and hands-on practice with real-life cases."
+    ],
+    "PREREQUISITES": [
+        "Knowledge of requirement engineering from sources such as Sommerville, Robertson, van Lamsweerde, Wiegers, or Pohl.",
+        "Understanding of modeling techniques such as UML diagrams to describe software behavior."
+    ],
+    "REGISTRATION_INFO": "https://student.uva.nl/en/topics/course-registration",
+    "TEACHING_METHODS": [
+        "Lecture",
+        "Seminar",
+        "Working independently on a project or thesis",
+        "Supervision/feedback meeting",
+        "Self-study",
+        "Presentation/symposium"
+    ],
+    "STUDY_MATERIALS": [
+        "Noise: A Flaw in Human Judgement (Kahneman)",
+        "Syllabus provided during the course"
+    ],
+    "ASSESSMENT": [
+        "Reading tests",
+        "Lab work",
+        "Exam"
+    ],
+    "STARTDATE": "2024-09-01"
+},
+  {
+    "PK": "COURSE#5364SSVT6Y",
+    "SK": "DETAILS",
+    "PROGRAM": "Master Software Engineering",
+    "CTYPE": "COURSE",
+    "COURSE_ID": "5364SSVT6Y",
+    "NAME": "Software Verification, Validation, and Testing (SVVT)",
+    "DESCRIPTION": "Software specification, verification, and testing entail checking whether a given software system satisfies given requirements and/or specifications. This course covers formal specifications, type-specification, abstraction, and automated testing methods with a focus on functional and imperative programming in Haskell.",
+    "OBJECTIVES": [
+      "Understand and write specifications in the language of predicate logic.",
+      "Use type-specification and abstraction to make programs more easily testable.",
+      "Write formal specifications for testing Haskell code.",
+      "Use random test generation for automating the test process."
+    ],
+    "CONTENTS": [
+      "Formal specifications: preconditions and postconditions in software testing.",
+      "Random test generation and automated test processes.",
+      "Testing functional and imperative programming styles in Haskell."
+    ],
+    "PREREQUISITES": ["Basic familiarity with logic and functional programming in Haskell"],
+    "REGISTRATION_INFO": "https://student.uva.nl/en/topics/course-registration",
+    "TEACHING_METHODS": [
+      "Lecture",
+      "Seminar",
+      "Laptop seminar",
+      "Self-study"
+    ],
+    "STUDY_MATERIALS": [
+      "Graham Hutton, Programming in Haskell, Cambridge University Press 2016 (Second Edition)",
+      "Recommended background reading: Logic in Action (available online)",
+      "The Haskell Road to Logic, Maths, and Programming"
+    ],
+    "ASSESSMENT": [
+      "Course examination with assignments and a final assessment of theoretical and practical components."
+    ],
+    "REMARKS": "Course materials and announcements will be provided via Canvas.",
+    "STARTDATE": "2024-09-01"
+  },
+  {
     "PK": "COURSE#5364DCBS6Y",
     "SK": "DETAILS",
     "COURSE_ID": "5364DCBS6Y",
@@ -39,7 +122,51 @@ courses = [{
       "Project development process"
     ],
     "REMARKS": "Availability of Canvas site",
-	"STARTDATE": "2024-05-15" 
+    "STARTDATE": "2025-02-15"
+  },
+  {
+    "PK": "COURSE#5364SOPR6Y",
+    "SK": "DETAILS",
+    "COURSE_ID": "5364SOPR6Y",
+    "PROGRAM": "Master Software Engineering",
+    "CTYPE": "COURSE",
+    "NAME": "Software Project Realization",
+    "DESCRIPTION": "Developing large-scale software systems is challenging due to incomplete, invalid, and ever-changing requirements. Adequacy of plans and code is difficult to assess, and large projects require coordination among thousands of people. While learning and adaptation are crucial, they are often difficult to implement effectively. This course explores the complexities of software project realization in business and government contexts. Students will read extensively about software engineering organization, hear from guest lecturers, analyze failed cases, and develop game plans for projects.",
+    "OBJECTIVES": [
+        "Understanding the dynamics of realizing software solutions in a business or government context.",
+        "Understanding the choices available to successfully create and deliver a software system.",
+        "An introduction to empirical research in software engineering."
+    ],
+    "CONTENTS": [
+        "Challenges in large-scale software development: incomplete and evolving requirements.",
+        "Strategies for planning, coordination, and tracking progress in software engineering.",
+        "Mechanisms for division of work and collaboration in large projects.",
+        "Analyzing failed software projects and formulating improvement strategies.",
+        "Guest lectures from industry professionals sharing real-world experiences.",
+        "Developing a game plan for a software engineering project."
+    ],
+    "PREREQUISITES": [
+        "Knowledge of software methods such as RUP, Scrum, XP.",
+        "Familiarity with software practices like pair programming and test-driven development.",
+        "Experience working in real software engineering projects."
+    ],
+    "REGISTRATION_INFO": "https://student.uva.nl/en/topics/course-registration",
+    "TEACHING_METHODS": [
+        "Lecture",
+        "Seminar",
+        "Presentation/symposium",
+        "Supervision/feedback meeting"
+    ],
+    "STUDY_MATERIALS": [
+        "Selected readings provided during the course"
+    ],
+    "ASSESSMENT": [
+        "Reading tests",
+        "Reports",
+        "Exam"
+    ],
+    "REMARKS": "Graduate-level course under the Graduate School of Informatics.",
+    "STARTDATE": "2025-02-15"
   },
   {
     "PK": "COURSE#5364SOEV6Y",
@@ -82,57 +209,8 @@ courses = [{
       "Individual reading and writing exercise (annotated bibliography for selected papers)."
     ],
     "REMARKS": "The course reader and assignments will be made available on Canvas.",
-	"STARTDATE": "2025-01-15" 
+    "STARTDATE": "2025-04-01"
 },
-{
-    "PK": "COURSE#5062COMP6Y",
-    "SK": "DETAILS",
-    "COURSE_ID": "5062COMP6Y",
-    "PROGRAM": "Master Software Engineering",
-    "CTYPE": "COURSE",
-    "NAME": "Compiler Construction",
-    "DESCRIPTION": "As implementations of programming languages, compilers are integral parts of any computing system software stack. The general ta of compilers to transform structured text from one format to another is ubiquitous in all areas of computing. This course covers all aspects of modern compiler design and implementation, including lexical and syntactical analysis, context/type checking and inference, high-level code transformations/optimizations, and target code generation.",
-    "OBJECTIVES": [
-      "To develop a profound understanding of the inner workings of compilers.",
-      "To develop the ability to design and implement compilers for varying purposes."
-    ],
-    "CONTENTS": [
-      "Step-by-step coverage of compiler design: lexical and syntactical analysis, context/type checking and inference, high-level code transformations/optimizations, and target code generation.",
-      "Case study: CiviC programming language, exposing imperative programming features found in C, Pascal, or Java.",
-      "Project-based learning: students develop a fully-fledged compiler targeting a stack-based virtual machine similar to the Java Virtual Machine.",
-      "Guest lectures from renowned compiler experts discussing industrial and commercial aspects of compiler construction."
-    ],
-    "PREREQUISITES": [
-      "General programming skills",
-      "Working proficiency in C",
-      "User-level knowledge of UNIX-like operating systems",
-      "General knowledge in computer science aligned with the first two years of a Bachelor's degree in Informatica"
-    ],
-    "REGISTRATION_INFO": "https://student.uva.nl/en/topics/course-registration",
-    "TEACHING_METHODS": [
-      "Lecture",
-      "Computer lab session/practical training",
-      "Self-study",
-      "Working independently on a project or thesis"
-    ],
-    "STUDY_MATERIALS": [
-      "The course does not follow any specific textbook, but recommended readings include:",
-      "Compilers: Principles, Techniques, and Tools - Aho, Lam, Sethi, Ullman",
-      "Engineering a Compiler - Cooper, Torczon",
-      "Modern Compiler Implementation in C - Appel, Ginsburg",
-      "Modern Compiler Design - Grune, van Reeuwijk, Bal, Jacobs, Langendoen",
-      "Optimizing Compilers for Modern Architectures - Allen, Kennedy",
-      "Practical training material: CiviC language specification, lecture slides, toolchain documentation",
-      "Software: CiviC reference compiler, assembler, virtual machine, and compiler construction framework"
-    ],
-    "ASSESSMENT": [
-      "Theoretical assignments or exam(s)",
-      "CiviC Compiler Project",
-      "CiviC Compiler Report"
-    ],
-    "REMARKS": "All study material as well as lectures are provided in English.",
-    "STARTDATE": "2024-03-15" 
-  },
   {
     "PK": "COURSE#5364MBDC6Y",
     "SK": "DETAILS",
@@ -169,43 +247,6 @@ courses = [{
       "Practical group project"
     ],
     "REMARKS": "A Canvas site for the course is available.",
-    "STARTDATE": "2025-03-15"
-  },
-  {
-    "PK": "COURSE#5364SSVT6Y",
-    "SK": "DETAILS",
-    "PROGRAM": "Master Software Engineering",
-    "CTYPE": "COURSE",
-    "COURSE_ID": "5364SSVT6Y",
-    "NAME": "Software Verification, Validation, and Testing (SVVT)",
-    "DESCRIPTION": "Software specification, verification, and testing entail checking whether a given software system satisfies given requirements and/or specifications. This course covers formal specifications, type-specification, abstraction, and automated testing methods with a focus on functional and imperative programming in Haskell.",
-    "OBJECTIVES": [
-      "Understand and write specifications in the language of predicate logic.",
-      "Use type-specification and abstraction to make programs more easily testable.",
-      "Write formal specifications for testing Haskell code.",
-      "Use random test generation for automating the test process."
-    ],
-    "CONTENTS": [
-      "Formal specifications: preconditions and postconditions in software testing.",
-      "Random test generation and automated test processes.",
-      "Testing functional and imperative programming styles in Haskell."
-    ],
-    "PREREQUISITES": ["Basic familiarity with logic and functional programming in Haskell"],
-    "REGISTRATION_INFO": "https://student.uva.nl/en/topics/course-registration",
-    "TEACHING_METHODS": [
-      "Lecture",
-      "Seminar",
-      "Laptop seminar",
-      "Self-study"
-    ],
-    "STUDY_MATERIALS": [
-      "Graham Hutton, Programming in Haskell, Cambridge University Press 2016 (Second Edition)",
-      "Recommended background reading: Logic in Action (available online)",
-      "The Haskell Road to Logic, Maths, and Programming"
-    ],
-    "ASSESSMENT": [
-      "Course examination with assignments and a final assessment of theoretical and practical components."
-    ],
-    "REMARKS": "Course materials and announcements will be provided via Canvas.",
-	"STARTDATE": "2025-03-15" 
-  }]
+    "STARTDATE": "2025-04-01"
+  }
+  ]
