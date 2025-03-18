@@ -6,7 +6,7 @@ Parameters:
   UserPoolArn:
     Type: String
     Description: ARN of the Cognito User Pool
-    Default: "arn:aws:cognito-idp:eu-north-1:565393034649:userpool/eu-north-1_cXdMnsSwH"
+    Default: "arn:aws:cognito-idp:eu-north-1:565393034649:userpool/eu-north-1_YxTYEALZB"
   Environment:
     Type: String
     Default: prod
@@ -21,21 +21,47 @@ Parameters:
 
 Globals:
   Api:
-    Auth:
     Cors:
       AllowMethods: "'GET,PUT,POST,PATCH,OPTIONS'"
-      AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token, Origin'"
+      AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,Origin'"
       AllowOrigin: !If
         - IsDev
         - "'*'"
-        - "'http://13.53.152.71'"
+        - "'https://smartstudentadvisor.nl'"
     Auth:
       Authorizers:
-        CognitoAuthorizer:
+        uudAuth:
           UserPoolArn: !Ref UserPoolArn
           AuthType: COGNITO_USER_POOLS
+          Identity:
+            Header: Authorization
+
+    MethodSettings:
+      - ResourcePath: "/*"
+        HttpMethod: "*"
+        LoggingLevel: INFO
+        DataTraceEnabled: true
+        MetricsEnabled: true
 
 Resources:
+  ApiGatewayCloudWatchLogsRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: apigateway.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs
+
+  ApiGatewayAccount:
+    Type: AWS::ApiGateway::Account
+    Properties:
+      CloudWatchRoleArn: !GetAtt ApiGatewayCloudWatchLogsRole.Arn
+
   HelloFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -51,8 +77,8 @@ Resources:
           Properties:
             Path: /hello
             Method: GET
-            Auth:
-              Authorizer: CognitoAuthorizer
+            # Auth:
+            #   Authorizer: UpdatedApiAuth
 
   GoodbyeFunction:
     Type: AWS::Serverless::Function
@@ -69,15 +95,15 @@ Resources:
           Properties:
             Path: /goodbye/bye
             Method: GET
-            Auth:
-              Authorizer: CognitoAuthorizer
+            # Auth:
+            #   Authorizer: uudAuth
         SeeyaEvent:
           Type: Api
           Properties:
             Path: /goodbye/seeya
             Method: GET
-            Auth:
-              Authorizer: CognitoAuthorizer
+            # Auth:
+            #   Authorizer: uudAuth
 
   DatabaseFunction:
     Type: AWS::Serverless::Function
@@ -98,22 +124,22 @@ Resources:
           Properties:
             Path: /student
             Method: PUT
-            Auth:
-              Authorizer: CognitoAuthorizer
+            # Auth:
+            #   Authorizer: uudAuth
         GetStudent:
           Type: Api
           Properties:
             Path: /student
             Method: GET
-            Auth:
-              Authorizer: CognitoAuthorizer
+            # Auth:
+            #   Authorizer: uudAuth
         PatchStudent:
           Type: Api
           Properties:
             Path: /student
             Method: PATCH
-            Auth:
-              Authorizer: CognitoAuthorizer
+            # Auth:
+            #   Authorizer: uudAuth
 
   TokenUsageFunction:
     Type: AWS::Serverless::Function
@@ -133,16 +159,15 @@ Resources:
           Properties:
             Path: /token-usage
             Method: POST
-            Auth:
-              Authorizer: CognitoAuthorizer
+            # Auth:
+            #   Authorizer: uudAuth
         GetTokenUsage:
           Type: Api
           Properties:
             Path: /token-usage
             Method: GET
-            Auth:
-              Authorizer: CognitoAuthorizer
-
+            # Auth:
+            #   Authorizer: uudAuth
 
   ChatFunction:
     Type: AWS::Serverless::Function
@@ -164,15 +189,15 @@ Resources:
           Properties:
             Path: /chat
             Method: POST
-            Auth:
-              Authorizer: CognitoAuthorizer
+            # Auth:
+            #   Authorizer: uudAuth
         CheckStudentEvent:
           Type: Api
           Properties:
             Path: /student/check
             Method: GET
-            Auth:
-              Authorizer: CognitoAuthorizer
+            # Auth:
+            #   Authorizer: uudAuth
 
 Outputs:
   ApiUrl:

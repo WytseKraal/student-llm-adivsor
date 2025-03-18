@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useUserData } from "@/hooks/userDataHook";
 import { useStudentData } from "@/hooks/studentDataHook";
+import { useStudentData } from "@/hooks/studentDataHook";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Loader2, Pencil, Check, X } from "lucide-react";
@@ -141,6 +142,10 @@ export default function UserProfile({ apiUrl, getToken }: UserProfileProps) {
               )}
             </div>
 
+            <div className="space-y-1">
+              <p className="text-sm text-muted-foreground">Program</p>
+              <p className="font-medium">{studentData?.program || "Not provided"}</p>
+            </div>
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">Program</p>
               <p className="font-medium">{studentData?.program || "Not provided"}</p>

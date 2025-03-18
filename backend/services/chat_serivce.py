@@ -23,8 +23,8 @@ class ChatService(BaseService):
         self.openai_api_key = os.getenv("OPENAI_API_KEY")
         if not self.openai_api_key:
             raise APIError("Missing OpenAI API key", status_code=500)
-        
-        logger.info(f"APIKEY: {self.openai_api_key}")
+
+        # logger.info(f"APIKEY: {self.openai_api_key}")
 
         self.client = openai.OpenAI(api_key=self.openai_api_key)
 
@@ -50,33 +50,34 @@ class ChatService(BaseService):
             # Extract student_id from query parameters
             query_parameters = self.event.queryStringParameters or {}
             student_id = query_parameters.get("student_id")
-            
+
             if not student_id:
-                raise APIError("Missing 'student_id' in query parameters", status_code=400)
-            
+                raise APIError(
+                    "Missing 'student_id' in query parameters", status_code=400)
+
             # Format the student ID with the proper prefix
             formatted_student_id = f"STUDENT#{student_id}"
-            
+
             # Check if student exists in the database
             dynamodb = boto3.resource('dynamodb', region_name=REGION)
             table = dynamodb.Table(TABLENAME)
-            
+
             # We only need to check if any item exists with this PK
             # Using a limit of 1 to minimize read capacity usage
             response = table.query(
                 KeyConditionExpression=Key('PK').eq(formatted_student_id),
                 Limit=1
             )
-            
+
             # If we got any items back, the student exists
             student_exists = len(response.get('Items', [])) > 0
-            
+
             return LambdaResponse(
                 statusCode=200,
                 headers=self.build_headers(),
                 body=json.dumps({"exists": student_exists})
             ).dict()
-            
+
         except Exception as e:
             self.logger.error(f"Error checking student existence: {str(e)}")
             raise APIError(f"Error checking student: {str(e)}",
@@ -91,11 +92,11 @@ class ChatService(BaseService):
             if not user_message:
                 raise APIError("Missing 'message' in request body",
                                status_code=400)
-            
+
             if not student_id:
                 raise APIError("Missing 'studentID' in request body",
                                status_code=400)
-            
+
             student = f"STUDENT#{student_id}"
 
             enrollments = self.get_items_sk_begins_with(student, 'ENROLLMENT')
@@ -103,54 +104,60 @@ class ChatService(BaseService):
             profile = self.get_items_sk_begins_with(student, 'PROFILE')
 
             course_ids = get_unique_course_ids(enrollments)
-            
-            for course_id in course_ids:
-                course_key = f"COURSE#{course_id}"
-                
-
-            # Initialize an empty dictionary to store timetables for all courses
-            # initialize a list to store all courses
             all_timetables = {}
             all_courses = []
 
-            # Retrieve timetable for each course
             for course_id in course_ids:
                 course_key = f"COURSE#{course_id}"
-                course_timetable = self.get_items_sk_begins_with(course_key, 'TIMETABLE')
-                course = self.get_items_sk_begins_with(course_key, "DETAILS")
+                course_timetable = self.get_items_sk_begins_with(course_key,
+                                                                 'TIMETABLE')
+                course_details = self.get_items_sk_begins_with(course_key,
+                                                               "DETAILS")
                 all_timetables[course_id] = course_timetable
-                all_courses.append(course)
+                all_courses.append(course_details)
 
-            logger.info(f"ENROLLMENT-----------------: {enrollments}")
-            logger.info(f"GRADES {grades}")
-            logger.info(f"TIMETABLE: {all_timetables}")
-            logger.info(f"COURSES {all_courses}")
+            logger.info(f"Student Profile: {profile}")
+            logger.info(f"Enrollments: {enrollments}")
+            logger.info(f"Grades: {grades}")
+            logger.info(f"Timetables: {all_timetables}")
+            logger.info(f"Courses: {all_courses}")
 
-            prompt = f"""
-            You are an expert student helper .
-            The profile of this student is: {profile}. Adress them by their PREFERRED_NAME if available.
-
-            The grades of this student is: {grades}
-
-            This student is enrolled in: {enrollments}
-
-            This students time table is: {all_timetables}
-
-            The info for his courses are: {all_courses}
-
-            Help this student as best as you can with this message, but don't tell them that their grades are low if they are.
-
-            In addition, if you do not have information on a course say you dont have that information do not make guesses on what the course could be like. 
-            
-            Also very important, is that when someone asks about a class or class name you often give an ID back like HY12VBS0 But you should just check to have the actual course name thx.
-
-            {user_message}
-            """
+            # OpenAI API request with structured messages
+            messages = [
+                {
+                    "role": "system",
+                    "content": (
+                        "You are an AI academic advisor specializing in assisting students "
+                        "with course information, academic progress, and general student inquiries. "
+                        "Your responses should be clear, concise, and professional. "
+                        "Use the student's preferred name if available. "
+                        "Use course name instead of course ID when referring to courses. "
+                        "Don't negatively tell students they are underperforming or failing, "
+                        "instead provide guidance on how to improve their grades. "
+                        "Avoid making assumptions about courses you do not have data for."
+                        "You only have to greet the student once at the beginning of the conversation."
+                        "You don need to sign off at the end of the conversation."
+                        "You can ask clarifying questions if needed."
+                    )
+                },
+                {
+                    "role": "user",
+                    "content": (
+                        f"Student Profile: {profile}\n"
+                        f"Grades: {grades}\n"
+                        f"Enrollments: {enrollments}\n"
+                        f"Timetable: {all_timetables}\n"
+                        f"Courses: {all_courses}\n\n"
+                        "Based on the above information, assist the student with their query:\n"
+                        f"{user_message}"
+                    )
+                }
+            ]
 
             # Call OpenAI API
             response = self.client.chat.completions.create(
                 model="gpt-4o-mini",
-                messages=[{"role": "user", "content": prompt}]
+                messages=messages
             )
 
             # Extract OpenAI response
@@ -169,7 +176,7 @@ class ChatService(BaseService):
                     {"response": ai_response, "usage": ai_usage_dict})
             )
 
-            return response.dict()
+            return response.model_dump()
 
         except json.JSONDecodeError:
             raise APIError("Invalid JSON in request body", status_code=400)
@@ -195,7 +202,7 @@ class ChatService(BaseService):
 
         try:
             response = table.query(
-                KeyConditionExpression=Key('PK').eq(pk_value) & 
+                KeyConditionExpression=Key('PK').eq(pk_value) &
                 Key('SK').begins_with(sk_prefix)
             )
             print(f"RESPONSE: {response}")
@@ -210,11 +217,11 @@ class ChatService(BaseService):
 def get_unique_course_ids(data):
     # Initialize an empty set to store unique course IDs
     unique_course_ids = set()
-    
+
     # Iterate through each dictionary in the data
     for item in data:
         # Add the course ID to the set
         unique_course_ids.add(item['COURSE_ID'])
-    
+
     # Convert the set to a list for easier use
     return list(unique_course_ids)

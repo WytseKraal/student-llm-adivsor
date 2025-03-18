@@ -32,7 +32,7 @@ class BaseService:
     
     def get_cors_origin(self):
         self.logger.info(f"Current env: {self.environment}")
-        return 'http://13.53.152.71' if self.environment == 'prod' else '*'
+        return 'https://smartstudentadvisor.nl' if self.environment == 'prod' else '*'
     
     def build_headers(self) -> dict[str, str]:
         request_origin = self.event.headers.get('origin', '')

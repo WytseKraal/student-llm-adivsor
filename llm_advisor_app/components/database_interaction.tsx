@@ -4,7 +4,6 @@ import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { useUserData } from "@/hooks/userDataHook";
 
-
 interface StudentData {
   id: string;
   name: string;
@@ -32,7 +31,7 @@ const StudentManager: React.FC<StudentManagerProps> = ({
   const [studentData, setStudentData] = useState<StudentData | null>(null);
 
   const { sub } = useUserData();
-  
+
   const handleCreateStudent = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
@@ -40,7 +39,7 @@ const StudentManager: React.FC<StudentManagerProps> = ({
       const response = await fetch(`${apiUrl}/student`, {
         method: "PUT",
         headers: {
-          Authorization: token,
+          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
@@ -71,7 +70,7 @@ const StudentManager: React.FC<StudentManagerProps> = ({
       const token = await getToken();
       const response = await fetch(`${apiUrl}/student?id=${searchId}`, {
         headers: {
-          Authorization: token,
+          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       });
@@ -104,24 +103,22 @@ const StudentManager: React.FC<StudentManagerProps> = ({
   const handleUpdateStudent = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-
       const token = await getToken();
       const response = await fetch(`${apiUrl}/student`, {
         method: "PATCH",
         headers: {
-          Authorization: token,
+          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
           id: sub,
           preferredName: studentPreferredName,
-          email:studentEmail
+          email: studentEmail,
         }),
       });
 
       const data = await response.json();
       setResponseMessage(data.message || "Student updated successfully");
-
     } catch (error) {
       setResponseMessage(
         "Error updating student: " +
@@ -161,32 +158,6 @@ const StudentManager: React.FC<StudentManagerProps> = ({
               }
             />
             <Button type="submit">Save Student</Button>
-          </form>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Update Student</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleUpdateStudent} className="flex flex-col gap-4">
-            <Input
-              placeholder="Preferred name"
-              value={studentPreferredName}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setStudentPreferredName(e.target.value)
-              }
-            />
-            <Input
-              placeholder="Email"
-              type="email"
-              value={studentEmail}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setStudentEmail(e.target.value)
-              }
-            />
-            <Button type="submit">Update Student</Button>
           </form>
         </CardContent>
       </Card>
