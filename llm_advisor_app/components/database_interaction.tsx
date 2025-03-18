@@ -25,7 +25,7 @@ const StudentManager: React.FC<StudentManagerProps> = ({
   const [studentId, setStudentId] = useState<string>("");
   const [studentName, setStudentName] = useState<string>("");
   const [studentEmail, setStudentEmail] = useState<string>("");
-  const [studentPreferredName, setStudentPreferredName] = useState<string>("");
+  // const [studentPreferredName, setStudentPreferredName] = useState<string>("");
   const [searchId, setSearchId] = useState<string>("");
   const [responseMessage, setResponseMessage] = useState<string>("");
   const [studentData, setStudentData] = useState<StudentData | null>(null);
@@ -100,32 +100,32 @@ const StudentManager: React.FC<StudentManagerProps> = ({
     }
   };
 
-  const handleUpdateStudent = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    try {
-      const token = await getToken();
-      const response = await fetch(`${apiUrl}/student`, {
-        method: "PATCH",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          id: sub,
-          preferredName: studentPreferredName,
-          email: studentEmail,
-        }),
-      });
+  // const handleUpdateStudent = async (e: React.FormEvent<HTMLFormElement>) => {
+  //   e.preventDefault();
+  //   try {
+  //     const token = await getToken();
+  //     const response = await fetch(`${apiUrl}/student`, {
+  //       method: "PATCH",
+  //       headers: {
+  //         Authorization: `Bearer ${token}`,
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify({
+  //         id: sub,
+  //         preferredName: studentPreferredName,
+  //         email: studentEmail,
+  //       }),
+  //     });
 
-      const data = await response.json();
-      setResponseMessage(data.message || "Student updated successfully");
-    } catch (error) {
-      setResponseMessage(
-        "Error updating student: " +
-          (error instanceof Error ? error.message : "Unknown error")
-      );
-    }
-  };
+  //     const data = await response.json();
+  //     setResponseMessage(data.message || "Student updated successfully");
+  //   } catch (error) {
+  //     setResponseMessage(
+  //       "Error updating student: " +
+  //         (error instanceof Error ? error.message : "Unknown error")
+  //     );
+  //   }
+  // };
 
   return (
     <div className="flex flex-col gap-8 w-full max-w-2xl">
