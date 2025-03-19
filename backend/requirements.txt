@@ -1,3 +1,5 @@
 pydantic
 openai
 dotenv
+boto3
+pinecone

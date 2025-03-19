@@ -18,6 +18,23 @@ Parameters:
     Type: String
     Description: OpenAI API Key for LLM access
     NoEcho: true # This prevents the key from being displayed in logs/console
+  AWSRegion:
+    Type: String
+    Description: AWS Region
+    Default: eu-north-1
+  PineconeApiKey:
+    Type: String
+    Description: Pinecone API Key
+    NoEcho: true
+  PineconeEnvironment:
+    Type: String
+    Description: Pinecone Environment
+  PineconeIndexName:
+    Type: String
+    Description: Pinecone Index Name
+  PineconeHost:
+    Type: String
+    Description: Pinecone Host
 
 Globals:
   Api:
@@ -174,7 +191,7 @@ Resources:
     Properties:
       Handler: handlers/chat_handler.lambda_handler
       Runtime: python3.12
-      Timeout: 10
+      Timeout: 60
       CodeUri: .
       Environment:
         Variables:
@@ -183,6 +200,14 @@ Resources:
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Sub "${Environment}-student-advisor-table"
+        - PolicyName: InvokeLambdaPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - lambda:InvokeFunction
+                Resource: "*"
       Events:
         ChatEvent:
           Type: Api
@@ -199,10 +224,79 @@ Resources:
             # Auth:
             #   Authorizer: uudAuth
 
-Outputs:
-  ApiUrl:
-    Description: "URL of the API Gateway endpoint"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod"
+  IndexingServiceFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handlers/indexing_handler.lambda_handler
+      Runtime: python3.12
+      Timeout: 300
+      CodeUri: .
+      Environment:
+        Variables:
+          Environment: !Ref Environment
+          OPENAI_API_KEY: !Ref OpenAIAPIKey
+          PINECONE_API_KEY: !Ref PineconeApiKey
+          PINECONE_ENVIRONMENT: !Ref PineconeEnvironment
+          PINECONE_INDEX_NAME: !Ref PineconeIndexName
+          PINECONE_HOST: !Ref PineconeHost
+      Events:
+        IndexAllCourses:
+          Type: Api
+          Properties:
+            Path: /indexing
+            Method: POST
+            Auth:
+              Authorizer: uudAuth
+        HealthCheck:
+          Type: Api
+          Properties:
+            Path: /indexing/health-check
+            Method: GET
+            Auth:
+              Authorizer: uudAuth
+        IndexCourse:
+          Type: Api
+          Properties:
+            Path: /indexing/{course_id}
+            Method: POST
+            Auth:
+              Authorizer: uudAuth
+        DeleteCourse:
+          Type: Api
+          Properties:
+            Path: /indexing/{course_id}
+            Method: DELETE
+            Auth:
+              Authorizer: uudAuth
+
+  RAGServiceFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handlers/rag_handler.lambda_handler
+      Runtime: python3.12
+      Timeout: 300
+      CodeUri: .
+      Environment:
+        Variables:
+          Environment: !Ref Environment
+          OPENAI_API_KEY: !Ref OpenAIAPIKey
+          PINECONE_API_KEY: !Ref PineconeApiKey
+          PINECONE_ENVIRONMENT: !Ref PineconeEnvironment
+          PINECONE_INDEX_NAME: !Ref PineconeIndexName
+          PINECONE_HOST: !Ref PineconeHost
+      Events:
+        RAGQuery:
+          Type: Api
+          Properties:
+            Path: /rag
+            Method: POST
+            Auth:
+              Authorizer: uudAuth
+
+  Outputs:
+    ApiUrl:
+      Description: "URL of the API Gateway endpoint"
+      Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod"
 
 Conditions:
   IsDev: !Equals
