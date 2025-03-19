@@ -191,7 +191,7 @@ Resources:
     Properties:
       Handler: handlers/chat_handler.lambda_handler
       Runtime: python3.12
-      Timeout: 10
+      Timeout: 60
       CodeUri: .
       Environment:
         Variables:
@@ -200,6 +200,14 @@ Resources:
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Sub "${Environment}-student-advisor-table"
+        - PolicyName: InvokeLambdaPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - lambda:InvokeFunction
+                Resource: "*"
       Events:
         ChatEvent:
           Type: Api
