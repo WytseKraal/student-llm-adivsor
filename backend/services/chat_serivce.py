@@ -166,7 +166,7 @@ class ChatService(BaseService):
                         "Greet the student once at the beginning of the conversation, but avoid repeating greetings. "
                         "You do not need to sign off at the end of the conversation. "
                         "Remember the content of the entire conversation. "
-                        "Use Markdown where appropriate to enhance readability. "
+                        "Use Markdown to enhance readability. "
                         "Structure your responses in a way that is detailed yet easy to read and understand. "
                         "Feel free to ask clarifying questions if necessary."
                     )
