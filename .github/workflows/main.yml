@@ -117,12 +117,12 @@ jobs:
             --s3-bucket artifacts-llm-advisor-cloudform \
             --no-confirm-changeset \
             --parameter-overrides \
-              "Environment=prod" \
-              "OpenAIAPIKey=${{ secrets.OPENAI_API_KEY }}" \
-              "UserPoolArn=${{ secrets.USER_POOL_ARN }}" \
-              "AWSRegion=${{ secrets.AWS_REGION }}" \
-              "PineconeApiKey=${{ secrets.PINECONE_API_KEY }}" \
-              "PineconeEnvironment=${{ secrets.PINECONE_ENVIRONMENT }}" \
-              "PineconeIndexName=${{ secrets.PINECONE_INDEX_NAME }}" \
-              "PineconeHost=${{ secrets.PINECONE_HOST }}" \
+              ParameterKey=Environment,ParameterValue=prod \
+              ParameterKey=OpenAIAPIKey,ParameterValue=${{ secrets.OPENAI_API_KEY }} \
+              ParameterKey=UserPoolArn,ParameterValue=${{ secrets.USER_POOL_ARN }} \
+              ParameterKey=AWSRegion,ParameterValue=${{ secrets.AWS_REGION }} \
+              ParameterKey=PineconeApiKey,ParameterValue=${{ secrets.PINECONE_API_KEY }} \
+              ParameterKey=PineconeEnvironment,ParameterValue=${{ secrets.PINECONE_ENVIRONMENT }} \
+              ParameterKey=PineconeIndexName,ParameterValue=${{ secrets.PINECONE_INDEX_NAME }} \
+              ParameterKey=PineconeHost,ParameterValue=${{ secrets.PINECONE_HOST }} \
             --no-fail-on-empty-changeset
