@@ -32,8 +32,8 @@ interface ChatServiceProps {
 
 export default function ChatService({ apiUrl, getToken }: ChatServiceProps) {
   const [messages, setMessages] = useState<Message[]>([]);
-  const {sub} = useUserData();
-  const {alreadyUsedTokenUsage} = useTokenUsage(apiUrl, sub, getToken);
+  const { sub } = useUserData();
+  const { alreadyUsedTokenUsage } = useTokenUsage(apiUrl, sub, getToken);
   const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false);
   const [tokenUsage, setTokenUsage] = useState<{
@@ -56,7 +56,7 @@ export default function ChatService({ apiUrl, getToken }: ChatServiceProps) {
         throw new Error("No authentication token available.");
       }
 
-      if(alreadyUsedTokenUsage <= 0) {
+      if (alreadyUsedTokenUsage <= 0) {
         return "You dont have any more remaining tokens to make requests.";
       }
 
@@ -73,7 +73,7 @@ export default function ChatService({ apiUrl, getToken }: ChatServiceProps) {
       }
 
       // Add the current message with the context and formatting instruction
-      const enhancedMessage = `${contextString}User: ${message}\n\nPlease format your response using markdown for better readability. Consider the entire conversation history above when responding.`;
+      const enhancedMessage = `${contextString}${message}`;
 
       const response = await fetch(`${apiUrl}/chat`, {
         method: "POST",

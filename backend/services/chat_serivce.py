@@ -13,6 +13,7 @@ logger.setLevel(logging.INFO)
 REGION = 'eu-north-1'
 environment = os.getenv('Environment', 'prod')
 TABLENAME = f'{environment}-student-advisor-table'
+AWS_REGION = os.environ.get("AWS_REGION", "eu-north-1")
 
 
 class ChatService(BaseService):
@@ -24,9 +25,8 @@ class ChatService(BaseService):
         if not self.openai_api_key:
             raise APIError("Missing OpenAI API key", status_code=500)
 
-        # logger.info(f"APIKEY: {self.openai_api_key}")
-
         self.client = openai.OpenAI(api_key=self.openai_api_key)
+        self.lambda_client = boto3.client("lambda", region_name=AWS_REGION)
 
         logger.info(f"Received event: {json.dumps(self.event.dict())}")
 
@@ -34,7 +34,7 @@ class ChatService(BaseService):
         http_method = self.event.httpMethod.upper()
         path = self.event.path
 
-        self.logger.info("Handling request: %s %s", http_method, path)
+        logger.info(f"Handling request: {http_method} {path}")
 
         if http_method == "OPTIONS":
             return self.options()
@@ -79,10 +79,10 @@ class ChatService(BaseService):
             ).dict()
 
         except Exception as e:
-            self.logger.error(f"Error checking student existence: {str(e)}")
+            logger.error(f"Error checking student existence: {str(e)}")
             raise APIError(f"Error checking student: {str(e)}",
                            status_code=500)
-    
+
     def removeStudentId(self, data, studentID):
         replacement = "1"
         if isinstance(data, dict):
@@ -109,10 +109,12 @@ class ChatService(BaseService):
 
             student = f"STUDENT#{student_id}"
 
+            logger.info("Fetching student profile, enrollments, and grades")
             enrollments = self.get_items_sk_begins_with(student, 'ENROLLMENT')
             grades = self.get_items_sk_begins_with(student, 'RESULT')
             profile = self.get_items_sk_begins_with(student, 'PROFILE')
 
+            logger.info("Fetching student timetable and course details")
             course_ids = get_unique_course_ids(enrollments)
             all_timetables = {}
             all_courses = []
@@ -126,11 +128,27 @@ class ChatService(BaseService):
                 all_timetables[course_id] = course_timetable
                 all_courses.append(course_details)
 
+            # Get relevant data from the RAG service
+            # try:
+            #     logger.info("Fetching RAG data")
+            #     rag_payload = {"query": user_message}
+            #     rag_response = self.lambda_client.invoke(
+            #         FunctionName="RAGServiceFunction",
+            #         Payload=json.dumps(rag_payload))
+            #     rag_response_payload = json.loads(
+            #         rag_response['Payload'].read())
+            #     relevant_data = rag_response_payload.get("relevant_data", [])
+            #     logger.info(f"Successfully fetched RAG data: {relevant_data}")
+            # except Exception as e:
+            #     logger.error(f"Error fetching RAG data: {str(e)}")
+            #     raise APIError("Error fetching RAG data", status_code=500)
+
             logger.info(f"Student Profile: {profile}")
             logger.info(f"Enrollments: {enrollments}")
             logger.info(f"Grades: {grades}")
             logger.info(f"Timetables: {all_timetables}")
             logger.info(f"Courses: {all_courses}")
+            # logger.info(f"RAG data: {relevant_data}")
 
             # OpenAI API request with structured messages
             messages = [
@@ -140,14 +158,17 @@ class ChatService(BaseService):
                         "You are an AI academic advisor specializing in assisting students "
                         "with course information, academic progress, and general student inquiries. "
                         "Your responses should be clear, concise, and professional. "
-                        "Use the student's preferred name if available. "
-                        "Use course name instead of course ID when referring to courses. "
-                        "Don't negatively tell students they are underperforming or failing, "
-                        "instead provide guidance on how to improve their grades. "
-                        "Avoid making assumptions about courses you do not have data for."
-                        "You only have to greet the student once at the beginning of the conversation."
-                        "You don need to sign off at the end of the conversation."
-                        "You can ask clarifying questions if needed."
+                        "Always use the student's preferred name, if available. "
+                        "When referring to courses, use the course name instead of the course ID. "
+                        "Avoid telling students they are underperforming or failing; instead, "
+                        "provide constructive guidance on how they can improve their grades. "
+                        "Do not make assumptions about courses for which you do not have data. "
+                        "Greet the student once at the beginning of the conversation, but avoid repeating greetings. "
+                        "You do not need to sign off at the end of the conversation. "
+                        "Remember the content of the entire conversation. "
+                        "Use Markdown to enhance readability. "
+                        "Structure your responses in a way that is detailed yet easy to read and understand. "
+                        "Feel free to ask clarifying questions if necessary."
                     )
                 },
                 {
@@ -158,7 +179,8 @@ class ChatService(BaseService):
                         f"Enrollments: {enrollments}\n"
                         f"Timetable: {all_timetables}\n"
                         f"Courses: {all_courses}\n\n"
-                        "Based on the above information, assist the student with their query:\n"
+                        # f"Relevant RAG data: {relevant_data}\n\n"
+                        "Based on the above information, assist the student with their query:\n\n"
                         f"{user_message}"
                     )
                 }
@@ -194,7 +216,7 @@ class ChatService(BaseService):
         except json.JSONDecodeError:
             raise APIError("Invalid JSON in request body", status_code=400)
         except Exception as e:
-            self.logger.error(f"Error processing OpenAI request: {str(e)}")
+            logger.error(f"Error processing OpenAI request: {str(e)}")
             raise APIError("Internal server error", status_code=500)
 
     def fetch_student_items(self, pk_value):
