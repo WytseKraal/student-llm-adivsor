@@ -89,43 +89,6 @@ export default function UserProfile({ apiUrl, getToken }: UserProfileProps) {
     );
   }
 
-<<<<<<< HEAD
-=======
-  // Handle student update
-  const handleUpdateStudent = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    try {
-      const token = await getToken();
-
-      if(studentEmail == "") {
-        setResponseMessage("Email was not provided.");
-        return;
-      }
-
-      const response = await fetch(`${apiUrl}/student`, {
-        method: "PATCH",
-        headers: {
-          Authorization: token || "",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          id: sub,
-          preferredName: studentPreferredName,
-          email: studentEmail,
-        }),
-      });
-
-      if (response.ok) {
-        setResponseMessage("Student updated successfully!");
-      } else {
-        setResponseMessage("Failed to update student.");
-      }
-    } catch (error) {
-      setResponseMessage("Error updating student.");
-    }
-  };
-
->>>>>>> 9ca84e5 (check if e-mail is empty)
   return (
     <Card className="w-full shadow-lg">
       <CardHeader className="border-b flex justify-between items-center">
@@ -190,38 +153,7 @@ export default function UserProfile({ apiUrl, getToken }: UserProfileProps) {
           </div>
         </div>
 
-<<<<<<< HEAD
         {responseMessage && <p className="mt-2 text-sm text-green-600">{responseMessage}</p>}
-=======
-        {/* Update Student Form */}
-        <div className="mt-6 border-t pt-6">
-          <h3 className="text-lg font-semibold">Update Student Information</h3>
-          <form onSubmit={handleUpdateStudent} className="flex flex-col gap-2 mt-4">
-            <label className="flex flex-col">
-              <span className="text-sm text-muted-foreground">Preferred Name</span>
-              <input
-                type="text"
-                value={studentPreferredName}
-                onChange={(e) => setStudentPreferredName(e.target.value)}
-                className="border p-2 rounded"
-              />
-            </label>
-            <label className="flex flex-col">
-              <span className="text-sm text-muted-foreground">Email</span>
-              <input
-                type="email"
-                value={studentEmail}
-                onChange={(e) => setStudentEmail(e.target.value)}
-                className="border p-2 rounded"
-              />
-            </label>
-            <button type="submit" className="bg-blue-500 text-white p-2 rounded">
-              Update Student
-            </button>
-          </form>
-          {responseMessage && <p className="mt-2 text-sm text-green-600">{responseMessage}</p>}
-        </div>
->>>>>>> 9ca84e5 (check if e-mail is empty)
       </CardContent>
     </Card>
   );
