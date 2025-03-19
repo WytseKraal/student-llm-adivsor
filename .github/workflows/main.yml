@@ -116,5 +116,13 @@ jobs:
             --region ${{ secrets.AWS_REGION }} \
             --s3-bucket artifacts-llm-advisor-cloudform \
             --no-confirm-changeset \
-            --parameter-overrides "Environment=prod OpenAIAPIKey=${{ secrets.OPENAI_API_KEY }}" \
+            --parameter-overrides \
+              "Environment=prod" \
+              "OpenAIAPIKey=${{ secrets.OPENAI_API_KEY }}" \
+              "UserPoolArn=${{ secrets.USER_POOL_ARN }}" \
+              "AWSRegion=${{ secrets.AWS_REGION }}" \
+              "PineconeApiKey=${{ secrets.PINECONE_API_KEY }}" \
+              "PineconeEnvironment=${{ secrets.PINECONE_ENVIRONMENT }}" \
+              "PineconeIndexName=${{ secrets.PINECONE_INDEX_NAME }}" \
+              "PineconeHost=${{ secrets.PINECONE_HOST }}" \
             --no-fail-on-empty-changeset
