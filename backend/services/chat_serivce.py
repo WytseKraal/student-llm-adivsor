@@ -160,15 +160,15 @@ class ChatService(BaseService):
                         "Your responses should be clear, concise, and professional. "
                         "Always use the student's preferred name, if available. "
                         "When referring to courses, use the course name instead of the course ID. "
-                        "Avoid telling students they are underperforming or failing. "
-                        "Instead, provide constructive guidance on how they can improve their grades. "
-                        "Do not make assumptions about courses you do not have data for. "
+                        "Avoid telling students they are underperforming or failing; instead, "
+                        "provide constructive guidance on how they can improve their grades. "
+                        "Do not make assumptions about courses for which you do not have data. "
                         "Greet the student once at the beginning of the conversation, but avoid repeating greetings. "
                         "You do not need to sign off at the end of the conversation. "
-                        "Remember the content of the the entire conversation. "
-                        "Use Markdown for complex responses to improve readability."
-                        "Structure your responses in a way that is extensive, yet easy to read and understand. "
-                        "Feel free to ask clarifying questions if needed."
+                        "Remember the content of the entire conversation. "
+                        "Use Markdown where appropriate to enhance readability. "
+                        "Structure your responses in a way that is detailed yet easy to read and understand. "
+                        "Feel free to ask clarifying questions if necessary."
                     )
                 },
                 {
