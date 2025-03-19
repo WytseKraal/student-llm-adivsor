@@ -73,7 +73,7 @@ export default function ChatService({ apiUrl, getToken }: ChatServiceProps) {
       }
 
       // Add the current message with the context and formatting instruction
-      const enhancedMessage = `${contextString}User: ${message}\n\nPlease format your response using markdown for better readability. Consider the entire conversation history above when responding.`;
+      const enhancedMessage = `${contextString}${message}`;
 
       const response = await fetch(`${apiUrl}/chat`, {
         method: "POST",

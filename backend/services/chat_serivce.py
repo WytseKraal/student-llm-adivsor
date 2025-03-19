@@ -82,7 +82,7 @@ class ChatService(BaseService):
             logger.error(f"Error checking student existence: {str(e)}")
             raise APIError(f"Error checking student: {str(e)}",
                            status_code=500)
-    
+
     def removeStudentId(self, data, studentID):
         replacement = "1"
         if isinstance(data, dict):
@@ -129,26 +129,26 @@ class ChatService(BaseService):
                 all_courses.append(course_details)
 
             # Get relevant data from the RAG service
-            try:
-                logger.info("Fetching RAG data")
-                rag_payload = {"query": user_message}
-                rag_response = self.lambda_client.invoke(
-                    FunctionName="RAGServiceFunction",
-                    Payload=json.dumps(rag_payload))
-                rag_response_payload = json.loads(
-                    rag_response['Payload'].read())
-                relevant_data = rag_response_payload.get("relevant_data", [])
-                logger.info(f"Successfully fetched RAG data: {relevant_data}")
-            except Exception as e:
-                logger.error(f"Error fetching RAG data: {str(e)}")
-                raise APIError("Error fetching RAG data", status_code=500)
+            # try:
+            #     logger.info("Fetching RAG data")
+            #     rag_payload = {"query": user_message}
+            #     rag_response = self.lambda_client.invoke(
+            #         FunctionName="RAGServiceFunction",
+            #         Payload=json.dumps(rag_payload))
+            #     rag_response_payload = json.loads(
+            #         rag_response['Payload'].read())
+            #     relevant_data = rag_response_payload.get("relevant_data", [])
+            #     logger.info(f"Successfully fetched RAG data: {relevant_data}")
+            # except Exception as e:
+            #     logger.error(f"Error fetching RAG data: {str(e)}")
+            #     raise APIError("Error fetching RAG data", status_code=500)
 
             logger.info(f"Student Profile: {profile}")
             logger.info(f"Enrollments: {enrollments}")
             logger.info(f"Grades: {grades}")
             logger.info(f"Timetables: {all_timetables}")
             logger.info(f"Courses: {all_courses}")
-            logger.info(f"RAG data: {relevant_data}")
+            # logger.info(f"RAG data: {relevant_data}")
 
             # OpenAI API request with structured messages
             messages = [
@@ -158,14 +158,17 @@ class ChatService(BaseService):
                         "You are an AI academic advisor specializing in assisting students "
                         "with course information, academic progress, and general student inquiries. "
                         "Your responses should be clear, concise, and professional. "
-                        "Use the student's preferred name if available. "
-                        "Use course name instead of course ID when referring to courses. "
-                        "Don't negatively tell students they are underperforming or failing, "
-                        "instead provide guidance on how to improve their grades. "
-                        "Avoid making assumptions about courses you do not have data for."
-                        "You only have to greet the student once at the beginning of the conversation."
-                        "You don need to sign off at the end of the conversation."
-                        "You can ask clarifying questions if needed."
+                        "Always use the student's preferred name, if available. "
+                        "When referring to courses, use the course name instead of the course ID. "
+                        "Avoid telling students they are underperforming or failing. "
+                        "Instead, provide constructive guidance on how they can improve their grades. "
+                        "Do not make assumptions about courses you do not have data for. "
+                        "Greet the student once at the beginning of the conversation, but avoid repeating greetings. "
+                        "You do not need to sign off at the end of the conversation. "
+                        "Remember the content of the the entire conversation. "
+                        "Use Markdown for complex responses to improve readability."
+                        "Structure your responses in a way that is extensive, yet easy to read and understand. "
+                        "Feel free to ask clarifying questions if needed."
                     )
                 },
                 {
@@ -176,8 +179,8 @@ class ChatService(BaseService):
                         f"Enrollments: {enrollments}\n"
                         f"Timetable: {all_timetables}\n"
                         f"Courses: {all_courses}\n\n"
-                        f"Relevant RAG data: {relevant_data}\n\n"
-                        "Based on the above information, assist the student with their query:\n"
+                        # f"Relevant RAG data: {relevant_data}\n\n"
+                        "Based on the above information, assist the student with their query:\n\n"
                         f"{user_message}"
                     )
                 }
