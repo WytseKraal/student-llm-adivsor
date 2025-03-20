@@ -204,7 +204,7 @@ Resources:
             - Effect: Allow
               Action:
                 - lambda:InvokeFunction
-              Resource: !GetAtt RAGServiceFunction.Arn
+              Resource: !Sub "${RAGServiceFunction.Arn}:*"
       Events:
         ChatEvent:
           Type: Api
@@ -270,6 +270,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handlers/rag_handler.lambda_handler
+      FunctionName: RAGServiceFunction
       Runtime: python3.12
       Timeout: 300
       CodeUri: .
@@ -289,6 +290,14 @@ Resources:
             Method: POST
             # Auth:
             #   Authorizer: uudAuth
+
+  RAGServiceInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref RAGServiceFunction
+      Action: lambda:InvokeFunction
+      Principal: lambda.amazonaws.com
+      SourceArn: !GetAtt ChatFunction.Arn
 
 Outputs:
   ApiUrl:
