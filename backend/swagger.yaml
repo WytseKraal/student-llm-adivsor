@@ -226,7 +226,7 @@ paths:
               properties:
                 message:
                   type: string
-                  example: "What's the assessment for the Devops and Cloud course?"
+                  example: "Hello, how can you help me?"
                 studentID:
                   type: string
                   example: "123456"
@@ -433,8 +433,17 @@ paths:
                 type: object
                 properties:
                   status:
-                    type: string
-                    example: "OK"
+                    type: object
+                    properties:
+                      pinecone:
+                        type: string
+                        example: "healthy"
+                      dynamodb:
+                        type: string
+                        example: "healthy"
+                      openai:
+                        type: string
+                        example: "healthy"
         "500":
           description: Internal server error during health check.
 
