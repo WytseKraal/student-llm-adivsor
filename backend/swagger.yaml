@@ -222,11 +222,14 @@ paths:
           application/json:
             schema:
               type: object
-              required: [message]
+              required: [message, studentID]
               properties:
                 message:
                   type: string
                   example: "Hello, how can you help me?"
+                studentID:
+                  type: string
+                  example: "123456"
       responses:
         "200":
           description: Successful chatbot response
@@ -238,6 +241,15 @@ paths:
                   response:
                     type: string
                     example: "Hello! How can I assist you today?"
+                  usage:
+                    type: object
+                    properties:
+                      prompt_tokens:
+                        type: integer
+                      completion_tokens:
+                        type: integer
+                      total_tokens:
+                        type: integer
         "400":
           description: Invalid request (e.g., missing message field or malformed JSON)
         "401":
@@ -349,32 +361,32 @@ paths:
 
   /indexing/{course_id}:
     post:
-    summary: Index a specific course
-    description: Indexes a specific course in the Pinecone database.
-    security:
-      - CognitoAuth: []
-    parameters:
-      - name: course_id
-        in: path
-        required: true
-        description: ID of the course to index.
-        schema:
-          type: string
-    responses:
-      "200":
-        description: Course indexed successfully.
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                message:
-                  type: string
-                  example: "Course indexed successfully"
-      "400":
-        description: Bad request due to missing course ID in request body.
-      "500":
-        description: Internal server error during Pinecone indexing.
+      summary: Index a specific course
+      description: Indexes a specific course in the Pinecone database.
+      security:
+        - CognitoAuth: []
+      parameters:
+        - name: course_id
+          in: path
+          required: true
+          description: ID of the course to index.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Course indexed successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Course indexed successfully"
+        "400":
+          description: Bad request due to missing course ID in request body.
+        "500":
+          description: Internal server error during Pinecone indexing.
 
     delete:
       summary: Delete a course from the index
