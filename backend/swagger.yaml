@@ -226,7 +226,7 @@ paths:
               properties:
                 message:
                   type: string
-                  example: "Hello, how can you help me?"
+                  example: "What's the assessment for the Devops and Cloud course?"
                 studentID:
                   type: string
                   example: "123456"
