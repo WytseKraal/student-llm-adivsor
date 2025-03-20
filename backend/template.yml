@@ -204,7 +204,7 @@ Resources:
             - Effect: Allow
               Action:
                 - lambda:InvokeFunction
-              Resource: "*"
+              Resource: !GetAtt RAGServiceFunction.Arn
       Events:
         ChatEvent:
           Type: Api
