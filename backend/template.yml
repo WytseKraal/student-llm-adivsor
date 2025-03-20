@@ -204,7 +204,7 @@ Resources:
             - Effect: Allow
               Action:
                 - lambda:InvokeFunction
-              Resource: !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:RAGServiceFunction:*"
+              Resource: !GetAtt RAGFunction.Arn
       Events:
         ChatEvent:
           Type: Api
@@ -221,7 +221,7 @@ Resources:
             # Auth:
             #   Authorizer: uudAuth
 
-  IndexingServiceFunction:
+  IndexingFunction:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handlers/indexing_handler.lambda_handler
@@ -266,11 +266,11 @@ Resources:
             # Auth:
             #   Authorizer: uudAuth
 
-  RAGServiceFunction:
+  RAGFunction:
     Type: AWS::Serverless::Function
     Properties:
       Handler: handlers/rag_handler.lambda_handler
-      FunctionName: RAGServiceFunction
+      FunctionName: RAGFunction
       Runtime: python3.12
       Timeout: 300
       CodeUri: .
@@ -291,10 +291,10 @@ Resources:
             # Auth:
             #   Authorizer: uudAuth
 
-  RAGServiceInvokePermission:
+  RAGInvokePermission:
     Type: AWS::Lambda::Permission
     Properties:
-      FunctionName: !Ref RAGServiceFunction
+      FunctionName: !Ref RAGFunction
       Action: lambda:InvokeFunction
       Principal: lambda.amazonaws.com
       SourceArn: !GetAtt ChatFunction.Arn

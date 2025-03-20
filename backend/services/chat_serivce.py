@@ -242,7 +242,7 @@ class ChatService(BaseService):
             logger.info(f"RAG payload: {json.dumps(rag_payload)}")
 
             response = self.lambda_client.invoke(
-                FunctionName="RAGServiceFunction",
+                FunctionName="RAGFunction",
                 Payload=json.dumps(rag_payload)
             )
             response_payload = json.loads(response['Payload'].read())
