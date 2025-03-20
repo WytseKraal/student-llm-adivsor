@@ -204,7 +204,7 @@ Resources:
             - Effect: Allow
               Action:
                 - lambda:InvokeFunction
-              Resource: !Sub "${RAGServiceFunction.Arn}:*"
+              Resource: !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:RAGServiceFunction:*"
       Events:
         ChatEvent:
           Type: Api
