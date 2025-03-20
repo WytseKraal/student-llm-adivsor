@@ -28,7 +28,7 @@ class ChatService(BaseService):
         self.client = openai.OpenAI(api_key=self.openai_api_key)
         self.lambda_client = boto3.client("lambda", region_name=AWS_REGION)
 
-        logger.info(f"Received event: {json.dumps(self.event.dict())}")
+        logger.info(f"Received event: {json.dumps(self.event.model_dump())}")
 
     def handle(self) -> dict:
         http_method = self.event.httpMethod.upper()
@@ -76,7 +76,7 @@ class ChatService(BaseService):
                 statusCode=200,
                 headers=self.build_headers(),
                 body=json.dumps({"exists": student_exists})
-            ).dict()
+            ).model_dump()
 
         except Exception as e:
             logger.error(f"Error checking student existence: {str(e)}")
@@ -129,26 +129,32 @@ class ChatService(BaseService):
                 all_courses.append(course_details)
 
             # Get relevant data from the RAG service
-            # try:
-            #     logger.info("Fetching RAG data")
-            #     rag_payload = {"query": user_message}
-            #     rag_response = self.lambda_client.invoke(
-            #         FunctionName="RAGServiceFunction",
-            #         Payload=json.dumps(rag_payload))
-            #     rag_response_payload = json.loads(
-            #         rag_response['Payload'].read())
-            #     relevant_data = rag_response_payload.get("relevant_data", [])
-            #     logger.info(f"Successfully fetched RAG data: {relevant_data}")
-            # except Exception as e:
-            #     logger.error(f"Error fetching RAG data: {str(e)}")
-            #     raise APIError("Error fetching RAG data", status_code=500)
+            try:
+                logger.info("Fetching RAG data")
+
+                rag_payload = {"query": user_message}
+                logger.info(f"RAG payload: {json.dumps(rag_payload)}")
+
+                rag_response = self.lambda_client.invoke(
+                    FunctionName="RAGServiceFunction",
+                    Payload=json.dumps(rag_payload))
+                rag_response_payload = json.loads(
+                    rag_response['Payload'].read())
+                relevant_data = rag_response_payload.get("relevant_data", [])
+
+                logger.info(f"RAG response: {rag_response_payload}")
+                logger.info(f"Successfully fetched RAG data: {relevant_data}")
+
+            except Exception as e:
+                logger.error(f"Error fetching RAG data: {str(e)}")
+                raise APIError("Error fetching RAG data", status_code=500)
 
             logger.info(f"Student Profile: {profile}")
             logger.info(f"Enrollments: {enrollments}")
             logger.info(f"Grades: {grades}")
             logger.info(f"Timetables: {all_timetables}")
             logger.info(f"Courses: {all_courses}")
-            # logger.info(f"RAG data: {relevant_data}")
+            logger.info(f"RAG data: {relevant_data}")
 
             # OpenAI API request with structured messages
             messages = [
@@ -179,7 +185,7 @@ class ChatService(BaseService):
                         f"Enrollments: {enrollments}\n"
                         f"Timetable: {all_timetables}\n"
                         f"Courses: {all_courses}\n\n"
-                        # f"Relevant RAG data: {relevant_data}\n\n"
+                        f"Relevant RAG data: {relevant_data}\n\n"
                         "Based on the above information, assist the student with their query:\n\n"
                         f"{user_message}"
                     )
@@ -187,7 +193,6 @@ class ChatService(BaseService):
             ]
 
             messages = self.removeStudentId(messages, student_id)
-            print(messages)
 
             # Call OpenAI API
             response = self.client.chat.completions.create(

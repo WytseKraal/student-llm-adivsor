@@ -6,7 +6,8 @@ from services.base_service import BaseService, APIError
 from openai import OpenAI
 from pinecone import Pinecone
 
-logger = logging.getLogger()
+# Use the module name for the logger
+logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 # Set up API keys from/and environment variables
@@ -76,10 +77,13 @@ class RAGService(BaseService):
                 raise APIError(
                     "Missing 'query' in request body", status_code=400)
 
+            logger.info(f"Generating response with query: {query}")
+
             # Generate OpenAI embedding for the query
             embedding = self.get_openai_embedding(query)
             # Retrieve relevant course content chunks from Pinecone
             relevant_data = self.retrieve_relevant_data(embedding)
+            logger.info(f"Retrieved relevant data: {relevant_data}")
 
             return LambdaResponse(
                 statusCode=200,
