@@ -115,7 +115,7 @@ class ChatService(BaseService):
             profile = self.get_items_sk_begins_with(student, 'PROFILE')
 
             logger.info("Fetching student timetable and course details")
-            course_ids = get_unique_course_ids(enrollments)
+            course_ids = self.get_unique_course_ids(enrollments)
             all_timetables = {}
             all_courses = []
 
@@ -129,14 +129,15 @@ class ChatService(BaseService):
                 all_courses.append(course_details)
 
             # Get relevant data from the RAG service
-            relevant_data = self.get_rag_data(user_message)
+            logger.info("Fetching relevant RAG data")
+            rag_data = self.get_rag_data(user_message)
 
             logger.info(f"Student Profile: {profile}")
             logger.info(f"Enrollments: {enrollments}")
             logger.info(f"Grades: {grades}")
             logger.info(f"Timetables: {all_timetables}")
             logger.info(f"Courses: {all_courses}")
-            logger.info(f"RAG data: {relevant_data}")
+            logger.info(f"RAG data: {rag_data}")
 
             # OpenAI API request with structured messages
             messages = [
@@ -167,7 +168,7 @@ class ChatService(BaseService):
                         f"Enrollments: {enrollments}\n"
                         f"Timetable: {all_timetables}\n"
                         f"Courses: {all_courses}\n\n"
-                        f"Relevant RAG data: {relevant_data}\n\n"
+                        f"Relevant RAG data: {rag_data}\n\n"
                         "Based on the above information, assist the student with their query:\n\n"
                         f"{user_message}"
                     )
@@ -214,7 +215,8 @@ class ChatService(BaseService):
             response = table.query(KeyConditionExpression=Key('PK').eq(
                 pk_value))
         except Exception as e:
-            print(f"Error fetching items for {pk_value}: {e}")
+            logger.error(f"Error fetching items for {pk_value}: {e}")
+            raise Exception(f"Error fetching items for {pk_value}: {e}")
 
         return response
 
@@ -227,43 +229,48 @@ class ChatService(BaseService):
                 KeyConditionExpression=Key('PK').eq(pk_value) &
                 Key('SK').begins_with(sk_prefix)
             )
-            print(f"RESPONSE: {response}")
             items = response.get('Items', [])
             return items
         except Exception as e:
-            print(f'''Error fetching items for {pk_value} with sk prefix
-                   {sk_prefix}: {e}''')
-            return None
+            logger.error(
+                f"Error fetching items for {pk_value} with sk prefix {sk_prefix}: {e}")
+            raise Exception(
+                f"Error fetching items for {pk_value} with sk prefix {sk_prefix}: {e}")
 
     def get_rag_data(self, user_message):
         try:
-            logger.info("Fetching RAG data")
-            rag_payload = {"query": user_message}
-            logger.info(f"RAG payload: {json.dumps(rag_payload)}")
-
             response = self.lambda_client.invoke(
                 FunctionName="RAGFunction",
-                Payload=json.dumps(rag_payload)
+                Payload=json.dumps({
+                    "path": "/rag",
+                    "httpMethod": "POST",
+                    "body": json.dumps({"query": user_message})
+                })
             )
-            response_payload = json.loads(response['Payload'].read())
-            relevant_data = response_payload.get("relevant_data", [])
 
-            logger.info(f"RAG response: {response_payload}")
-            logger.info(f"Successfully fetched RAG data: {relevant_data}")
+            response_payload = json.loads(response['Payload'].read())
+
+            # Ensure that "body" is parsed as JSON
+            if "body" in response_payload:
+                body = json.loads(response_payload["body"])
+            else:
+                body = {}
+
+            relevant_data = body.get("relevant_data", [])
+
             return relevant_data
         except Exception as e:
             logger.error(f"Error fetching RAG data: {str(e)}")
             raise Exception("Error fetching RAG data") from e
 
+    def get_unique_course_ids(self, data):
+        # Initialize an empty set to store unique course IDs
+        unique_course_ids = set()
 
-def get_unique_course_ids(data):
-    # Initialize an empty set to store unique course IDs
-    unique_course_ids = set()
+        # Iterate through each dictionary in the data
+        for item in data:
+            # Add the course ID to the set
+            unique_course_ids.add(item['COURSE_ID'])
 
-    # Iterate through each dictionary in the data
-    for item in data:
-        # Add the course ID to the set
-        unique_course_ids.add(item['COURSE_ID'])
-
-    # Convert the set to a list for easier use
-    return list(unique_course_ids)
+        # Convert the set to a list for easier use
+        return list(unique_course_ids)

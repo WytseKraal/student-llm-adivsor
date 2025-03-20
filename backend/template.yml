@@ -39,7 +39,7 @@ Parameters:
 Globals:
   Api:
     Cors:
-      AllowMethods: "'GET,PUT,POST,PATCH,OPTIONS'"
+      AllowMethods: "'GET,PUT,POST,PATCH,OPTIONS,DELETE'"
       AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,Origin'"
       AllowOrigin: !If
         - IsDev
@@ -95,7 +95,7 @@ Resources:
             Path: /hello
             Method: GET
             # Auth:
-            #   Authorizer: UpdatedApiAuth
+            #   Authorizer: uudAuth
 
   GoodbyeFunction:
     Type: AWS::Serverless::Function
@@ -211,8 +211,8 @@ Resources:
           Properties:
             Path: /chat
             Method: POST
-            # Auth:
-            #   Authorizer: uudAuth
+            Auth:
+              Authorizer: uudAuth
         CheckStudentEvent:
           Type: Api
           Properties:
@@ -263,8 +263,8 @@ Resources:
           Properties:
             Path: /indexing/{course_id}
             Method: DELETE
-            # Auth:
-            #   Authorizer: uudAuth
+            Auth:
+              Authorizer: uudAuth
 
   RAGFunction:
     Type: AWS::Serverless::Function
@@ -288,8 +288,8 @@ Resources:
           Properties:
             Path: /rag
             Method: POST
-            # Auth:
-            #   Authorizer: uudAuth
+            Auth:
+              Authorizer: uudAuth
 
   RAGInvokePermission:
     Type: AWS::Lambda::Permission
