@@ -129,25 +129,7 @@ class ChatService(BaseService):
                 all_courses.append(course_details)
 
             # Get relevant data from the RAG service
-            try:
-                logger.info("Fetching RAG data")
-
-                rag_payload = {"query": user_message}
-                logger.info(f"RAG payload: {json.dumps(rag_payload)}")
-
-                rag_response = self.lambda_client.invoke(
-                    FunctionName="RAGServiceFunction",
-                    Payload=json.dumps(rag_payload))
-                rag_response_payload = json.loads(
-                    rag_response['Payload'].read())
-                relevant_data = rag_response_payload.get("relevant_data", [])
-
-                logger.info(f"RAG response: {rag_response_payload}")
-                logger.info(f"Successfully fetched RAG data: {relevant_data}")
-
-            except Exception as e:
-                logger.error(f"Error fetching RAG data: {str(e)}")
-                raise APIError("Error fetching RAG data", status_code=500)
+            relevant_data = self.get_rag_data(user_message)
 
             logger.info(f"Student Profile: {profile}")
             logger.info(f"Enrollments: {enrollments}")
@@ -221,8 +203,8 @@ class ChatService(BaseService):
         except json.JSONDecodeError:
             raise APIError("Invalid JSON in request body", status_code=400)
         except Exception as e:
-            logger.error(f"Error processing OpenAI request: {str(e)}")
-            raise APIError("Internal server error", status_code=500)
+            logger.error(f"Error generating response: {str(e)}")
+            raise APIError(" Error generating response", status_code=500)
 
     def fetch_student_items(self, pk_value):
         dynamodb = boto3.resource('dynamodb', region_name=REGION)
@@ -252,6 +234,26 @@ class ChatService(BaseService):
             print(f'''Error fetching items for {pk_value} with sk prefix
                    {sk_prefix}: {e}''')
             return None
+
+    def get_rag_data(self, user_message):
+        try:
+            logger.info("Fetching RAG data")
+            rag_payload = {"query": user_message}
+            logger.info(f"RAG payload: {json.dumps(rag_payload)}")
+
+            response = self.lambda_client.invoke(
+                FunctionName="RAGServiceFunction",
+                Payload=json.dumps(rag_payload)
+            )
+            response_payload = json.loads(response['Payload'].read())
+            relevant_data = response_payload.get("relevant_data", [])
+
+            logger.info(f"RAG response: {response_payload}")
+            logger.info(f"Successfully fetched RAG data: {relevant_data}")
+            return relevant_data
+        except Exception as e:
+            logger.error(f"Error fetching RAG data: {str(e)}")
+            raise Exception("Error fetching RAG data") from e
 
 
 def get_unique_course_ids(data):
