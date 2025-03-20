@@ -263,8 +263,8 @@ Resources:
           Properties:
             Path: /indexing/{course_id}
             Method: DELETE
-            Auth:
-              Authorizer: uudAuth
+            # Auth:
+            #   Authorizer: uudAuth
 
   RAGServiceFunction:
     Type: AWS::Serverless::Function
@@ -287,13 +287,13 @@ Resources:
           Properties:
             Path: /rag
             Method: POST
-            Auth:
-              Authorizer: uudAuth
+            # Auth:
+            #   Authorizer: uudAuth
 
-  Outputs:
-    ApiUrl:
-      Description: "URL of the API Gateway endpoint"
-      Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod"
+Outputs:
+  ApiUrl:
+    Description: "URL of the API Gateway endpoint"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod"
 
 Conditions:
   IsDev: !Equals
