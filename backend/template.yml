@@ -200,14 +200,11 @@ Resources:
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Sub "${Environment}-student-advisor-table"
-        - PolicyName: InvokeLambdaPolicy
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: Allow
-                Action:
-                  - lambda:InvokeFunction
-                Resource: "*"
+        - Statement:
+            - Effect: Allow
+              Action:
+                - lambda:InvokeFunction
+              Resource: "*"
       Events:
         ChatEvent:
           Type: Api
