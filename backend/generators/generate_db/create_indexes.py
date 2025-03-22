@@ -1,4 +1,8 @@
-''' Script to create global secondary indexes'''
+##############################################
+# File: create_indexes.py
+# Creates the GSI'S for dynamodb; only needed when 
+# creating a new DynamoDB instance
+##############################################
 import boto3
 
 REGION = 'eu-north-1'
@@ -20,8 +24,7 @@ usage_index = {
                 ],
                "Projection": {
                     "ProjectionType": "ALL"
-                }
-                
+                }          
             }
         }
     ]
@@ -80,8 +83,11 @@ def create_index(index, name):
 
 
 def main():
+    # due to free plan you can't create multiple indexes
+    # at the same time
     indexes = [(course_index, "course_per_program")]
-              # ,(usage_index, "usage_index")]
+    # indexes = [(students_index, "GSI_STUDENTS")]
+    # indexes = [(usage_index, "GSI_TOKENUSAGE_BY_TIME")]
     for i in indexes:
         (index, name) = i
         create_index(index, name)

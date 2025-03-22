@@ -1,3 +1,7 @@
+##############################################
+# File: chat_handler.py
+# directs lambda events to DatabaseService
+##############################################
 import json
 import logging
 from pydantic import ValidationError

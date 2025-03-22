@@ -1,3 +1,7 @@
+##############################################
+# File: database_service.py
+# For interacts with DynamoDB to Patch, Put and Get
+##############################################
 import boto3
 from models.response import LambdaResponse
 from services.base_service import BaseService, APIError

@@ -1,3 +1,7 @@
+##############################################
+# File: base_service.py
+# Base service for handling and creating lambda services and endpoints
+##############################################
 import os
 import logging
 from pydantic import BaseModel, Field, ValidationError
@@ -6,10 +10,6 @@ from models.response import LambdaResponse
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
-
-# TODO: Move APIError
-# TODO: Retrieve urls from .env file
-# TODO: use model dump and json dump
 
 class APIError(Exception):
     """

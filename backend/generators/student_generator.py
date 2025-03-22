@@ -1,3 +1,7 @@
+##############################################
+# File: student_generator.py
+# Creates a random student for the student portal.
+##############################################
 import random as r
 from decimal import Decimal
 import datetime as dt
@@ -32,6 +36,7 @@ def create_result_item(student_id, course_id, asss):
 def create_enrollments(student, courses):
     enrollments = []
     results = []
+    # sample is used, to mimic parttime students and have more differences between students
     student_courses = r.sample(courses, r.randint(1, len(courses)))
     sNow = str(dt.datetime.now())
     sStartPeriod = str(dt.datetime.now() - dt.timedelta(days=60))

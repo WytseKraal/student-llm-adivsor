@@ -1,3 +1,7 @@
+##############################################
+# File: hello_handler.py
+# directs lambda events to hello_service
+##############################################
 from pydantic import ValidationError
 import logging
 from models.event import LambdaEvent

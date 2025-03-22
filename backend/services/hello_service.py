@@ -1,3 +1,7 @@
+##############################################
+# File: Hello_service.py
+# Service for handling /hello requests
+##############################################
 from services.base_service import BaseService
 from models.response import HelloResponse, LambdaResponse
 import logging

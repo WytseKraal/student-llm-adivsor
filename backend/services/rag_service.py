@@ -1,3 +1,7 @@
+##############################################
+# File: rag_service.py
+# Service for the RAG
+##############################################
 import json
 import logging
 import os

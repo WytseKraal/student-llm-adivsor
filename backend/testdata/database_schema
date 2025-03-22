@@ -21,6 +21,7 @@ PK (STUDENT#UUID) [PK]
 SK (PROFILE)
 STUDENT_UUID
 STUDENT_ID
+OTYPE (STUDENT_PROFILE)
 FIRST_NAME
 LAST_NAME
 PREFERRED_NAME
@@ -53,10 +54,24 @@ USAGE_TYPE
 PROMPT_USAGE
 COMPLETION_USAGE
 TOTAL_USAGE"]
+	GSI_TOKENUSAGE_BY_TIME [label="GSI_TOKENUSAGE_BY_TIME
+----------------------
+PK (USAGE_TYPE) [GSI]
+SK (TIMESTAMP)"]
+	GSI_COURSES_PER_PROGRAM [label="GSI_COURSES_PER_PROGRAM
+----------------------
+PK (PROGRAM) [GSI]
+SK (CTYPE)"]
+	GSI_STUDENTS [label="GSI_STUDENTS
+----------------------
+PK (OTYPE) [GSI]"]
 	Student_Profile -> Student_Enrollment [label="Enrolls in"]
 	Student_Profile -> Student_Result [label="Has results in"]
-	Student_Profile -> Student_Query [label="Does request in"]
+	Student_Profile -> Student_Query [label="Does requests"]
 	Course_Details -> Student_Enrollment [label="Enrollment for"]
 	Course_Details -> Student_Result [label="Assessment for"]
 	Course_Details -> Course_Timetable [label="Scheduled as"]
+	Student_Query -> GSI_TOKENUSAGE_BY_TIME [label="Indexed by"]
+	Student_Profile -> GSI_STUDENTS [label="Indexed by"]
+	Course_Details -> GSI_COURSES_PER_PROGRAM [label="Indexed by"]
 }

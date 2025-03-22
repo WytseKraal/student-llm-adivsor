@@ -1,0 +1,19 @@
+// Database Schema
+digraph {
+	Course_Details [label="Course_Details
+----------------------
+PK (COURSE#ID) [PK]
+SK (DETAILS)
+"]
+	Course_Timetable [label="Course_Timetable
+----------------------
+PK (COURSE#ID) [PK]
+SK (TIMETABLE)
+"]
+	GSI_COURSES_PER_PROGRAM [label="GSI_COURSES_PER_PROGRAM
+----------------------
+PK (PROGRAM) [GSI]
+SK (CTYPE)"]
+	Course_Details -> Course_Timetable [label="Scheduled as"]
+	Course_Details -> GSI_COURSES_PER_PROGRAM [label="Indexed by"]
+}

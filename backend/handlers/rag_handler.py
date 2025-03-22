@@ -1,3 +1,7 @@
+##############################################
+# File: hello_handler.py
+# directs lambda events to RAG_service
+##############################################
 import json
 import logging
 from pydantic import ValidationError

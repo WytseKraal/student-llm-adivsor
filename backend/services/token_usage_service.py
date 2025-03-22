@@ -1,3 +1,7 @@
+##############################################
+# File: token_usage_service.py
+# Service for handling token usage 
+##############################################
 import json
 import logging
 import time
@@ -136,7 +140,7 @@ class TokenUsageService(BaseService):
 
 
 class TokenAllocator:
-    MAX_TOKENS = 1_000_000 # max tokens per month
+    MAX_TOKENS = 1_000_000  # max tokens per month
 
     def get_total_amount_of_tokens_used(self) -> int:
         ts_now = dt.timestamp(dt.now())

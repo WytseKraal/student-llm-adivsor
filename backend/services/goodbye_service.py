@@ -1,3 +1,7 @@
+##############################################
+# File: goodbye_service.py
+# Service for handling /bye and /seeya
+##############################################
 from models.response import GoodbyeResponse, LambdaResponse
 from services.base_service import BaseService, APIError
 import json

@@ -1,3 +1,7 @@
+##############################################
+# File: Indexing_service.py
+# Service for indexing the rag database
+##############################################
 import re
 import boto3
 from boto3.dynamodb.conditions import Key

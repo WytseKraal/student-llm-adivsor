@@ -1,3 +1,7 @@
+##############################################
+# File: chat_service.py
+# For interaction with the LLM
+##############################################
 import openai
 import os
 import json
@@ -31,6 +35,7 @@ class ChatService(BaseService):
         logger.info(f"Received event: {json.dumps(self.event.model_dump())}")
 
     def handle(self) -> dict:
+        '''Allows OPTIONS, POST and GET'''
         http_method = self.event.httpMethod.upper()
         path = self.event.path
 
@@ -46,6 +51,7 @@ class ChatService(BaseService):
             raise APIError("Method not allowed", status_code=405)
 
     def check_student_exists(self) -> dict:
+        '''Checks if student with STUDENT#student_id exists in dynamodb'''
         try:
             # Extract student_id from query parameters
             query_parameters = self.event.queryStringParameters or {}
@@ -84,6 +90,8 @@ class ChatService(BaseService):
                            status_code=500)
 
     def removeStudentId(self, data, studentID):
+        ''' Replaces student UUID from prompt with 1 so relations remain
+        but are anonymized'''
         replacement = "1"
         if isinstance(data, dict):
             return {key: self.removeStudentId(value, studentID) for key, value in data.items()}
@@ -94,6 +102,7 @@ class ChatService(BaseService):
         return data
 
     def generate_response(self) -> dict:
+        ''' Creates prompt for LLM and returns answer '''
         try:
             body = json.loads(self.event.body)
             user_message = body.get("message")
@@ -208,6 +217,7 @@ class ChatService(BaseService):
             raise APIError(" Error generating response", status_code=500)
 
     def fetch_student_items(self, pk_value):
+        ''' fetches values from db based on PK value '''
         dynamodb = boto3.resource('dynamodb', region_name=REGION)
         table = dynamodb.Table(TABLENAME)
         response = None
@@ -221,6 +231,7 @@ class ChatService(BaseService):
         return response
 
     def get_items_sk_begins_with(self, pk_value, sk_prefix):
+        ''' returns items with PK pk_value and where SK begins with sk_prefix'''
         dynamodb = boto3.resource('dynamodb', region_name=REGION)
         table = dynamodb.Table(TABLENAME)
 
