@@ -1,3 +1,7 @@
+//#############################################
+// File: userDataHook.tsx
+// returns Cogito user information
+//#############################################
 import { useState, useEffect } from "react";
 import { useAuth } from "./auth";
 import { ICognitoUserAttributeData } from "amazon-cognito-identity-js";

@@ -1,3 +1,7 @@
+//#############################################
+// File: page.tsx
+// Handles authentication
+//#############################################
 "use client";
 
 import { useEffect, useState } from "react";

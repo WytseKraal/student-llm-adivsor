@@ -1,3 +1,7 @@
+//#############################################
+// File: ChatService.tsx
+// Components for chatting with LLM
+//#############################################
 "use client";
 
 import { useState, useRef, useEffect } from "react";

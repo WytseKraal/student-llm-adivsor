@@ -1,3 +1,7 @@
+//#############################################
+// File: UserProfileManager.tsx
+// Components for viewing profile and changing email/preferred name
+//#############################################
 "use client";
 
 import { useState, useEffect } from "react";

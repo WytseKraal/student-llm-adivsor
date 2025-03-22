@@ -1,3 +1,7 @@
+//#############################################
+// File: page.tsx
+// UI for login screen
+//#############################################
 "use client";
 import { useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";

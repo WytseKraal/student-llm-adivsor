@@ -1,3 +1,7 @@
+//#############################################
+// File: page.tsx
+// UI for test page
+//#############################################
 "use client";
 import { useEffect } from "react";
 import { useAuth } from "@/hooks/auth";

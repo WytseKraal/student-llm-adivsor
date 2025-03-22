@@ -1,3 +1,7 @@
+//#############################################
+// File: createStudentHook.tsx
+// creates GET message for API gateway to receive student info
+//#############################################
 import { useState, useEffect } from "react";
 
 interface StudentData {

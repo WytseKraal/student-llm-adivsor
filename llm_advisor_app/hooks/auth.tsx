@@ -1,3 +1,7 @@
+//#############################################
+// File: auth.tsx
+// Hook to handle authentication
+//#############################################
 "use client";
 import {
   createContext,

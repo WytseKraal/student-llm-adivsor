@@ -1,3 +1,7 @@
+//#############################################
+// File: page.tsx
+// UI to register new Cogito user
+//#############################################
 "use client";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";

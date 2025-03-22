@@ -1,3 +1,7 @@
+//#############################################
+// File: database_interaction.tsx
+// Several test UI elements (like updating student)
+//#############################################
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
