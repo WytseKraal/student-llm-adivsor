@@ -8,13 +8,13 @@ The Student LLM Advisor is a dialogue-based student portal designed to assist st
 
 ## Architecture Diagram & Tech Stack
 
-### Architecture Diagram (Exluding RAG & Pinecone)
+### Architecture Diagram (Excluding RAG & Pinecone)
 
-![Architecture Diagram exluding RAG and Pinecone](documentation/architecture_excluding_some.png)
+![Architecture Diagram excluding RAG and Pinecone](documentation/architecture_excluding_some.png)
 
 ## AWS infrastructure
 
-![Infrastrcture Diagram](documentation/aws_SAM_based_infrastructure.png)
+![Infrastructure Diagram](documentation/aws_SAM_based_infrastructure.png)
 
 ### Tech Stack
 
@@ -55,12 +55,14 @@ The Student LLM Advisor is a dialogue-based student portal designed to assist st
 
 3. **Add your environment variables**:
     Create a `env.json` file in the `backend` directory with the following content:
-    ```env
-    PINECONE_API_KEY=<your_pinecone_api_key>
-    PINECONE_ENVIRONMENT=<your_pinecone_environment>
-    PINECONE_INDEX_NAME=<your_pinecone_index_name>
-    PINECONE_HOST=<your_pinecone_host>
-    OPENAI_API_KEY=<your_openai_api_key>
+    ```json
+    {
+      "PINECONE_API_KEY": "<your_pinecone_api_key>",
+      "PINECONE_ENVIRONMENT": "<your_pinecone_environment>",
+      "PINECONE_INDEX_NAME": "<your_pinecone_index_name>",
+      "PINECONE_HOST": "<your_pinecone_host>",
+      "OPENAI_API_KEY": "<your_openai_api_key>"
+    }
     ```
 
 4. **Deploy using AWS SAM**:
@@ -70,8 +72,11 @@ The Student LLM Advisor is a dialogue-based student portal designed to assist st
     ```
 
 5. **Configure AWS Cognito and API Gateway**:
-    - Set up a Cognito User Pool and update the `UserPoolArn` in `template.yml`.
+    - Set up a Cognito User Pool and update the `UserPoolArn` in `backend/template.yml`.
     - Configure API Gateway to use the Cognito authorizer.
+
+6. **Populate the Pinecone vector database with embeddings**:
+    - Call the `/indexing` endpoint to index all courses.
 
 ## Services & Endpoints (API Documentation)
 
@@ -223,16 +228,16 @@ print(student_info)
 
 ### Folder Structure
 
-- backend: Contains all backend services and handlers.
-- llm_advisor_app: Contains the frontend application.
-- documentation: Contains project documentation and diagrams.
+- **backend**: Contains all backend services and handlers.
+- **llm_advisor_app**: Contains the frontend application.
+- **documentation**: Contains project documentation and diagrams.
 
 ### Adding New API Endpoints
 
 1. **Create a new service in `backend/services/`**.
 2. **Add a new handler in `backend/handlers/`**.
-3. **Update `template.yml` to include the new Lambda function and API Gateway configuration**.
-4. **Update `swagger.yaml` to document the new endpoint**.
+3. **Update `backend/template.yml` to include the new Lambda function and API Gateway configuration**.
+4. **Update `backend/swagger.yaml` to document the new endpoint**.
 
 ### Testing Locally
 
